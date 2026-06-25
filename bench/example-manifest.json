@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "empty-name-fallback",
+      "fixture": "example-fixture",
+      "goal": "When the greeting name is empty or whitespace, return Hello, stranger without changing normal names.",
+      "expected_paths": ["app.py", "test_visible.py"],
+      "hidden_checks": [
+        {
+          "id": "hidden-behavior",
+          "command": ["python3", "hidden_check.py"],
+          "timeout_seconds": 30,
+          "weight": 2
+        },
+        {
+          "id": "visible-regression",
+          "command": ["python3", "-m", "unittest", "-v", "test_visible.py"],
+          "timeout_seconds": 30,
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

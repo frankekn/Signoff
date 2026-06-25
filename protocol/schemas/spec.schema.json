@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:signoff-protocol:schema:spec:1",
+  "title": "Signoff Specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mission_id",
+    "goal_sha256",
+    "requirements",
+    "acceptance_criteria",
+    "non_goals",
+    "constraints",
+    "stop_conditions",
+    "max_iterations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "mission_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goal_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "statement",
+          "priority",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^REQ-[A-Za-z0-9_-]+$"
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 8
+          },
+          "priority": {
+            "enum": [
+              "must",
+              "should",
+              "could"
+            ]
+          },
+          "source": {
+            "enum": [
+              "user",
+              "constraint",
+              "derived"
+            ]
+          }
+        }
+      }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "requirement_ids",
+          "observable",
+          "oracle"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^AC-[A-Za-z0-9_-]+$"
+          },
+          "requirement_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "observable": {
+            "type": "string",
+            "minLength": 8
+          },
+          "oracle": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "description"
+            ],
+            "properties": {
+              "type": {
+                "enum": [
+                  "command",
+                  "inspection",
+                  "human",
+                  "external"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "minLength": 5
+              }
+            }
+          }
+        }
+      }
+    },
+    "non_goals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "max_iterations": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 25
+    }
+  }
+}

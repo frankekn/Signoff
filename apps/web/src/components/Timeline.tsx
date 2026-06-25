@@ -1,0 +1,37 @@
+import { useQuery } from '@tanstack/react-query'
+import { api } from '../api'
+
+function label(type: string) {
+  return type
+    .split('.')
+    .map((part) => part.replace(/_/g, ' '))
+    .join(' · ')
+}
+
+export function Timeline({ missionId }: { missionId?: string }) {
+  const query = useQuery({
+    queryKey: ['events', missionId],
+    queryFn: () => api.events(missionId),
+    enabled: Boolean(missionId),
+    refetchInterval: 3_000,
+  })
+
+  if (!missionId) return <div className="empty-state">Mission activity will appear here.</div>
+  if (query.isLoading) return <div className="empty-state">Loading history…</div>
+  if (query.error) return <div className="inline-error">{query.error.message}</div>
+
+  return (
+    <ol className="timeline">
+      {[...(query.data ?? [])].reverse().map((event) => (
+        <li key={event.hash}>
+          <span className="timeline-node" />
+          <div>
+            <strong>{label(event.type)}</strong>
+            <time>{new Date(event.time).toLocaleString()}</time>
+            <pre>{JSON.stringify(event.payload, null, 2)}</pre>
+          </div>
+        </li>
+      ))}
+    </ol>
+  )
+}

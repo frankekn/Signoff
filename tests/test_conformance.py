@@ -1,0 +1,206 @@
+from __future__ import annotations
+
+import json
+import unittest
+from pathlib import Path
+
+from signoff.errors import IntegrityError, StateError, ValidationError
+from signoff.installer import install
+from signoff.util import atomic_write_json, read_json
+
+from tests.support import RepoFixture
+
+
+class ConformanceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.fx = RepoFixture()
+
+    def tearDown(self) -> None:
+        self.fx.close()
+
+    def test_01_golden_path_reaches_done_with_receipts(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence(final=True)
+        self.fx.fill_roast(iteration)
+        result = self.fx.runtime.roast()
+        self.assertEqual(result["decision"], "PASS")
+        self.assertEqual(self.fx.runtime.finish("done")["phase"], "DONE")
+        self.assertTrue((self.fx.mission / "FINAL_PATCH.diff").is_file())
+        self.assertTrue((self.fx.mission / "FINAL_RECEIPT.json").is_file())
+        integrity = self.fx.runtime.integrity()
+        self.assertEqual(integrity["ledger"], "pass")
+        self.assertEqual(integrity["final_receipt"], "pass")
+
+    def test_02_placeholder_draft_cannot_reach_council(self) -> None:
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.prepare_council()
+
+    def test_03_locked_spec_tamper_is_detected(self) -> None:
+        self.fx.lock()
+        spec = read_json(self.fx.mission / "SPEC.json")
+        spec["constraints"].append("Quietly changed after lock")
+        atomic_write_json(self.fx.mission / "SPEC.json", spec)
+        with self.assertRaises(IntegrityError):
+            self.fx.runtime.prepare_slice()
+
+    def test_04_council_must_answer_shared_claim_registry(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_council()
+        council = read_json(self.fx.mission / "COUNCIL.json")
+        council["advisors"][0]["claims"].pop()
+        atomic_write_json(self.fx.mission / "COUNCIL.json", council)
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.lock()
+
+    def test_05_council_duplicate_context_is_not_quorum(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_council(duplicate_context=True)
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.lock()
+
+    def test_06_council_conflict_requires_evidence_resolution(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_council(conflict=True, resolve=False)
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.lock()
+
+    def test_07_council_conflict_can_be_resolved_by_evidence(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_council(conflict=True, resolve=True)
+        self.assertEqual(self.fx.runtime.lock()["phase"], "LOCKED")
+
+    def test_08_unmapped_file_fails_scope(self) -> None:
+        self.fx.lock()
+        self.fx.activate()
+        self.fx.implement()
+        (self.fx.project / "surprise.txt").write_text("scope creep\n", encoding="utf-8")
+        result = self.fx.runtime.verify()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("surprise.txt", result["scope"]["unmapped_files"])
+
+    def test_09_changed_line_budget_is_enforced(self) -> None:
+        self.fx.lock()
+        self.fx.activate(changed_lines=1)
+        self.fx.implement()
+        result = self.fx.runtime.verify()
+        self.assertEqual(result["status"], "fail")
+        self.assertTrue(result["scope"]["line_budget_overflow"])
+
+    def test_10_failing_command_cannot_be_called_evidence(self) -> None:
+        self.fx.lock()
+        self.fx.activate(command=["git", "grep", "-F", "-q", "definitely-not-present", "--", "app.py"])
+        self.fx.implement()
+        result = self.fx.runtime.verify()
+        self.assertEqual(result["status"], "fail")
+        self.assertEqual(result["checks"][0]["exit_code"], 1)
+
+    def test_11_verification_mutation_invalidates_patch(self) -> None:
+        self.fx.lock()
+        command = ["git", "checkout", "--", "app.py"]
+        self.fx.activate(command=command)
+        self.fx.implement()
+        result = self.fx.runtime.verify()
+        self.assertEqual(result["status"], "fail")
+        self.assertTrue(result["verification_mutated_patch"])
+
+    def test_12_builder_cannot_count_as_reviewer(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        self.fx.fill_roast(iteration, reviewer_one_is_builder=True)
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.roast()
+
+    def test_13_duplicate_review_context_is_not_quorum(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        self.fx.fill_roast(iteration, duplicate_context=True)
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.roast()
+
+    def test_14_unknown_cannot_be_promoted_to_pass(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        self.fx.fill_roast(iteration, verdicts=("PASS", "UNKNOWN"))
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.roast()
+
+    def test_15_vote_is_not_valid_arbitration(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        self.fx.fill_roast(iteration, verdicts=("PASS", "FAIL"), resolution_basis="vote")
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.roast()
+
+    def test_16_evidence_can_resolve_review_disagreement(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        self.fx.fill_roast(iteration, verdicts=("PASS", "FAIL"), resolution_basis="experiment")
+        self.assertEqual(self.fx.runtime.roast()["decision"], "PASS")
+
+    def test_17_high_finding_cannot_be_silently_dismissed(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        finding = {
+            "id": "F-001",
+            "severity": "high",
+            "acceptance_ids": ["AC-001"],
+            "claim": "A high-severity regression remains in the sealed patch.",
+            "evidence": "The reviewer identifies the affected execution path.",
+            "falsifier": "A focused passing check covering the claimed regression.",
+            "recommended_disposition": "ACT_ON",
+        }
+        disposition = {
+            "finding_id": "F-001",
+            "disposition": "DISMISSED",
+            "rationale": "The lead does not believe the reviewer.",
+            "evidence_ref": "",
+        }
+        self.fx.fill_roast(iteration, finding=finding, disposition=disposition)
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.roast()
+
+    def test_18_ledger_tamper_is_detected(self) -> None:
+        self.fx.lock()
+        ledger = self.fx.mission / "LEDGER.jsonl"
+        lines = ledger.read_text(encoding="utf-8").splitlines()
+        record = json.loads(lines[0])
+        record["payload"]["goal_sha256"] = "0" * 64
+        lines[0] = json.dumps(record)
+        ledger.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        with self.assertRaises(IntegrityError):
+            self.fx.runtime.status()
+
+    def test_19_done_requires_cumulative_final_contract(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence(final=False)
+        self.fx.fill_roast(iteration)
+        self.fx.runtime.roast()
+        with self.assertRaises(StateError):
+            self.fx.runtime.finish("done")
+
+    def test_20_install_is_idempotent_and_local(self) -> None:
+        source_root = Path(__file__).resolve().parents[1]
+        first = install(self.fx.project, source_root)
+        second = install(self.fx.project, source_root)
+        self.assertEqual(first["status"], "installed")
+        self.assertEqual(second["status"], "installed")
+        self.assertTrue((self.fx.project / "signoff").is_file())
+        self.assertTrue((self.fx.project / ".agents" / "skills" / "council" / "SKILL.md").is_file())
+        self.assertTrue((self.fx.project / ".signoff" / "runtime" / "signoff" / "cli.py").is_file())
+
+    def test_21_historical_receipt_tamper_is_detected(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence(final=True)
+        self.fx.fill_roast(iteration)
+        self.fx.runtime.roast()
+        self.fx.runtime.finish("done")
+        evidence = iteration / "EVIDENCE.json"
+        data = read_json(evidence)
+        data["status"] = "fail"
+        atomic_write_json(evidence, data)
+        with self.assertRaises(IntegrityError):
+            self.fx.runtime.integrity()
+
+
+if __name__ == "__main__":
+    unittest.main()

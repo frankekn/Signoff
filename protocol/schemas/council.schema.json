@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:signoff-protocol:schema:council:1",
+  "title": "Signoff Council Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mission_id",
+    "artifact_hashes",
+    "claim_registry",
+    "advisors",
+    "decision"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "mission_id": {
+      "type": "string"
+    },
+    "artifact_hashes": {
+      "type": "object",
+      "required": [
+        "goal",
+        "charter",
+        "spec"
+      ],
+      "properties": {
+        "goal": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "charter": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "spec": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "claim_registry": {
+      "const": [
+        "mission-value",
+        "feasibility",
+        "proof-sufficiency",
+        "scope-minimality"
+      ]
+    },
+    "advisors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identity",
+          "independent_first_round",
+          "verdict",
+          "claims",
+          "null_hypothesis",
+          "first_move",
+          "cut"
+        ],
+        "properties": {
+          "identity": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "participant_id",
+              "provider",
+              "model",
+              "context_id"
+            ],
+            "properties": {
+              "participant_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "provider": {
+                "type": "string",
+                "minLength": 1
+              },
+              "model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "context_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "independent_first_round": {
+            "const": true
+          },
+          "verdict": {
+            "enum": [
+              "PROCEED",
+              "STOP",
+              "PIVOT"
+            ]
+          },
+          "claims": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "topic_key",
+                "stance",
+                "claim",
+                "evidence",
+                "falsifier"
+              ],
+              "properties": {
+                "topic_key": {
+                  "enum": [
+                    "mission-value",
+                    "feasibility",
+                    "proof-sufficiency",
+                    "scope-minimality"
+                  ]
+                },
+                "stance": {
+                  "enum": [
+                    "SUPPORT",
+                    "OPPOSE",
+                    "UNKNOWN"
+                  ]
+                },
+                "claim": {
+                  "type": "string",
+                  "minLength": 8
+                },
+                "evidence": {
+                  "type": "string",
+                  "minLength": 3
+                },
+                "falsifier": {
+                  "type": "string",
+                  "minLength": 5
+                }
+              }
+            }
+          },
+          "null_hypothesis": {
+            "type": "string",
+            "minLength": 8
+          },
+          "first_move": {
+            "type": "string",
+            "minLength": 4
+          },
+          "cut": {
+            "type": "string",
+            "minLength": 3
+          }
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "rationale",
+        "conflict_resolutions",
+        "first_slice",
+        "chair"
+      ],
+      "properties": {
+        "verdict": {
+          "enum": [
+            "PROCEED",
+            "STOP",
+            "PIVOT",
+            "INSUFFICIENT_QUORUM"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 8
+        },
+        "first_slice": {
+          "type": "string"
+        },
+        "chair": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "participant_id",
+            "provider",
+            "model",
+            "context_id"
+          ],
+          "properties": {
+            "participant_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "provider": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model": {
+              "type": "string",
+              "minLength": 1
+            },
+            "context_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "conflict_resolutions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "topic_key",
+              "basis",
+              "evidence",
+              "conclusion"
+            ],
+            "properties": {
+              "topic_key": {
+                "enum": [
+                  "mission-value",
+                  "feasibility",
+                  "proof-sufficiency",
+                  "scope-minimality"
+                ]
+              },
+              "basis": {
+                "enum": [
+                  "experiment",
+                  "existing_evidence",
+                  "locked_spec",
+                  "user_decision"
+                ]
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 5
+              },
+              "conclusion": {
+                "type": "string",
+                "minLength": 5
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

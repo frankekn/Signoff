@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:signoff-protocol:schema:review:1",
+  "title": "Signoff Roast Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mission_id",
+    "iteration",
+    "reviewer",
+    "artifact_hashes",
+    "read_only",
+    "criteria",
+    "findings",
+    "overall"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "mission_id": {
+      "type": "string"
+    },
+    "iteration": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "participant_id",
+        "provider",
+        "model",
+        "context_id"
+      ],
+      "properties": {
+        "participant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "artifact_hashes": {
+      "type": "object",
+      "required": [
+        "contract",
+        "evidence",
+        "patch"
+      ],
+      "properties": {
+        "contract": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "evidence": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "patch": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "read_only": {
+      "const": true
+    },
+    "criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "acceptance_id",
+          "verdict",
+          "evidence_refs",
+          "reason"
+        ],
+        "properties": {
+          "acceptance_id": {
+            "type": "string"
+          },
+          "verdict": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "UNKNOWN"
+            ]
+          },
+          "evidence_refs": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 5
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "severity",
+          "acceptance_ids",
+          "claim",
+          "evidence",
+          "falsifier",
+          "recommended_disposition"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low",
+              "note"
+            ]
+          },
+          "acceptance_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claim": {
+            "type": "string",
+            "minLength": 5
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 3
+          },
+          "falsifier": {
+            "type": "string",
+            "minLength": 5
+          },
+          "recommended_disposition": {
+            "enum": [
+              "ACT_ON",
+              "CONSIDER",
+              "NOTED",
+              "DISMISSED",
+              "OUT_OF_SCOPE"
+            ]
+          }
+        }
+      }
+    },
+    "overall": {
+      "enum": [
+        "PASS",
+        "REWORK",
+        "BLOCKED"
+      ]
+    }
+  }
+}
