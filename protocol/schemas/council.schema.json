@@ -8,7 +8,6 @@
     "schema_version",
     "mission_id",
     "artifact_hashes",
-    "claim_registry",
     "advisors",
     "decision"
   ],
@@ -41,14 +40,6 @@
         }
       }
     },
-    "claim_registry": {
-      "const": [
-        "mission-value",
-        "feasibility",
-        "proof-sufficiency",
-        "scope-minimality"
-      ]
-    },
     "advisors": {
       "type": "array",
       "items": {
@@ -58,8 +49,9 @@
           "identity",
           "independent_first_round",
           "verdict",
-          "claims",
-          "null_hypothesis",
+          "route",
+          "falsifiable_criteria",
+          "risk",
           "first_move",
           "cut"
         ],
@@ -102,54 +94,21 @@
               "PIVOT"
             ]
           },
-          "claims": {
-            "type": "array",
-            "minItems": 4,
-            "maxItems": 4,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "topic_key",
-                "stance",
-                "claim",
-                "evidence",
-                "falsifier"
-              ],
-              "properties": {
-                "topic_key": {
-                  "enum": [
-                    "mission-value",
-                    "feasibility",
-                    "proof-sufficiency",
-                    "scope-minimality"
-                  ]
-                },
-                "stance": {
-                  "enum": [
-                    "SUPPORT",
-                    "OPPOSE",
-                    "UNKNOWN"
-                  ]
-                },
-                "claim": {
-                  "type": "string",
-                  "minLength": 8
-                },
-                "evidence": {
-                  "type": "string",
-                  "minLength": 3
-                },
-                "falsifier": {
-                  "type": "string",
-                  "minLength": 5
-                }
-              }
-            }
-          },
-          "null_hypothesis": {
+          "route": {
             "type": "string",
             "minLength": 8
+          },
+          "falsifiable_criteria": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 8
+            }
+          },
+          "risk": {
+            "type": "string",
+            "minLength": 5
           },
           "first_move": {
             "type": "string",
@@ -221,19 +180,15 @@
           "items": {
             "type": "object",
             "required": [
-              "topic_key",
+              "topic",
               "basis",
               "evidence",
               "conclusion"
             ],
             "properties": {
-              "topic_key": {
-                "enum": [
-                  "mission-value",
-                  "feasibility",
-                  "proof-sufficiency",
-                  "scope-minimality"
-                ]
+              "topic": {
+                "type": "string",
+                "minLength": 1
               },
               "basis": {
                 "enum": [

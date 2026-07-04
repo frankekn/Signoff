@@ -3,8 +3,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from .schemas import COUNCIL_TOPICS
-
 
 def charter_template(mission_id: str, goal: str) -> str:
     return f"""# Mission Charter
@@ -78,17 +76,11 @@ def council_template(mission_id: str, hashes: dict[str, str]) -> dict[str, Any]:
             },
             "independent_first_round": True,
             "verdict": "PROCEED",
-            "claims": [
-                {
-                    "topic_key": topic,
-                    "stance": "UNKNOWN",
-                    "claim": "REPLACE_ME",
-                    "evidence": "REPLACE_ME",
-                    "falsifier": "REPLACE_ME",
-                }
-                for topic in COUNCIL_TOPICS
+            "route": "REPLACE_ME with the smallest viable route this advisor recommends",
+            "falsifiable_criteria": [
+                "REPLACE_ME with an observable outcome that proves or falsifies the route",
             ],
-            "null_hypothesis": "REPLACE_ME with the strongest case for not building this route",
+            "risk": "REPLACE_ME with the strongest reason this route fails",
             "first_move": "REPLACE_ME with one executable first move",
             "cut": "REPLACE_ME with work to remove from scope",
         }
@@ -97,7 +89,6 @@ def council_template(mission_id: str, hashes: dict[str, str]) -> dict[str, Any]:
         "schema_version": 1,
         "mission_id": mission_id,
         "artifact_hashes": hashes,
-        "claim_registry": list(COUNCIL_TOPICS),
         "advisors": [advisor(1), advisor(2)],
         "decision": {
             "verdict": "PROCEED",

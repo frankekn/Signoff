@@ -44,16 +44,9 @@ Then run:
 
 ### COUNCIL
 
-Use the sibling `council` skill. Give every advisor the exact same goal, charter, spec, hashes, null hypothesis, and four canonical topics:
+Use the sibling `council` skill. Give every advisor the exact same goal, charter, spec, and hashes.
 
-```text
-mission-value
-feasibility
-proof-sufficiency
-scope-minimality
-```
-
-Advisors answer independently before seeing peers. Fill the generated `COUNCIL.json`. Material `SUPPORT`/`OPPOSE` conflicts require an evidence-based resolution. If independent contexts are unavailable, return `INSUFFICIENT_QUORUM`; do not imitate extra voices.
+Advisors answer independently before seeing peers. Fill the generated `COUNCIL.json`. Material verdict splits require an evidence-based resolution. If independent contexts are unavailable, return `INSUFFICIENT_QUORUM`; do not imitate extra voices.
 
 Then run:
 

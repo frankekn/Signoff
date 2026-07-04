@@ -5,20 +5,12 @@ question registry, hashes, identities, and evidence surface.
 """
 from __future__ import annotations
 
-from collections import defaultdict
 from typing import Any, Iterable
 
 from .errors import ValidationError
 from .util import require_clean_text, require_keys, unique_ids
 
 SCHEMA_VERSION = 1
-COUNCIL_TOPICS = (
-    "mission-value",
-    "feasibility",
-    "proof-sufficiency",
-    "scope-minimality",
-)
-STANCES = {"SUPPORT", "OPPOSE", "UNKNOWN"}
 COUNCIL_VERDICTS = {"PROCEED", "STOP", "PIVOT", "INSUFFICIENT_QUORUM"}
 CRITERION_VERDICTS = {"PASS", "FAIL", "UNKNOWN"}
 FINDING_SEVERITIES = {"critical", "high", "medium", "low", "note"}
@@ -135,35 +127,11 @@ def validate_spec(spec: dict[str, Any], *, mission_id: str, goal_sha256: str) ->
     }
 
 
-def _validate_claims(claims_value: Any, context: str) -> dict[str, dict[str, Any]]:
-    claims = _expect_list(claims_value, f"{context}.claims", nonempty=True)
-    by_topic: dict[str, dict[str, Any]] = {}
-    for index, claim_value in enumerate(claims):
-        claim = _expect_object(claim_value, f"{context}.claims[{index}]")
-        require_keys(claim, ("topic_key", "stance", "claim", "evidence", "falsifier"), f"{context}.claims[{index}]")
-        topic = claim["topic_key"]
-        if topic not in COUNCIL_TOPICS:
-            raise ValidationError(f"{context} answered unknown topic: {topic}")
-        if topic in by_topic:
-            raise ValidationError(f"{context} answered topic twice: {topic}")
-        if claim["stance"] not in STANCES:
-            raise ValidationError(f"{context}.{topic}.stance must be SUPPORT, OPPOSE, or UNKNOWN")
-        require_clean_text(claim["claim"], f"{context}.{topic}.claim", minimum=8)
-        require_clean_text(claim["evidence"], f"{context}.{topic}.evidence", minimum=3)
-        require_clean_text(claim["falsifier"], f"{context}.{topic}.falsifier", minimum=5)
-        by_topic[topic] = claim
-    missing = set(COUNCIL_TOPICS) - set(by_topic)
-    if missing:
-        raise ValidationError(f"{context} did not answer the shared registry: {', '.join(sorted(missing))}")
-    return by_topic
-
-
 def council_conflicts(advisors: list[dict[str, Any]]) -> set[str]:
-    positions: dict[str, set[str]] = defaultdict(set)
-    for advisor in advisors:
-        for claim in advisor["claims"]:
-            positions[claim["topic_key"]].add(claim["stance"])
-    return {topic for topic, stances in positions.items() if {"SUPPORT", "OPPOSE"}.issubset(stances)}
+    verdicts = {advisor["verdict"] for advisor in advisors}
+    if len(verdicts) > 1:
+        return {"verdict-split"}
+    return set()
 
 
 def validate_council(
@@ -172,7 +140,7 @@ def validate_council(
     mission_id: str,
     expected_hashes: dict[str, str],
 ) -> dict[str, Any]:
-    require_keys(council, ("schema_version", "mission_id", "artifact_hashes", "claim_registry", "advisors", "decision"), "council")
+    require_keys(council, ("schema_version", "mission_id", "artifact_hashes", "advisors", "decision"), "council")
     if council["schema_version"] != SCHEMA_VERSION:
         raise ValidationError("council.schema_version must be 1")
     if council["mission_id"] != mission_id:
@@ -181,9 +149,6 @@ def validate_council(
     for key, expected in expected_hashes.items():
         if hashes.get(key) != expected:
             raise ValidationError(f"council.artifact_hashes.{key} does not match the reviewed artifact")
-    registry = tuple(_expect_string_list(council["claim_registry"], "council.claim_registry", nonempty=True))
-    if registry != COUNCIL_TOPICS:
-        raise ValidationError("council.claim_registry must use the canonical four topics in canonical order")
 
     advisors = _expect_list(council["advisors"], "council.advisors")
     identities: list[dict[str, str]] = []
@@ -191,18 +156,34 @@ def validate_council(
     for index, advisor_value in enumerate(advisors):
         context = f"council.advisors[{index}]"
         advisor = _expect_object(advisor_value, context)
-        require_keys(advisor, ("identity", "independent_first_round", "verdict", "claims", "null_hypothesis", "first_move", "cut"), context)
+        require_keys(
+            advisor,
+            ("identity", "independent_first_round", "verdict", "route", "falsifiable_criteria", "risk", "first_move", "cut"),
+            context,
+        )
         identity = validate_identity(advisor["identity"], f"{context}.identity")
         if advisor["independent_first_round"] is not True:
             raise ValidationError(f"{context} must attest independent_first_round=true")
         if advisor["verdict"] not in {"PROCEED", "STOP", "PIVOT"}:
             raise ValidationError(f"{context}.verdict is invalid")
-        claims = _validate_claims(advisor["claims"], context)
-        require_clean_text(advisor["null_hypothesis"], f"{context}.null_hypothesis", minimum=8)
+        require_clean_text(advisor["route"], f"{context}.route", minimum=8)
+        criteria_values = _expect_list(advisor["falsifiable_criteria"], f"{context}.falsifiable_criteria", nonempty=True)
+        falsifiable_criteria: list[str] = []
+        for criterion_index, criterion_value in enumerate(criteria_values):
+            falsifiable_criteria.append(
+                require_clean_text(
+                    criterion_value,
+                    f"{context}.falsifiable_criteria[{criterion_index}]",
+                    minimum=8,
+                )
+            )
+        if len(falsifiable_criteria) != len(set(falsifiable_criteria)):
+            raise ValidationError(f"{context}.falsifiable_criteria contains duplicates")
+        require_clean_text(advisor["risk"], f"{context}.risk", minimum=5)
         require_clean_text(advisor["first_move"], f"{context}.first_move", minimum=4)
         require_clean_text(advisor["cut"], f"{context}.cut", minimum=3)
         identities.append(identity)
-        normalized_advisors.append({**advisor, "identity": identity, "claims": list(claims.values())})
+        normalized_advisors.append({**advisor, "identity": identity, "falsifiable_criteria": falsifiable_criteria})
 
     participant_ids = [identity["participant_id"] for identity in identities]
     context_ids = [identity["context_id"] for identity in identities]
@@ -233,10 +214,8 @@ def validate_council(
     for index, resolution_value in enumerate(resolutions_value):
         context = f"council.decision.conflict_resolutions[{index}]"
         resolution = _expect_object(resolution_value, context)
-        require_keys(resolution, ("topic_key", "basis", "evidence", "conclusion"), context)
-        topic = resolution["topic_key"]
-        if topic not in COUNCIL_TOPICS:
-            raise ValidationError(f"{context}.topic_key is invalid")
+        require_keys(resolution, ("topic", "basis", "evidence", "conclusion"), context)
+        topic = require_clean_text(resolution["topic"], f"{context}.topic")
         if topic in resolutions:
             raise ValidationError(f"duplicate Council conflict resolution: {topic}")
         basis = resolution["basis"]

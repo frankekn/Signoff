@@ -1,6 +1,6 @@
 # Council cross-examination prompt (round 2 — template)
 
-Sent by the chair ONLY when round 1 produced a material conflict. Fill `{{GOAL}}`,
+Sent by the chair ONLY when round 1 produced a verdict split. Fill `{{GOAL}}`,
 `{{YOUR_ROUND1}}`, and `{{OPPOSING_CLAIMS}}` and send verbatim to a single advisor via its Roster
 transport. One pass only — never a second round 2.
 

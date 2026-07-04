@@ -1,6 +1,6 @@
 ---
 name: council
-description: "Use before costly implementation to obtain independent, falsifiable PROCEED / STOP / PIVOT advice on the same decision surface. In Signoff mode, fill the generated COUNCIL.json and let ./signoff lock validate quorum, shared claims, hashes, and conflict closure."
+description: "Use before costly implementation to obtain independent, falsifiable PROCEED / STOP / PIVOT advice on the same decision surface. In Signoff mode, fill the generated COUNCIL.json and let ./signoff lock validate quorum, hashes, verdict-split conflicts, and conflict closure."
 ---
 
 # Council — independent deliberation that can stop or pivot
@@ -14,9 +14,7 @@ When `./signoff next` reports `COUNCIL`, use the generated `COUNCIL.json` as the
 - `GOAL.txt`;
 - `CHARTER.md`;
 - `SPEC.json`;
-- their current SHA-256 values;
-- the null hypothesis that no implementation should occur;
-- the canonical topic registry in the template.
+- their current SHA-256 values.
 
 Never give one advisor extra context, a different question, or another advisor's first-round answer.
 
@@ -26,27 +24,17 @@ Use at least two real fresh contexts. Each advisor must provide:
 
 - a real identity tuple: participant ID, provider, model, context ID;
 - `PROCEED`, `STOP`, or `PIVOT`;
-- exactly one answer to each canonical topic;
-- `SUPPORT`, `OPPOSE`, or `UNKNOWN` for that topic;
-- a concrete claim, current evidence, and a falsifier;
-- the strongest null hypothesis;
+- the smallest viable route this advisor recommends;
+- falsifiable criteria — observable outcomes that would prove the route right or wrong;
+- the strongest reason this route fails;
 - one executable first move;
 - what to cut from scope.
-
-The canonical topics are fixed:
-
-```text
-mission-value
-feasibility
-proof-sufficiency
-scope-minimality
-```
 
 If the host cannot create independent contexts, record `INSUFFICIENT_QUORUM`. Never simulate additional advisors in one context or invent provider diversity.
 
 ## Conditional cross-examination
 
-Only topics with both `SUPPORT` and `OPPOSE` receive a second round. Strip provider/model identity and label positions neutrally. Ask each side:
+Only when advisors return different verdicts (`verdict-split`) receive a second round. Strip provider/model identity and label positions neutrally. Ask each side:
 
 1. What precise claim from the opposing position is wrong?
 2. What evidence supports that answer?

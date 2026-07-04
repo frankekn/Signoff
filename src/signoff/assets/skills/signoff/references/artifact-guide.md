@@ -6,7 +6,7 @@ Agent-authored inputs:
 
 - `CHARTER.md` — user-visible success, hard constraints, non-goals, stop/pivot conditions, evidence standard;
 - `SPEC.json` — stable requirements and falsifiable acceptance criteria;
-- `COUNCIL.json` — independent positions on the shared claim registry and a synthesis;
+- `COUNCIL.json` — independent advisor routes, falsifiable criteria, risks, and a synthesis;
 - `iterations/<n>/CONTRACT.json` — one bounded implementation slice;
 - `reviews/review-*.json` — read-only criterion decisions and findings;
 - `JUDGMENT.json` — complete finding accounting and evidence-based conflict resolution.

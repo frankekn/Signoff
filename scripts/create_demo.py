@@ -88,14 +88,13 @@ The focused unit test passes against a patch limited to `app.py`.
             "context_id": f"demo-context-{index}",
         }
         advisor["verdict"] = "PROCEED"
-        advisor["null_hypothesis"] = "The requested behavior might already exist or the test may encode the wrong result."
+        advisor["route"] = "Change only app.py and prove the exact greeting with the focused unittest."
+        advisor["falsifiable_criteria"] = [
+            "The focused unittest passes after the minimal implementation change.",
+        ]
+        advisor["risk"] = "The requested behavior might already exist or the test may encode the wrong result."
         advisor["first_move"] = "Run the focused unittest before changing implementation code."
         advisor["cut"] = "Exclude all refactors and dependency changes."
-        for claim in advisor["claims"]:
-            claim["stance"] = "SUPPORT"
-            claim["claim"] = f"The route is acceptable for {claim['topic_key']} in this small demo."
-            claim["evidence"] = "The repository has one function and a focused observable test."
-            claim["falsifier"] = "A failing focused test after the minimal implementation would falsify this route."
     council["decision"]["verdict"] = "PROCEED"
     council["decision"]["rationale"] = "Both independent demo advisors support the same minimal route and executable oracle."
     council["decision"]["first_slice"] = "Change only app.py and prove the exact greeting with unittest."

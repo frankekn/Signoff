@@ -45,11 +45,11 @@ class ConformanceTests(unittest.TestCase):
         with self.assertRaises(IntegrityError):
             self.fx.runtime.prepare_slice()
 
-    def test_04_council_must_answer_shared_claim_registry(self) -> None:
+    def test_04_advisor_with_empty_falsifiable_criteria_is_rejected(self) -> None:
         self.fx.valid_draft()
         self.fx.valid_council()
         council = read_json(self.fx.mission / "COUNCIL.json")
-        council["advisors"][0]["claims"].pop()
+        council["advisors"][0]["falsifiable_criteria"] = []
         atomic_write_json(self.fx.mission / "COUNCIL.json", council)
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
@@ -60,7 +60,7 @@ class ConformanceTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
 
-    def test_06_council_conflict_requires_evidence_resolution(self) -> None:
+    def test_06_advisor_verdict_split_without_evidence_resolution_is_rejected(self) -> None:
         self.fx.valid_draft()
         self.fx.valid_council(conflict=True, resolve=False)
         with self.assertRaises(ValidationError):
@@ -312,6 +312,22 @@ class ConformanceTests(unittest.TestCase):
         self.fx.fill_roast(iteration, finding=finding, disposition=disposition, judgment_decision="PASS")
         with self.assertRaises(ValidationError):
             self.fx.runtime.roast()
+
+    def test_31_council_conflict_resolution_with_vote_basis_is_rejected(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_council(conflict=True, resolve=False)
+        council = read_json(self.fx.mission / "COUNCIL.json")
+        council["decision"]["conflict_resolutions"] = [
+            {
+                "topic": "verdict-split",
+                "basis": "vote",
+                "evidence": "Both advisors participated and one side had more votes.",
+                "conclusion": "Proceed because the majority favored implementation.",
+            }
+        ]
+        atomic_write_json(self.fx.mission / "COUNCIL.json", council)
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.lock()
 
 
 if __name__ == "__main__":

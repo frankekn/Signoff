@@ -75,21 +75,15 @@ The focused unit test must pass against the sealed patch.
                 "model": f"model-{index}",
                 "context_id": "same-context" if duplicate_context else f"advisor-context-{index}",
             }
-            advisor["verdict"] = "PROCEED"
-            advisor["null_hypothesis"] = "The current behavior may already satisfy the requested outcome."
+            advisor["verdict"] = "STOP" if conflict and index == 2 else "PROCEED"
+            advisor["route"] = "Change greet in app.py and prove it with the focused unit test."
+            advisor["falsifiable_criteria"] = [
+                "The focused unit test passes after changing only app.py.",
+            ]
+            advisor["risk"] = "The test may encode the wrong expected value."
             advisor["first_move"] = "Run the focused failing unit test before changing code."
             advisor["cut"] = "Exclude every unrelated refactor and dependency change."
-            for claim in advisor["claims"]:
-                stance = "SUPPORT"
-                if conflict and index == 2 and claim["topic_key"] == "feasibility":
-                    stance = "OPPOSE"
-                claim.update(
-                    stance=stance,
-                    claim="The route is bounded, valuable, and independently testable.",
-                    evidence="The repository contains a focused test and a one-file implementation surface.",
-                    falsifier="A baseline check proving the requested behavior already exists or cannot be isolated.",
-                )
-        council["decision"]["rationale"] = "Independent advisors examined the same claims and support a bounded route."
+        council["decision"]["rationale"] = "Independent advisors examined the same route and support a bounded implementation."
         council["decision"]["first_slice"] = "Make the focused greet behavior pass without adjacent cleanup."
         council["decision"]["chair"] = {
             "participant_id": "chair",
@@ -100,7 +94,7 @@ The focused unit test must pass against the sealed patch.
         if conflict and resolve:
             council["decision"]["conflict_resolutions"] = [
                 {
-                    "topic_key": "feasibility",
+                    "topic": "verdict-split",
                     "basis": "existing_evidence",
                     "evidence": "The focused test and one-file path make the route executable within budget.",
                     "conclusion": "Proceed with the smallest implementation slice.",
