@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, type CourtAction } from '../api'
+import { api, type GripAction } from '../api'
 import { ArtifactPanel } from '../components/ArtifactPanel'
 import { HeroPanel } from '../components/HeroPanel'
 import { Mark } from '../components/Mark'
@@ -39,7 +39,7 @@ export function Dashboard(): ReactElement {
   const [goal, setGoal] = useState('')
   const [tab, setTab] = useState<'artifacts' | 'timeline'>('artifacts')
   const [copied, setCopied] = useState(false)
-  const [noteAction, setNoteAction] = useState<CourtAction | null>(null)
+  const [noteAction, setNoteAction] = useState<GripAction | null>(null)
   const [note, setNote] = useState('')
   const [noteError, setNoteError] = useState('')
   const [selectedRunId, setSelectedRunId] = useState<string | undefined>()
@@ -86,7 +86,7 @@ export function Dashboard(): ReactElement {
     },
   })
 
-  const runAction = (action: CourtAction): void => {
+  const runAction = (action: GripAction): void => {
     if (action.requiresNote) {
       setNoteAction(action)
       setNote('')

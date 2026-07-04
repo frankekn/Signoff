@@ -113,7 +113,7 @@ export function ArtifactPanel({ runId, onDirtyChange }: ArtifactPanelProps) {
           >
             <span>
               <strong>{artifact.name}</strong>
-              <small>{artifact.path.replace(/^\.signoff\/runs\/[^/]+\//, '')}</small>
+              <small>{artifact.path.replace(/^\.traction\/runs\/[^/]+\//, '')}</small>
             </span>
             <span className={artifact.editable ? 'edit-pill' : 'read-pill'}>{artifact.editable ? 'Edit' : prettySize(artifact.size)}</span>
           </button>

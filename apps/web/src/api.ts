@@ -1,6 +1,6 @@
 export type Tone = 'primary' | 'neutral' | 'danger'
 
-export interface CourtAction {
+export interface GripAction {
   id: string
   label: string
   tone: Tone
@@ -18,7 +18,7 @@ export interface RunSummary {
   error?: string
 }
 
-export interface CourtStatus {
+export interface GripStatus {
   run_id?: string
   active_run_id?: string | null
   phase: string
@@ -75,13 +75,13 @@ export interface Overview {
   version: string
   project: string
   goal: string
-  status: CourtStatus
+  status: GripStatus
   next: string
   canStartRun: boolean
   blockedByIntegrity: boolean
   integrityStatus: string
   integrityMessage: string
-  actions: CourtAction[]
+  actions: GripAction[]
   editablePaths: string[]
   runs: RunSummary[]
   proofSummary: ProofSummary | null

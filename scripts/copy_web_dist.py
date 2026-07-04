@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 source = ROOT / "apps" / "web" / "dist"
-destination = ROOT / "src" / "signoff" / "web_dist"
+destination = ROOT / "src" / "traction" / "web_dist"
 if not (source / "index.html").is_file():
     raise SystemExit("apps/web/dist is missing; build the Vite app first")
 if destination.exists():

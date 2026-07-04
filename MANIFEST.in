@@ -1,6 +1,6 @@
 include README.md README.zh-TW.md LICENSE INSTALL_FOR_AGENTS.md
-recursive-include src/signoff/assets *
-recursive-include src/signoff/web_dist *
+recursive-include src/traction/assets *
+recursive-include src/traction/web_dist *
 recursive-include protocol *
 recursive-include docs *
 recursive-include skills *

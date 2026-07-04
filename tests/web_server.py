@@ -7,10 +7,10 @@ from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-import signoff
-from signoff.util import atomic_write_json, read_json
-from signoff.web import create_server
-from signoff.web_proof import JsonObject
+import traction
+from traction.util import atomic_write_json, read_json
+from traction.web import create_server
+from traction.web_proof import JsonObject
 
 from tests.support import RepoFixture
 
@@ -56,7 +56,7 @@ class WebServerTestCase(unittest.TestCase):
                 return exc.code, json.loads(exc.read().decode("utf-8"))
 
     def _start_server(self) -> None:
-        static_root = Path(signoff.__file__).resolve().parent / "web_dist"
+        static_root = Path(traction.__file__).resolve().parent / "web_dist"
         self.server = create_server(self.fx.project, host="127.0.0.1", port=0, static_root=static_root)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()

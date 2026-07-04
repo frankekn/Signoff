@@ -12,9 +12,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from signoff.installer import install  # noqa: E402
-from signoff.runtime import Runtime  # noqa: E402
-from signoff.util import atomic_write_json, read_json  # noqa: E402
+from traction.installer import install  # noqa: E402
+from traction.runtime import Runtime  # noqa: E402
+from traction.util import atomic_write_json, read_json  # noqa: E402
 
 
 def git(project: Path, *args: str) -> None:
@@ -23,7 +23,7 @@ def git(project: Path, *args: str) -> None:
 
 def create(destination: Path | None = None) -> Path:
     if destination is None:
-        destination = Path(tempfile.mkdtemp(prefix="signoff-demo-"))
+        destination = Path(tempfile.mkdtemp(prefix="traction-demo-"))
     else:
         destination = destination.expanduser().resolve()
         if destination.exists():
@@ -32,20 +32,20 @@ def create(destination: Path | None = None) -> Path:
 
     shutil.copytree(ROOT / "examples" / "demo-project", destination, dirs_exist_ok=True)
     git(destination, "init", "-q")
-    git(destination, "config", "user.email", "demo@signoff.local")
-    git(destination, "config", "user.name", "Signoff Demo")
+    git(destination, "config", "user.email", "demo@traction.local")
+    git(destination, "config", "user.name", "Traction Demo")
     git(destination, "add", ".")
     git(destination, "commit", "-qm", "demo baseline")
 
     install(destination, ROOT)
     git(destination, "add", ".")
-    git(destination, "commit", "-qm", "install Signoff")
+    git(destination, "commit", "-qm", "install Traction")
     runtime = Runtime(destination)
     goal = "Change greet() to return exactly hello world while preserving all unrelated behavior."
     runtime.start(goal)
     status = runtime.status()
     run_id = status["run_id"]
-    run_path = destination / ".signoff" / "runs" / run_id
+    run_path = destination / ".traction" / "runs" / run_id
 
     (run_path / "CHARTER.md").write_text(
         f"""# Run Charter
@@ -120,7 +120,7 @@ The focused unit test passes against a patch limited to `app.py`.
         "context_id": "demo-builder-context",
     }
     contract["allowed_paths"] = ["app.py", "test_app.py"]
-    contract["forbidden_paths"] = [".git/**", ".signoff/**"]
+    contract["forbidden_paths"] = [".git/**", ".traction/**"]
     contract["exempt_paths"] = ["test_*.py"]
     contract["budgets"] = {"production_files": 1, "changed_lines": 12}
     contract["verification"] = [
@@ -139,7 +139,7 @@ The focused unit test passes against a patch limited to `app.py`.
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Create a disposable Signoff demo repository")
+    parser = argparse.ArgumentParser(description="Create a disposable Traction demo repository")
     parser.add_argument("--destination", type=Path)
     args = parser.parse_args()
     project = create(args.destination)

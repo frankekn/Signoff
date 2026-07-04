@@ -5,8 +5,8 @@ import tempfile
 from pathlib import Path
 from typing import Iterable
 
-from signoff.runtime import Runtime
-from signoff.util import atomic_write_json, read_json
+from traction.runtime import Runtime
+from traction.util import atomic_write_json, read_json
 
 
 class RepoFixture:
@@ -17,7 +17,7 @@ class RepoFixture:
         self.project = Path(self.tmp.name)
         subprocess.run(["git", "init", "-q", str(self.project)], check=True)
         subprocess.run(["git", "-C", str(self.project), "config", "user.email", "test@example.com"], check=True)
-        subprocess.run(["git", "-C", str(self.project), "config", "user.name", "Signoff Test"], check=True)
+        subprocess.run(["git", "-C", str(self.project), "config", "user.name", "Traction Test"], check=True)
         (self.project / "app.py").write_text('def greet():\n    return "hello"\n', encoding="utf-8")
         (self.project / "test_app.py").write_text(
             'import unittest\nimport app\nclass T(unittest.TestCase):\n    def test_greet(self):\n        self.assertEqual(app.greet(), "hello world")\n',
@@ -28,7 +28,7 @@ class RepoFixture:
         self.runtime = Runtime(self.project)
         self.runtime.start(self.goal)
         self.run_id = self.runtime.status()["run_id"]
-        self.run = self.project / ".signoff" / "runs" / self.run_id
+        self.run = self.project / ".traction" / "runs" / self.run_id
 
     def close(self) -> None:
         self.tmp.cleanup()
@@ -128,7 +128,7 @@ The focused unit test must pass against the sealed patch.
             "context_id": "builder-context",
         }
         contract["allowed_paths"] = allowed_paths or ["app.py", "test_app.py"]
-        contract["forbidden_paths"] = forbidden_paths or [".git/**", ".signoff/**"]
+        contract["forbidden_paths"] = forbidden_paths or [".git/**", ".traction/**"]
         contract["exempt_paths"] = ["test_*.py"]
         contract["budgets"] = {"production_files": production_files, "changed_lines": changed_lines}
         contract["verification"] = [

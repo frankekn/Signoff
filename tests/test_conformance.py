@@ -6,9 +6,9 @@ import sys
 import unittest
 from pathlib import Path
 
-from signoff.errors import IntegrityError, StateError, ValidationError
-from signoff.installer import install
-from signoff.util import atomic_write_json, read_json
+from traction.errors import IntegrityError, StateError, ValidationError
+from traction.installer import install
+from traction.util import atomic_write_json, read_json
 
 from tests.support import RepoFixture
 
@@ -186,9 +186,9 @@ class ConformanceTests(unittest.TestCase):
         second = install(self.fx.project, source_root)
         self.assertEqual(first["status"], "installed")
         self.assertEqual(second["status"], "installed")
-        self.assertTrue((self.fx.project / "signoff").is_file())
+        self.assertTrue((self.fx.project / "traction").is_file())
         self.assertTrue((self.fx.project / ".agents" / "skills" / "push" / "SKILL.md").is_file())
-        self.assertTrue((self.fx.project / ".signoff" / "runtime" / "signoff" / "cli.py").is_file())
+        self.assertTrue((self.fx.project / ".traction" / "runtime" / "traction" / "cli.py").is_file())
 
     def test_21_historical_receipt_tamper_is_detected(self) -> None:
         self.fx.lock()
@@ -210,13 +210,13 @@ class ConformanceTests(unittest.TestCase):
         subprocess.run(["git", "-C", str(self.fx.project), "commit", "-qm", "track control artifact"], check=True)
         self.fx.lock()
         control.write_text("modified control instructions\n", encoding="utf-8")
-        scratch = self.fx.project / ".signoff" / "agent-scratch.log"
+        scratch = self.fx.project / ".traction" / "agent-scratch.log"
         scratch.write_text("untracked control noise\n", encoding="utf-8")
         iteration = self.fx.passing_evidence(final=True)
         sealed_patch = (iteration / "PATCH.diff").read_text(encoding="utf-8")
         self.assertNotIn("diff --git a/AGENTS.md", sealed_patch)
         self.assertNotIn("modified control instructions", sealed_patch)
-        self.assertNotIn("diff --git a/.signoff/", sealed_patch)
+        self.assertNotIn("diff --git a/.traction/", sealed_patch)
         self.assertNotIn("agent-scratch.log", sealed_patch)
 
     def test_23_charter_tamper_after_lock_is_detected(self) -> None:
@@ -245,7 +245,7 @@ class ConformanceTests(unittest.TestCase):
 
     def test_26_forbidden_path_violation_fails_scope(self) -> None:
         self.fx.lock()
-        self.fx.activate(forbidden_paths=[".git/**", ".signoff/**", "surprise.txt"])
+        self.fx.activate(forbidden_paths=[".git/**", ".traction/**", "surprise.txt"])
         self.fx.implement()
         (self.fx.project / "surprise.txt").write_text("forbidden\n", encoding="utf-8")
         scope = self.fx.runtime.check_scope()

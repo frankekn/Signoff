@@ -1,19 +1,19 @@
 import type { ChangeEvent, FormEvent, ReactElement } from 'react'
-import type { CourtAction } from '../api'
+import type { GripAction } from '../api'
 
 type NextActionCardProps = {
   readonly actionPending: boolean
-  readonly actions: readonly CourtAction[]
+  readonly actions: readonly GripAction[]
   readonly agentInstruction: string
   readonly copied: boolean
   readonly next: string | undefined
   readonly note: string
-  readonly noteAction: CourtAction | null
+  readonly noteAction: GripAction | null
   readonly noteError: string
   readonly onCancelNote: () => void
   readonly onCopyAgent: () => Promise<void>
   readonly onNoteChange: (value: string) => void
-  readonly onRunAction: (action: CourtAction) => void
+  readonly onRunAction: (action: GripAction) => void
   readonly onSubmitNote: () => void
 }
 

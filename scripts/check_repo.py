@@ -20,14 +20,14 @@ REQUIRED = [
     "package-lock.json",
     "install.sh",
     "install.ps1",
-    "signoff",
-    "signoff.cmd",
-    "signoff.ps1",
-    "src/signoff/cli.py",
-    "src/signoff/web.py",
-    "src/signoff/web_dist/index.html",
+    "traction",
+    "traction.cmd",
+    "traction.ps1",
+    "src/traction/cli.py",
+    "src/traction/web.py",
+    "src/traction/web_dist/index.html",
     "apps/web/src/main.tsx",
-    "skills/signoff/SKILL.md",
+    "skills/traction/SKILL.md",
     "skills/push/SKILL.md",
     "skills/pull/SKILL.md",
     "protocol/schemas/spec.schema.json",
@@ -76,9 +76,9 @@ if is_git_repository:
         if "node_modules" in relative.parts or ("apps" in relative.parts and "dist" in relative.parts):
             errors.append(f"tracked development build artifact: {relative}")
 
-for skill in ("signoff", "push", "pull"):
+for skill in ("traction", "push", "pull"):
     top = ROOT / "skills" / skill
-    packaged = ROOT / "src" / "signoff" / "assets" / "skills" / skill
+    packaged = ROOT / "src" / "traction" / "assets" / "skills" / skill
     top_files = {path.relative_to(top) for path in top.rglob("*") if path.is_file()}
     packaged_files = {path.relative_to(packaged) for path in packaged.rglob("*") if path.is_file()}
     if top_files != packaged_files:
@@ -101,15 +101,15 @@ try:
 except (OSError, json.JSONDecodeError) as exc:
     errors.append(f"invalid package metadata: {exc}")
 
-index_path = ROOT / "src" / "signoff" / "web_dist" / "index.html"
+index_path = ROOT / "src" / "traction" / "web_dist" / "index.html"
 if index_path.is_file():
     index = index_path.read_text(encoding="utf-8")
     for asset in re.findall(r'(?:src|href)="(/assets/[^"]+)"', index):
-        if not (ROOT / "src" / "signoff" / "web_dist" / asset.lstrip("/")).is_file():
+        if not (ROOT / "src" / "traction" / "web_dist" / asset.lstrip("/")).is_file():
             errors.append(f"packaged UI references missing asset: {asset}")
 
-if os.name != "nt" and (ROOT / "signoff").is_file() and not os.access(ROOT / "signoff", os.X_OK):
-    errors.append("signoff launcher is not executable")
+if os.name != "nt" and (ROOT / "traction").is_file() and not os.access(ROOT / "traction", os.X_OK):
+    errors.append("traction launcher is not executable")
 if os.name != "nt" and (ROOT / "install.sh").is_file() and not os.access(ROOT / "install.sh", os.X_OK):
     errors.append("install.sh is not executable")
 

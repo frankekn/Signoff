@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Controlled baseline vs prompt-loop vs Signoff runner.
+"""Controlled baseline vs prompt-loop vs Traction runner.
 
 The harness deliberately executes hidden checks only after the agent exits. For real
 secrecy, keep the manifest and evaluator outside the agent-writable filesystem and run
@@ -40,7 +40,7 @@ def git_output(project: Path, args: list[str]) -> str:
 
 
 def changed_metrics(project: Path) -> dict[str, Any]:
-    files = sorted({x for x in (git_output(project,["diff","--name-only","HEAD","--","."]) + git_output(project,["ls-files","--others","--exclude-standard"])).splitlines() if x and not x.startswith(".signoff/")})
+    files = sorted({x for x in (git_output(project,["diff","--name-only","HEAD","--","."]) + git_output(project,["ls-files","--others","--exclude-standard"])).splitlines() if x and not x.startswith(".traction/")})
     added = deleted = 0
     for line in git_output(project,["diff","--numstat","HEAD","--","."]).splitlines():
         parts=line.split("\t")
@@ -50,7 +50,7 @@ def changed_metrics(project: Path) -> dict[str, Any]:
     return {"changed_files":files,"changed_file_count":len(files),"changed_lines":added+deleted,"added_lines":added,"deleted_lines":deleted}
 
 
-def render_prompt(mode: str, goal: str, signoff_url: str) -> str:
+def render_prompt(mode: str, goal: str, traction_url: str) -> str:
     if mode == "baseline":
         return goal
     if mode == "prompt-loop":
@@ -58,10 +58,10 @@ def render_prompt(mode: str, goal: str, signoff_url: str) -> str:
 
 Before editing, write a falsifiable specification. Work in small bounded slices. Run real tests, inspect the full diff, obtain independent critical review when possible, repair material findings, avoid unrelated cleanup, and stop or pivot rather than changing the goal. Do not claim completion without evidence.
 """
-    if mode == "signoff":
-        return f"""Install Signoff from {signoff_url} into this repository if it is not already installed.
-Then use Signoff to achieve this exact outcome: {goal}
-Follow ./signoff next until DONE, STOPPED, PIVOT, or BLOCKED. Do not bypass a failing gate.
+    if mode == "traction":
+        return f"""Install Traction from {traction_url} into this repository if it is not already installed.
+Then use Traction to achieve this exact outcome: {goal}
+Follow ./traction next until DONE, STOPPED, PIVOT, or BLOCKED. Do not bypass a failing gate.
 """
     raise ValueError(mode)
 
@@ -82,11 +82,11 @@ def main() -> int:
     ap=argparse.ArgumentParser()
     ap.add_argument("--manifest",required=True)
     ap.add_argument("--agent-argv-json",required=True,help='JSON argv array; placeholders: {project} {prompt} {prompt_file} {mode} {case_id} {python}')
-    ap.add_argument("--modes",default="baseline,prompt-loop,signoff")
+    ap.add_argument("--modes",default="baseline,prompt-loop,traction")
     ap.add_argument("--repetitions",type=int,default=1)
     ap.add_argument("--timeout-seconds",type=int,default=1800)
     ap.add_argument("--output",required=True)
-    ap.add_argument("--signoff-source",default=str(ROOT))
+    ap.add_argument("--traction-source",default=str(ROOT))
     args=ap.parse_args()
     manifest_path=Path(args.manifest).resolve(); manifest=json.loads(manifest_path.read_text())
     argv_template=json.loads(args.agent_argv_json)
@@ -97,15 +97,15 @@ def main() -> int:
         fixture=(manifest_path.parent/case["fixture"]).resolve()
         for mode in modes:
             for repetition in range(1,args.repetitions+1):
-                with tempfile.TemporaryDirectory(prefix=f"signoff-efficacy-{case['id']}-{mode}-") as tmp:
+                with tempfile.TemporaryDirectory(prefix=f"traction-efficacy-{case['id']}-{mode}-") as tmp:
                     project=Path(tmp)/"project"; shutil.copytree(fixture,project)
                     if not (project/".git").exists():
                         subprocess.run(["git","init","-q",str(project)],check=True)
                         subprocess.run(["git","-C",str(project),"config","user.email","benchmark@example.invalid"],check=True)
-                        subprocess.run(["git","-C",str(project),"config","user.name","Signoff Benchmark"],check=True)
+                        subprocess.run(["git","-C",str(project),"config","user.name","Traction Benchmark"],check=True)
                         subprocess.run(["git","-C",str(project),"add","."],check=True)
                         subprocess.run(["git","-C",str(project),"commit","-qm","benchmark baseline"],check=True)
-                    prompt=render_prompt(mode,case["goal"],args.signoff_source)
+                    prompt=render_prompt(mode,case["goal"],args.traction_source)
                     prompt_file=Path(tmp)/"PROMPT.txt"; prompt_file.write_text(prompt)
                     mapping={"project":str(project),"prompt":prompt,"prompt_file":str(prompt_file),"mode":mode,"case_id":case["id"],"python":sys.executable}
                     agent=run(expand_argv(argv_template,mapping),cwd=project,timeout=args.timeout_seconds)
@@ -121,15 +121,15 @@ def main() -> int:
                     weighted_total=sum(float(x["weight"]) for x in hidden) or 1.0
                     weighted_pass=sum(float(x["weight"]) for x in hidden if x["status"]=="finished" and x["exit_code"]==0)
                     metrics=changed_metrics(project)
-                    allowed=set(case.get("expected_paths",[])); unnecessary=[p for p in metrics["changed_files"] if allowed and p not in allowed and not p.startswith((".agents/",".claude/",".gemini/")) and p not in {"signoff","signoff.cmd","signoff.ps1","AGENTS.md","CLAUDE.md","GEMINI.md"}]
-                    signoff_phase=None
-                    state=project/".signoff"/"state.json"
+                    allowed=set(case.get("expected_paths",[])); unnecessary=[p for p in metrics["changed_files"] if allowed and p not in allowed and not p.startswith((".agents/",".claude/",".gemini/")) and p not in {"traction","traction.cmd","traction.ps1","AGENTS.md","CLAUDE.md","GEMINI.md"}]
+                    traction_phase=None
+                    state=project/".traction"/"state.json"
                     if state.exists():
                         try:
                             rs=json.loads(state.read_text()); mid=rs.get("active_run_id")
-                            if mid: signoff_phase=json.loads((project/".signoff"/"runs"/mid/"STATE.json").read_text()).get("phase")
-                        except Exception: signoff_phase="INVALID_STATE"
-                    results.append({"case_id":case["id"],"mode":mode,"repetition":repetition,"agent":agent,"hidden_checks":hidden,"task_success":hidden_success,"claimed_completion":claimed,"false_completion":bool(claimed and not hidden_success),"spec_retention_score":weighted_pass/weighted_total,"signoff_terminal_outcome":signoff_phase,"unnecessary_changed_files":unnecessary,"slop_file_ratio":len(unnecessary)/max(1,metrics["changed_file_count"]),**metrics})
+                            if mid: traction_phase=json.loads((project/".traction"/"runs"/mid/"STATE.json").read_text()).get("phase")
+                        except Exception: traction_phase="INVALID_STATE"
+                    results.append({"case_id":case["id"],"mode":mode,"repetition":repetition,"agent":agent,"hidden_checks":hidden,"task_success":hidden_success,"claimed_completion":claimed,"false_completion":bool(claimed and not hidden_success),"spec_retention_score":weighted_pass/weighted_total,"traction_terminal_outcome":traction_phase,"unnecessary_changed_files":unnecessary,"slop_file_ratio":len(unnecessary)/max(1,metrics["changed_file_count"]),**metrics})
     summary={}
     for mode in modes:
         rows=[r for r in results if r["mode"]==mode]; n=len(rows); wins=sum(r["task_success"] for r in rows); false=sum(r["false_completion"] for r in rows)

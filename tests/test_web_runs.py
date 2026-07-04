@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from signoff.util import atomic_write_json, read_json
+from traction.util import atomic_write_json, read_json
 
 from tests.web_server import WebServerTestCase
 
