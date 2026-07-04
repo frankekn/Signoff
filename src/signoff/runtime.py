@@ -12,7 +12,7 @@ from typing import Any
 from .errors import IntegrityError, SignoffError, StateError, ValidationError
 from .git import changed_files, changed_line_count, ensure_repository, patch, snapshot_commit
 from .ledger import append as append_ledger
-from .schemas import validate_contract, validate_council, validate_roast, validate_spec
+from .schemas import validate_contract, validate_push, validate_roast, validate_spec
 from .state import (
     TERMINAL_PHASES,
     active_mission,
@@ -30,7 +30,7 @@ from .state import (
 from .templates import (
     charter_template,
     contract_template,
-    council_template,
+    push_template,
     judgment_template,
     review_template,
     spec_template,
@@ -235,45 +235,45 @@ class Runtime:
             "next": self.next_action(),
         }
 
-    def prepare_council(self) -> dict[str, Any]:
+    def prepare_push(self) -> dict[str, Any]:
         _, state = active_mission(self.project)
-        require_phase(state, {"DRAFT", "COUNCIL"})
+        require_phase(state, {"DRAFT", "PUSH"})
         _validate_charter(self.project, state)
         _spec, spec_info = _spec_info(self.project, state)
         del spec_info
         base = mission_dir(self.project, state["mission_id"])
         hashes = _artifact_hashes(base, {"goal": "GOAL.txt", "charter": "CHARTER.md", "spec": "SPEC.json"})
-        council_path = base / "COUNCIL.json"
-        if council_path.exists() and state["phase"] == "COUNCIL":
-            existing = read_json(council_path)
+        push_path = base / "PUSH.json"
+        if push_path.exists() and state["phase"] == "PUSH":
+            existing = read_json(push_path)
             if existing.get("advisors") and not any("REPLACE_ME" in json.dumps(x) for x in existing.get("advisors", [])):
-                raise StateError("COUNCIL.json already contains advisor work; do not overwrite it")
-        atomic_write_json(council_path, council_template(state["mission_id"], hashes))
-        state["phase"] = "COUNCIL"
+                raise StateError("PUSH.json already contains advisor work; do not overwrite it")
+        atomic_write_json(push_path, push_template(state["mission_id"], hashes))
+        state["phase"] = "PUSH"
         state["updated_at"] = now_utc()
         write_mission_state(self.project, state)
-        append_ledger(ledger_path(self.project, state["mission_id"]), "council.prepared", {"artifact_hashes": hashes})
-        return {"phase": "COUNCIL", "council_path": str(council_path.relative_to(self.project)), "artifact_hashes": hashes, "next": self.next_action()}
+        append_ledger(ledger_path(self.project, state["mission_id"]), "push.prepared", {"artifact_hashes": hashes})
+        return {"phase": "PUSH", "push_path": str(push_path.relative_to(self.project)), "artifact_hashes": hashes, "next": self.next_action()}
 
     def lock(self) -> dict[str, Any]:
         _, state = active_mission(self.project)
-        require_phase(state, {"COUNCIL"})
+        require_phase(state, {"PUSH"})
         _validate_charter(self.project, state)
         spec, spec_info = _spec_info(self.project, state)
         base = mission_dir(self.project, state["mission_id"])
         hashes = _artifact_hashes(base, {"goal": "GOAL.txt", "charter": "CHARTER.md", "spec": "SPEC.json"})
-        council_path = base / "COUNCIL.json"
-        council = read_json(council_path)
-        council_result = validate_council(council, mission_id=state["mission_id"], expected_hashes=hashes)
-        council_sha = sha256_file(council_path)
-        verdict = council_result["verdict"]
+        push_path = base / "PUSH.json"
+        push = read_json(push_path)
+        push_result = validate_push(push, mission_id=state["mission_id"], expected_hashes=hashes)
+        push_sha = sha256_file(push_path)
+        verdict = push_result["verdict"]
         if verdict != "PROCEED":
             terminal = {"STOP": "STOPPED", "PIVOT": "PIVOT", "INSUFFICIENT_QUORUM": "BLOCKED"}[verdict]
             state["phase"] = terminal
             state["updated_at"] = now_utc()
-            state["terminal_reason"] = council["decision"]["rationale"]
+            state["terminal_reason"] = push["decision"]["rationale"]
             write_mission_state(self.project, state)
-            append_ledger(ledger_path(self.project, state["mission_id"]), "mission.concluded", {"phase": terminal, "council_sha256": council_sha})
+            append_ledger(ledger_path(self.project, state["mission_id"]), "mission.concluded", {"phase": terminal, "push_sha256": push_sha})
             return {"phase": terminal, "verdict": verdict, "reason": state["terminal_reason"]}
         lock = {
             "schema_version": 1,
@@ -283,8 +283,8 @@ class Runtime:
             "goal_sha256": hashes["goal"],
             "charter_sha256": hashes["charter"],
             "spec_sha256": hashes["spec"],
-            "council_sha256": council_sha,
-            "council_result": council_result,
+            "push_sha256": push_sha,
+            "push_result": push_result,
             "requirement_ids": sorted(spec_info["requirement_ids"]),
             "acceptance_ids": sorted(spec_info["acceptance_ids"]),
             "max_iterations": spec_info["max_iterations"],
@@ -296,12 +296,12 @@ class Runtime:
         state["phase"] = "LOCKED"
         state["updated_at"] = now_utc()
         state["max_iterations"] = spec_info["max_iterations"]
-        state["council_first_slice"] = council["decision"]["first_slice"]
+        state["push_first_slice"] = push["decision"]["first_slice"]
         write_mission_state(self.project, state)
         append_ledger(
             ledger_path(self.project, state["mission_id"]),
             "mission.locked",
-            {"lock_sha256": state["lock_file_sha256"], "council_sha256": council_sha},
+            {"lock_sha256": state["lock_file_sha256"], "push_sha256": push_sha},
         )
         del spec
         return {"phase": "LOCKED", "lock_path": str(lock_path.relative_to(self.project)), "lock_sha256": state["lock_file_sha256"], "next": self.next_action()}
@@ -311,15 +311,15 @@ class Runtime:
         require_phase(state, {"LOCKED"})
         verify_lock(self.project, state)
         if state["iteration"] >= state["max_iterations"]:
-            state["phase"] = "COUNCIL_REVIEW"
+            state["phase"] = "PUSH_REVIEW"
             state["updated_at"] = now_utc()
             write_mission_state(self.project, state)
-            raise StateError("iteration budget exhausted; Council must STOP or authorize a pivot")
+            raise StateError("iteration budget exhausted; Push must STOP or authorize a pivot")
         spec, _ = _spec_info(self.project, state)
         iteration = state["iteration"] + 1
         iteration_dir = mission_dir(self.project, state["mission_id"]) / "iterations" / f"{iteration:04d}"
         iteration_dir.mkdir(parents=True, exist_ok=False)
-        first_slice = state.get("council_first_slice", "") if iteration == 1 else ""
+        first_slice = state.get("push_first_slice", "") if iteration == 1 else ""
         atomic_write_json(iteration_dir / "CONTRACT.json", contract_template(state["mission_id"], iteration, spec, first_slice))
         state["current"] = {"iteration": iteration, "attempt": 1, "root_causes": []}
         state["phase"] = "SLICE_DRAFT"
@@ -602,7 +602,7 @@ class Runtime:
                 repeated = state["current"]["root_causes"].count(root_cause) >= 2
                 no_progress = len(state["current"]["root_causes"]) >= 2
                 if repeated or no_progress:
-                    state["phase"] = "COUNCIL_REVIEW"
+                    state["phase"] = "PUSH_REVIEW"
                     state["pending_pivot_reason"] = "repeated root cause" if repeated else "two review cycles without accepted progress"
                 else:
                     state["phase"] = "IMPLEMENTING"
@@ -658,10 +658,10 @@ class Runtime:
                 "next": self.next_action(),
             }
 
-        require_phase(state, {"DRAFT", "COUNCIL", "LOCKED", "SLICE_DRAFT", "IMPLEMENTING", "VERIFY_FAILED", "VERIFIED", "REVIEWING", "REVIEWED", "COUNCIL_REVIEW"})
+        require_phase(state, {"DRAFT", "PUSH", "LOCKED", "SLICE_DRAFT", "IMPLEMENTING", "VERIFY_FAILED", "VERIFIED", "REVIEWING", "REVIEWED", "PUSH_REVIEW"})
         phase = decision.upper()
         if phase == "PIVOT":
-            phase = "COUNCIL_REVIEW"
+            phase = "PUSH_REVIEW"
         state["phase"] = phase
         state["terminal_reason"] = require_clean_text(note or root_cause, "reason", minimum=4)
         state["updated_at"] = now_utc()
@@ -671,12 +671,12 @@ class Runtime:
 
     def authorize_pivot(self, reason: str) -> dict[str, Any]:
         _, state = active_mission(self.project)
-        require_phase(state, {"COUNCIL_REVIEW", "PIVOT"})
+        require_phase(state, {"PUSH_REVIEW", "PIVOT"})
         reason = require_clean_text(reason, "pivot reason", minimum=8)
         base = mission_dir(self.project, state["mission_id"])
         revision_dir = base / "revisions" / f"revision-{state['revision']:04d}"
         revision_dir.mkdir(parents=True, exist_ok=False)
-        for name in ("CHARTER.md", "SPEC.json", "COUNCIL.json", "LOCK.json"):
+        for name in ("CHARTER.md", "SPEC.json", "PUSH.json", "LOCK.json"):
             source = base / name
             if source.exists():
                 source.replace(revision_dir / name)
@@ -783,8 +783,8 @@ class Runtime:
                 "then run ./signoff slice."
             )
         actions = {
-            "DRAFT": f"Complete {base}/CHARTER.md and {base}/SPEC.json, then run ./signoff prepare-council.",
-            "COUNCIL": f"Run independent Council contexts using skills/council, fill {base}/COUNCIL.json, then run ./signoff lock.",
+            "DRAFT": f"Complete {base}/CHARTER.md and {base}/SPEC.json, then run ./signoff prepare-push.",
+            "PUSH": f"Run independent Push contexts using skills/push, fill {base}/PUSH.json, then run ./signoff lock.",
             "LOCKED": "Run ./signoff prepare-slice to create exactly one bounded iteration contract.",
             "SLICE_DRAFT": slice_draft_action,
             "IMPLEMENTING": "Implement only the active contract; then run ./signoff verify.",
@@ -792,7 +792,7 @@ class Runtime:
             "VERIFIED": "Run ./signoff prepare-roast, collect fresh read-only reviews, then run ./signoff roast.",
             "REVIEWING": "Fill every review and JUDGMENT.json against the sealed hashes; then run ./signoff roast.",
             "REVIEWED": "Follow the deterministic gate: ./signoff finish accepted, ./signoff finish done, or ./signoff finish rework --root-cause \"...\".",
-            "COUNCIL_REVIEW": "Implementation is paused. Run ./signoff pivot --reason \"<evidence-based reason>\" or ./signoff finish stopped --note \"<reason>\".",
+            "PUSH_REVIEW": "Implementation is paused. Run ./signoff pivot --reason \"<evidence-based reason>\" or ./signoff finish stopped --note \"<reason>\".",
             "DONE": "Terminal result: DONE. Do not continue implementation under this mission.",
             "STOPPED": "Terminal result: STOPPED. Do not continue implementation under this mission.",
             "PIVOT": "Terminal result: PIVOT. Start a revised mission only through the pivot gate.",

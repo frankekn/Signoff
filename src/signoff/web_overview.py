@@ -53,10 +53,10 @@ def allowed_actions(phase: str) -> list[CourtAction]:
     actions: dict[str, list[CourtAction]] = {
         "IDLE": [],
         "DRAFT": [
-            {"id": "prepare_council", "label": "Send to Council", "tone": "primary"},
+            {"id": "prepare_push", "label": "Send to Push", "tone": "primary"},
             {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
         ],
-        "COUNCIL": [
+        "PUSH": [
             {"id": "lock", "label": "Lock decision", "tone": "primary"},
             {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
         ],
@@ -80,7 +80,7 @@ def allowed_actions(phase: str) -> list[CourtAction]:
             {"id": "finish_accepted", "label": "Accept slice", "tone": "neutral"},
             {"id": "finish_rework", "label": "Rework", "tone": "danger", "requiresNote": True},
         ],
-        "COUNCIL_REVIEW": [
+        "PUSH_REVIEW": [
             {"id": "pivot", "label": "Authorize pivot", "tone": "primary", "requiresNote": True},
             {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
         ],
@@ -99,8 +99,8 @@ def editable_paths(project: Path, state: JsonObject) -> set[str]:
     allowed: set[Path] = set()
     if phase == "DRAFT":
         allowed.update({base / "CHARTER.md", base / "SPEC.json"})
-    elif phase == "COUNCIL":
-        allowed.add(base / "COUNCIL.json")
+    elif phase == "PUSH":
+        allowed.add(base / "PUSH.json")
     elif phase in {"SLICE_DRAFT", "REVIEWING"} and state.get("current"):
         current = json_object(state.get("current"))
         iteration = integer(current.get("iteration")) if current else None

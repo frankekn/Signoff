@@ -86,12 +86,12 @@ def verify_lock(project: Path, state: dict[str, Any]) -> dict[str, str]:
         "goal": base / "GOAL.txt",
         "charter": base / "CHARTER.md",
         "spec": base / "SPEC.json",
-        "council": base / "COUNCIL.json",
+        "push": base / "PUSH.json",
     }
     actual = {name: sha256_file(path) for name, path in mapping.items()}
     for name, digest in actual.items():
         if lock.get(f"{name}_sha256") != digest:
-            raise IntegrityError(f"locked {name} hash mismatch; use a recorded Council pivot instead of editing it")
+            raise IntegrityError(f"locked {name} hash mismatch; use a recorded Push pivot instead of editing it")
     lock_path = base / "LOCK.json"
     if sha256_file(lock_path) != state.get("lock_file_sha256"):
         raise IntegrityError("LOCK.json hash mismatch")

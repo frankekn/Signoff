@@ -1,4 +1,4 @@
-# Council cross-examination prompt (round 2 — template)
+# Push cross-examination prompt (round 2 — template)
 
 Sent by the chair ONLY when round 1 produced a verdict split. Fill `{{GOAL}}`,
 `{{YOUR_ROUND1}}`, and `{{OPPOSING_CLAIMS}}` and send verbatim to a single advisor via its Roster
@@ -6,12 +6,12 @@ transport. One pass only — never a second round 2.
 
 ---
 
-This is round 2 of the council. You already gave an independent first-round position. The chair has
-collected the points where the council disagreed and is sending you the ones that bear on your
+This is round 2 of the push. You already gave an independent first-round position. The chair has
+collected the points where the push disagreed and is sending you the ones that bear on your
 position — **anonymized on purpose**. You are not told which model raised them. Judge each on its
 merits, not its source. Do not assume the chair agrees with any of them.
 
-Your goal is unchanged: help the council reach the RIGHT DECISION (PROCEED / STOP / PIVOT) on:
+Your goal is unchanged: help the push reach the RIGHT DECISION (PROCEED / STOP / PIVOT) on:
 
 GOAL:
 {{GOAL}}

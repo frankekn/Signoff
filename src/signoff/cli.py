@@ -41,8 +41,8 @@ def build_parser() -> argparse.ArgumentParser:
     start = sub.add_parser("start", help="start a mission from the exact user-visible outcome")
     start.add_argument("goal")
 
-    sub.add_parser("prepare-council", help="validate the draft and create the shared Council packet")
-    sub.add_parser("lock", help="validate Council and hash-lock goal, charter, and spec")
+    sub.add_parser("prepare-push", help="validate the draft and create the shared Push packet")
+    sub.add_parser("lock", help="validate Push and hash-lock goal, charter, and spec")
     sub.add_parser("prepare-slice", help="create one bounded CONTRACT.json template")
     sub.add_parser("slice", help="validate and activate the current iteration contract")
     sub.add_parser("check-scope", help="show path, file, and changed-line budget status")
@@ -57,7 +57,7 @@ def build_parser() -> argparse.ArgumentParser:
     finish.add_argument("--root-cause", default="")
     finish.add_argument("--note", default="")
 
-    pivot = sub.add_parser("pivot", help="archive the old lock and return to draft after Council review")
+    pivot = sub.add_parser("pivot", help="archive the old lock and return to draft after Push review")
     pivot.add_argument("--reason", required=True)
 
     sub.add_parser("status", help="show current mission, proof, scope, and next action")
@@ -85,8 +85,8 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if result["status"] == "pass" else 2
         elif args.command == "start":
             _emit(runtime.start(args.goal))
-        elif args.command == "prepare-council":
-            _emit(runtime.prepare_council())
+        elif args.command == "prepare-push":
+            _emit(runtime.prepare_push())
         elif args.command == "lock":
             _emit(runtime.lock())
         elif args.command == "prepare-slice":

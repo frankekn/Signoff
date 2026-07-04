@@ -30,14 +30,14 @@ class WebServerTestCase(unittest.TestCase):
         self.fx = RepoFixture()
         self._start_server()
 
-    def conclude_from_council(self, verdict: str) -> None:
+    def conclude_from_push(self, verdict: str) -> None:
         self.fx.valid_draft()
-        self.fx.valid_council()
-        council = read_json(self.fx.mission / "COUNCIL.json")
-        council["decision"]["verdict"] = verdict
+        self.fx.valid_push()
+        push = read_json(self.fx.mission / "PUSH.json")
+        push["decision"]["verdict"] = verdict
         if verdict == "INSUFFICIENT_QUORUM":
-            council["advisors"] = council["advisors"][:1]
-        atomic_write_json(self.fx.mission / "COUNCIL.json", council)
+            push["advisors"] = push["advisors"][:1]
+        atomic_write_json(self.fx.mission / "PUSH.json", push)
         self.fx.runtime.lock()
 
     def request(self, path: str, *, method: str = "GET", body: JsonObject | None = None) -> tuple[int, JsonObject]:

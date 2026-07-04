@@ -65,7 +65,7 @@ def spec_template(mission_id: str, goal_sha256: str, goal: str) -> dict[str, Any
     }
 
 
-def council_template(mission_id: str, hashes: dict[str, str]) -> dict[str, Any]:
+def push_template(mission_id: str, hashes: dict[str, str]) -> dict[str, Any]:
     def advisor(index: int) -> dict[str, Any]:
         return {
             "identity": {

@@ -5,7 +5,7 @@ The **Signoff Protocol** is the versioned repository-local contract between user
 - exact mission and artifact hash matching;
 - stable ID references across spec and contract;
 - unique real participant/context identities;
-- complete canonical Council topic coverage;
+- complete canonical Push topic coverage;
 - machine-detected SUPPORT/OPPOSE conflicts;
 - builder/reviewer/judge role separation;
 - complete acceptance and finding accounting;

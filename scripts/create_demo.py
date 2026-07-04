@@ -78,9 +78,9 @@ The focused unit test passes against a patch limited to `app.py`.
     spec["non_goals"] = ["Do not add dependencies or refactor unrelated code."]
     atomic_write_json(mission / "SPEC.json", spec)
 
-    runtime.prepare_council()
-    council = read_json(mission / "COUNCIL.json")
-    for index, advisor in enumerate(council["advisors"], start=1):
+    runtime.prepare_push()
+    push = read_json(mission / "PUSH.json")
+    for index, advisor in enumerate(push["advisors"], start=1):
         advisor["identity"] = {
             "participant_id": f"demo-advisor-{index}",
             "provider": "demo",
@@ -95,16 +95,16 @@ The focused unit test passes against a patch limited to `app.py`.
         advisor["risk"] = "The requested behavior might already exist or the test may encode the wrong result."
         advisor["first_move"] = "Run the focused unittest before changing implementation code."
         advisor["cut"] = "Exclude all refactors and dependency changes."
-    council["decision"]["verdict"] = "PROCEED"
-    council["decision"]["rationale"] = "Both independent demo advisors support the same minimal route and executable oracle."
-    council["decision"]["first_slice"] = "Change only app.py and prove the exact greeting with unittest."
-    council["decision"]["chair"] = {
+    push["decision"]["verdict"] = "PROCEED"
+    push["decision"]["rationale"] = "Both independent demo advisors support the same minimal route and executable oracle."
+    push["decision"]["first_slice"] = "Change only app.py and prove the exact greeting with unittest."
+    push["decision"]["chair"] = {
         "participant_id": "demo-chair",
         "provider": "demo",
         "model": "chair",
         "context_id": "demo-chair-context",
     }
-    atomic_write_json(mission / "COUNCIL.json", council)
+    atomic_write_json(mission / "PUSH.json", push)
     runtime.lock()
     runtime.prepare_slice()
 

@@ -1,15 +1,15 @@
 ---
-name: council
-description: "Use before costly implementation to obtain independent, falsifiable PROCEED / STOP / PIVOT advice on the same decision surface. In Signoff mode, fill the generated COUNCIL.json and let ./signoff lock validate quorum, hashes, verdict-split conflicts, and conflict closure."
+name: push
+description: "Use before costly implementation to obtain independent, falsifiable PROCEED / STOP / PIVOT advice on the same decision surface. In Signoff mode, fill the generated PUSH.json and let ./signoff lock validate quorum, hashes, verdict-split conflicts, and conflict closure."
 ---
 
-# Council — independent deliberation that can stop or pivot
+# Push — independent deliberation that can stop or pivot
 
-Council is not a vote and not a multi-agent brainstorming chat. Its purpose is to create independent error signals before implementation and convert material disagreement into a discriminating observation.
+Push is not a vote and not a multi-agent brainstorming chat. Its purpose is to create independent error signals before implementation and convert material disagreement into a discriminating observation.
 
 ## Signoff runtime mode
 
-When `./signoff next` reports `COUNCIL`, use the generated `COUNCIL.json` as the output contract. Read the exact same sealed packet for every advisor:
+When `./signoff next` reports `PUSH`, use the generated `PUSH.json` as the output contract. Read the exact same sealed packet for every advisor:
 
 - `GOAL.txt`;
 - `CHARTER.md`;
@@ -63,7 +63,7 @@ user_decision
 
 Votes, majority, confidence, consensus, model brand, or rhetorical strength are invalid arbitration bases. Preserve unresolved dissent instead of laundering it into confidence.
 
-After filling `COUNCIL.json`, run:
+After filling `PUSH.json`, run:
 
 ```sh
 ./signoff lock

@@ -1,6 +1,6 @@
 ---
 name: signoff
-description: "Use for engineering work that must autonomously write a specification, obtain independent Council pressure, implement one bounded slice, prove it with executable receipts, obtain independent Roast review, and continue without goal drift or AI slop. The ./signoff state machine is authoritative."
+description: "Use for engineering work that must autonomously write a specification, obtain independent Push pressure, implement one bounded slice, prove it with executable receipts, obtain independent Roast review, and continue without goal drift or AI slop. The ./signoff state machine is authoritative."
 disable-model-invocation: true
 ---
 
@@ -20,7 +20,7 @@ Then perform exactly the one legal action returned by `./signoff next`.
 ## Non-negotiable rules
 
 1. Preserve the user's exact outcome in `GOAL.txt`; never paraphrase it in `./signoff start`.
-2. Do not edit any artifact after its hash is locked. A changed goal, charter, or spec requires the pivot gate and a fresh Council.
+2. Do not edit any artifact after its hash is locked. A changed goal, charter, or spec requires the pivot gate and a fresh Push.
 3. Work on one contract only. Do not touch files outside `allowed_paths`, exceed file/line budgets, or introduce adjacent cleanup.
 4. A builder cannot count as a reviewer or lead judge. Context IDs must represent real fresh contexts; never manufacture quorum.
 5. Claims such as “tests pass” are invalid until `./signoff verify` executes the commands and seals `EVIDENCE.json` plus `PATCH.diff`.
@@ -39,14 +39,14 @@ The charter states user-visible success, hard constraints, non-goals, stop/pivot
 Then run:
 
 ```sh
-./signoff prepare-council
+./signoff prepare-push
 ```
 
-### COUNCIL
+### PUSH
 
-Use the sibling `council` skill. Give every advisor the exact same goal, charter, spec, and hashes.
+Use the sibling `push` skill. Give every advisor the exact same goal, charter, spec, and hashes.
 
-Advisors answer independently before seeing peers. Fill the generated `COUNCIL.json`. Material verdict splits require an evidence-based resolution. If independent contexts are unavailable, return `INSUFFICIENT_QUORUM`; do not imitate extra voices.
+Advisors answer independently before seeing peers. Fill the generated `PUSH.json`. Material verdict splits require an evidence-based resolution. If independent contexts are unavailable, return `INSUFFICIENT_QUORUM`; do not imitate extra voices.
 
 Then run:
 
@@ -106,7 +106,7 @@ Follow the deterministic result:
 ./signoff finish rework --root-cause "<stable root cause>"
 ```
 
-`DONE` requires a final cumulative contract that covers every locked requirement and acceptance criterion. Repeated root causes or two review cycles without accepted progress force `COUNCIL_REVIEW`; implementation must pause until a pivot or stop decision.
+`DONE` requires a final cumulative contract that covers every locked requirement and acceptance criterion. Repeated root causes or two review cycles without accepted progress force `PUSH_REVIEW`; implementation must pause until a pivot or stop decision.
 
 ## User-facing progress
 

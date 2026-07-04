@@ -30,8 +30,8 @@ MAX_BODY_BYTES = 2 * 1024 * 1024
 
 
 def _action(runtime: Runtime, action: str, payload: dict[str, Any]) -> Any:
-    if action == "prepare_council":
-        return runtime.prepare_council()
+    if action == "prepare_push":
+        return runtime.prepare_push()
     if action == "lock":
         return runtime.lock()
     if action == "prepare_slice":

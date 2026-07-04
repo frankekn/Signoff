@@ -62,5 +62,5 @@ class WebMissionApiTests(WebServerTestCase):
         self.assertFalse(payload["data"]["canStartMission"])
         self.assertTrue(any(path.endswith("/CHARTER.md") for path in payload["data"]["editablePaths"]))
         action_ids = [action["id"] for action in payload["data"]["actions"]]
-        self.assertEqual(action_ids, ["prepare_council", "finish_stopped"])
+        self.assertEqual(action_ids, ["prepare_push", "finish_stopped"])
         self.assertEqual(payload["data"]["proofSummary"]["finalReceipt"]["status"], "present")

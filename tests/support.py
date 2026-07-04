@@ -65,10 +65,10 @@ The focused unit test must pass against the sealed patch.
         spec["non_goals"] = ["Do not refactor unrelated files."]
         atomic_write_json(self.mission / "SPEC.json", spec)
 
-    def valid_council(self, *, conflict: bool = False, resolve: bool = False, duplicate_context: bool = False) -> None:
-        self.runtime.prepare_council()
-        council = read_json(self.mission / "COUNCIL.json")
-        for index, advisor in enumerate(council["advisors"], start=1):
+    def valid_push(self, *, conflict: bool = False, resolve: bool = False, duplicate_context: bool = False) -> None:
+        self.runtime.prepare_push()
+        push = read_json(self.mission / "PUSH.json")
+        for index, advisor in enumerate(push["advisors"], start=1):
             advisor["identity"] = {
                 "participant_id": f"advisor-{index}",
                 "provider": f"provider-{index}",
@@ -83,16 +83,16 @@ The focused unit test must pass against the sealed patch.
             advisor["risk"] = "The test may encode the wrong expected value."
             advisor["first_move"] = "Run the focused failing unit test before changing code."
             advisor["cut"] = "Exclude every unrelated refactor and dependency change."
-        council["decision"]["rationale"] = "Independent advisors examined the same route and support a bounded implementation."
-        council["decision"]["first_slice"] = "Make the focused greet behavior pass without adjacent cleanup."
-        council["decision"]["chair"] = {
+        push["decision"]["rationale"] = "Independent advisors examined the same route and support a bounded implementation."
+        push["decision"]["first_slice"] = "Make the focused greet behavior pass without adjacent cleanup."
+        push["decision"]["chair"] = {
             "participant_id": "chair",
             "provider": "chair-provider",
             "model": "chair-model",
             "context_id": "chair-context",
         }
         if conflict and resolve:
-            council["decision"]["conflict_resolutions"] = [
+            push["decision"]["conflict_resolutions"] = [
                 {
                     "topic": "verdict-split",
                     "basis": "existing_evidence",
@@ -100,11 +100,11 @@ The focused unit test must pass against the sealed patch.
                     "conclusion": "Proceed with the smallest implementation slice.",
                 }
             ]
-        atomic_write_json(self.mission / "COUNCIL.json", council)
+        atomic_write_json(self.mission / "PUSH.json", push)
 
-    def lock(self, **council_kwargs) -> None:
+    def lock(self, **push_kwargs) -> None:
         self.valid_draft()
-        self.valid_council(**council_kwargs)
+        self.valid_push(**push_kwargs)
         self.runtime.lock()
 
     def activate(

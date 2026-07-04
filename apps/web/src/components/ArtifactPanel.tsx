@@ -11,7 +11,7 @@ function prettySize(bytes: number) {
 function priority(path: string) {
   if (path.endsWith('CHARTER.md')) return 0
   if (path.endsWith('SPEC.json')) return 1
-  if (path.endsWith('COUNCIL.json')) return 2
+  if (path.endsWith('PUSH.json')) return 2
   if (path.endsWith('CONTRACT.json')) return 3
   if (path.endsWith('EVIDENCE.json')) return 4
   if (path.endsWith('JUDGMENT.json')) return 5

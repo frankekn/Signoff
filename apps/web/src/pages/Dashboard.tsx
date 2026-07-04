@@ -13,7 +13,7 @@ import { Timeline } from '../components/Timeline'
 const phaseCopy: Record<string, { title: string; note: string }> = {
   IDLE: { title: 'Ready for a mission', note: 'Describe the outcome. Signoff will preserve it as the immutable target.' },
   DRAFT: { title: 'Define what success means', note: 'Complete the charter and falsifiable acceptance criteria before implementation begins.' },
-  COUNCIL: { title: 'Challenge the route', note: 'Independent agents answer the same claims and expose what would prove them wrong.' },
+  PUSH: { title: 'Challenge the route', note: 'Independent agents answer the same claims and expose what would prove them wrong.' },
   LOCKED: { title: 'The goal is locked', note: 'Create one small implementation slice with explicit scope and executable checks.' },
   SLICE_DRAFT: { title: 'Bound the next change', note: 'Choose allowed paths, budgets, builder identity, and verification commands.' },
   IMPLEMENTING: { title: 'Build only the active slice', note: 'The contract is fixed. Scope and proof are measured from a sealed Git baseline.' },
@@ -21,7 +21,7 @@ const phaseCopy: Record<string, { title: string; note: string }> = {
   VERIFIED: { title: 'Executable evidence passed', note: 'Now independent reviewers inspect the exact sealed patch and evidence.' },
   REVIEWING: { title: 'Independent review in progress', note: 'Each criterion must be PASS, FAIL, or UNKNOWN; unresolved doubt cannot be hidden.' },
   REVIEWED: { title: 'A decision is ready', note: 'Sign off only when the deterministic gate permits it, otherwise rework or accept the slice.' },
-  COUNCIL_REVIEW: { title: 'Implementation is paused', note: 'Repeated failure or exhausted budget requires an explicit pivot or stop.' },
+  PUSH_REVIEW: { title: 'Implementation is paused', note: 'Repeated failure or exhausted budget requires an explicit pivot or stop.' },
   DONE: { title: 'Signed off', note: 'The final patch is tied to a replayable receipt and the locked user outcome.' },
   STOPPED: { title: 'Stopped honestly', note: 'The loop ended without pretending the goal was achieved.' },
   BLOCKED: { title: 'Blocked', note: 'External evidence or capability is missing. Resolve it before continuing.' },

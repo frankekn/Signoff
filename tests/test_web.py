@@ -60,7 +60,7 @@ class WebApiTests(WebServerTestCase):
         self.assertTrue(payload["data"]["canStartMission"])
 
         self.restart_fixture()
-        self.conclude_from_council("PIVOT")
+        self.conclude_from_push("PIVOT")
         status, payload = self.request("/api/overview")
         create_status, create_payload = self.request("/api/missions", method="POST", body={"goal": "Start after pivot"})
         self.assertEqual(status, 200)
@@ -69,7 +69,7 @@ class WebApiTests(WebServerTestCase):
         self.assertFalse(create_payload["ok"])
 
         self.restart_fixture()
-        self.conclude_from_council("INSUFFICIENT_QUORUM")
+        self.conclude_from_push("INSUFFICIENT_QUORUM")
         status, payload = self.request("/api/overview")
         create_status, create_payload = self.request("/api/missions", method="POST", body={"goal": "Start after blocked"})
         self.assertEqual(status, 200)

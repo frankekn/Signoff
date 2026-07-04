@@ -15,7 +15,7 @@ type HeroPanelProps = {
 function statusTone(phase: string): string {
   if (phase === 'DONE') return 'good'
   if (['BLOCKED', 'VERIFY_FAILED'].includes(phase)) return 'bad'
-  if (phase === 'COUNCIL_REVIEW') return 'paused'
+  if (phase === 'PUSH_REVIEW') return 'paused'
   if (['STOPPED', 'PIVOT'].includes(phase)) return 'terminal'
   if (phase === 'IDLE') return 'quiet'
   return 'live'

@@ -11,7 +11,7 @@ from .errors import ValidationError
 from .util import require_clean_text, require_keys, unique_ids
 
 SCHEMA_VERSION = 1
-COUNCIL_VERDICTS = {"PROCEED", "STOP", "PIVOT", "INSUFFICIENT_QUORUM"}
+PUSH_VERDICTS = {"PROCEED", "STOP", "PIVOT", "INSUFFICIENT_QUORUM"}
 CRITERION_VERDICTS = {"PASS", "FAIL", "UNKNOWN"}
 FINDING_SEVERITIES = {"critical", "high", "medium", "low", "note"}
 FINDING_DISPOSITIONS = {"ACT_ON", "CONSIDER", "NOTED", "DISMISSED", "OUT_OF_SCOPE"}
@@ -127,34 +127,34 @@ def validate_spec(spec: dict[str, Any], *, mission_id: str, goal_sha256: str) ->
     }
 
 
-def council_conflicts(advisors: list[dict[str, Any]]) -> set[str]:
+def push_conflicts(advisors: list[dict[str, Any]]) -> set[str]:
     verdicts = {advisor["verdict"] for advisor in advisors}
     if len(verdicts) > 1:
         return {"verdict-split"}
     return set()
 
 
-def validate_council(
-    council: dict[str, Any],
+def validate_push(
+    push: dict[str, Any],
     *,
     mission_id: str,
     expected_hashes: dict[str, str],
 ) -> dict[str, Any]:
-    require_keys(council, ("schema_version", "mission_id", "artifact_hashes", "advisors", "decision"), "council")
-    if council["schema_version"] != SCHEMA_VERSION:
-        raise ValidationError("council.schema_version must be 1")
-    if council["mission_id"] != mission_id:
-        raise ValidationError("council.mission_id does not match the active mission")
-    hashes = _expect_object(council["artifact_hashes"], "council.artifact_hashes")
+    require_keys(push, ("schema_version", "mission_id", "artifact_hashes", "advisors", "decision"), "push")
+    if push["schema_version"] != SCHEMA_VERSION:
+        raise ValidationError("push.schema_version must be 1")
+    if push["mission_id"] != mission_id:
+        raise ValidationError("push.mission_id does not match the active mission")
+    hashes = _expect_object(push["artifact_hashes"], "push.artifact_hashes")
     for key, expected in expected_hashes.items():
         if hashes.get(key) != expected:
-            raise ValidationError(f"council.artifact_hashes.{key} does not match the reviewed artifact")
+            raise ValidationError(f"push.artifact_hashes.{key} does not match the reviewed artifact")
 
-    advisors = _expect_list(council["advisors"], "council.advisors")
+    advisors = _expect_list(push["advisors"], "push.advisors")
     identities: list[dict[str, str]] = []
     normalized_advisors: list[dict[str, Any]] = []
     for index, advisor_value in enumerate(advisors):
-        context = f"council.advisors[{index}]"
+        context = f"push.advisors[{index}]"
         advisor = _expect_object(advisor_value, context)
         require_keys(
             advisor,
@@ -188,36 +188,36 @@ def validate_council(
     participant_ids = [identity["participant_id"] for identity in identities]
     context_ids = [identity["context_id"] for identity in identities]
     if len(participant_ids) != len(set(participant_ids)):
-        raise ValidationError("council participant_id values must be unique")
+        raise ValidationError("push participant_id values must be unique")
     if len(context_ids) != len(set(context_ids)):
-        raise ValidationError("council context_id values must be unique; duplicate contexts are not independent")
+        raise ValidationError("push context_id values must be unique; duplicate contexts are not independent")
 
-    decision = _expect_object(council["decision"], "council.decision")
-    require_keys(decision, ("verdict", "rationale", "conflict_resolutions", "first_slice", "chair"), "council.decision")
+    decision = _expect_object(push["decision"], "push.decision")
+    require_keys(decision, ("verdict", "rationale", "conflict_resolutions", "first_slice", "chair"), "push.decision")
     verdict = decision["verdict"]
-    if verdict not in COUNCIL_VERDICTS:
-        raise ValidationError("council.decision.verdict is invalid")
-    require_clean_text(decision["rationale"], "council.decision.rationale", minimum=8)
-    chair = validate_identity(decision["chair"], "council.decision.chair")
+    if verdict not in PUSH_VERDICTS:
+        raise ValidationError("push.decision.verdict is invalid")
+    require_clean_text(decision["rationale"], "push.decision.rationale", minimum=8)
+    chair = validate_identity(decision["chair"], "push.decision.chair")
     if chair["participant_id"] in set(participant_ids):
-        raise ValidationError("Council chair must not impersonate or count as an advisor")
+        raise ValidationError("Push chair must not impersonate or count as an advisor")
     if verdict != "INSUFFICIENT_QUORUM" and len(advisors) < 2:
-        raise ValidationError("Council requires at least two independent advisors")
+        raise ValidationError("Push requires at least two independent advisors")
     if verdict == "INSUFFICIENT_QUORUM" and len(advisors) >= 2:
         raise ValidationError("INSUFFICIENT_QUORUM is invalid when two independent advisors are present")
     if verdict == "PROCEED":
-        require_clean_text(decision["first_slice"], "council.decision.first_slice", minimum=5)
+        require_clean_text(decision["first_slice"], "push.decision.first_slice", minimum=5)
 
-    conflicts = council_conflicts(normalized_advisors)
-    resolutions_value = _expect_list(decision["conflict_resolutions"], "council.decision.conflict_resolutions")
+    conflicts = push_conflicts(normalized_advisors)
+    resolutions_value = _expect_list(decision["conflict_resolutions"], "push.decision.conflict_resolutions")
     resolutions: dict[str, dict[str, Any]] = {}
     for index, resolution_value in enumerate(resolutions_value):
-        context = f"council.decision.conflict_resolutions[{index}]"
+        context = f"push.decision.conflict_resolutions[{index}]"
         resolution = _expect_object(resolution_value, context)
         require_keys(resolution, ("topic", "basis", "evidence", "conclusion"), context)
         topic = require_clean_text(resolution["topic"], f"{context}.topic")
         if topic in resolutions:
-            raise ValidationError(f"duplicate Council conflict resolution: {topic}")
+            raise ValidationError(f"duplicate Push conflict resolution: {topic}")
         basis = resolution["basis"]
         if basis in FORBIDDEN_ARBITRATION or basis not in ALLOWED_ARBITRATION:
             raise ValidationError(f"{context}.basis must be evidence, not votes, confidence, or model authority")
@@ -226,7 +226,7 @@ def validate_council(
         resolutions[topic] = resolution
     unresolved = conflicts - set(resolutions)
     if verdict in {"PROCEED", "STOP", "PIVOT"} and unresolved:
-        raise ValidationError("material Council conflicts are unresolved: " + ", ".join(sorted(unresolved)))
+        raise ValidationError("material Push conflicts are unresolved: " + ", ".join(sorted(unresolved)))
     return {
         "verdict": verdict,
         "advisor_count": len(advisors),
@@ -289,7 +289,7 @@ def validate_contract(
         if not isinstance(budgets[key], int) or budgets[key] < 1:
             raise ValidationError(f"contract.budgets.{key} must be a positive integer")
     if budgets["production_files"] > 100 or budgets["changed_lines"] > 20_000:
-        raise ValidationError("contract budget is unbounded; split the slice or record a Council pivot")
+        raise ValidationError("contract budget is unbounded; split the slice or record a Push pivot")
 
     checks = _expect_list(contract["verification"], "contract.verification", nonempty=True)
     check_ids = unique_ids(checks, "contract.verification")

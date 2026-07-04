@@ -28,7 +28,7 @@ REQUIRED = [
     "src/signoff/web_dist/index.html",
     "apps/web/src/main.tsx",
     "skills/signoff/SKILL.md",
-    "skills/council/SKILL.md",
+    "skills/push/SKILL.md",
     "skills/roast/SKILL.md",
     "protocol/schemas/spec.schema.json",
     "tests/test_conformance.py",
@@ -76,7 +76,7 @@ if is_git_repository:
         if "node_modules" in relative.parts or ("apps" in relative.parts and "dist" in relative.parts):
             errors.append(f"tracked development build artifact: {relative}")
 
-for skill in ("signoff", "council", "roast"):
+for skill in ("signoff", "push", "roast"):
     top = ROOT / "skills" / skill
     packaged = ROOT / "src" / "signoff" / "assets" / "skills" / skill
     top_files = {path.relative_to(top) for path in top.rglob("*") if path.is_file()}

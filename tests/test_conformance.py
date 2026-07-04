@@ -33,9 +33,9 @@ class ConformanceTests(unittest.TestCase):
         self.assertEqual(integrity["ledger"], "pass")
         self.assertEqual(integrity["final_receipt"], "pass")
 
-    def test_02_placeholder_draft_cannot_reach_council(self) -> None:
+    def test_02_placeholder_draft_cannot_reach_push(self) -> None:
         with self.assertRaises(ValidationError):
-            self.fx.runtime.prepare_council()
+            self.fx.runtime.prepare_push()
 
     def test_03_locked_spec_tamper_is_detected(self) -> None:
         self.fx.lock()
@@ -47,28 +47,28 @@ class ConformanceTests(unittest.TestCase):
 
     def test_04_advisor_with_empty_falsifiable_criteria_is_rejected(self) -> None:
         self.fx.valid_draft()
-        self.fx.valid_council()
-        council = read_json(self.fx.mission / "COUNCIL.json")
-        council["advisors"][0]["falsifiable_criteria"] = []
-        atomic_write_json(self.fx.mission / "COUNCIL.json", council)
+        self.fx.valid_push()
+        push = read_json(self.fx.mission / "PUSH.json")
+        push["advisors"][0]["falsifiable_criteria"] = []
+        atomic_write_json(self.fx.mission / "PUSH.json", push)
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
 
-    def test_05_council_duplicate_context_is_not_quorum(self) -> None:
+    def test_05_push_duplicate_context_is_not_quorum(self) -> None:
         self.fx.valid_draft()
-        self.fx.valid_council(duplicate_context=True)
+        self.fx.valid_push(duplicate_context=True)
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
 
     def test_06_advisor_verdict_split_without_evidence_resolution_is_rejected(self) -> None:
         self.fx.valid_draft()
-        self.fx.valid_council(conflict=True, resolve=False)
+        self.fx.valid_push(conflict=True, resolve=False)
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
 
-    def test_07_council_conflict_can_be_resolved_by_evidence(self) -> None:
+    def test_07_push_conflict_can_be_resolved_by_evidence(self) -> None:
         self.fx.valid_draft()
-        self.fx.valid_council(conflict=True, resolve=True)
+        self.fx.valid_push(conflict=True, resolve=True)
         self.assertEqual(self.fx.runtime.lock()["phase"], "LOCKED")
 
     def test_08_unmapped_file_fails_scope(self) -> None:
@@ -187,7 +187,7 @@ class ConformanceTests(unittest.TestCase):
         self.assertEqual(first["status"], "installed")
         self.assertEqual(second["status"], "installed")
         self.assertTrue((self.fx.project / "signoff").is_file())
-        self.assertTrue((self.fx.project / ".agents" / "skills" / "council" / "SKILL.md").is_file())
+        self.assertTrue((self.fx.project / ".agents" / "skills" / "push" / "SKILL.md").is_file())
         self.assertTrue((self.fx.project / ".signoff" / "runtime" / "signoff" / "cli.py").is_file())
 
     def test_21_historical_receipt_tamper_is_detected(self) -> None:
@@ -226,11 +226,11 @@ class ConformanceTests(unittest.TestCase):
         with self.assertRaises(IntegrityError):
             self.fx.runtime.prepare_slice()
 
-    def test_24_council_tamper_after_lock_is_detected(self) -> None:
+    def test_24_push_tamper_after_lock_is_detected(self) -> None:
         self.fx.lock()
-        council = read_json(self.fx.mission / "COUNCIL.json")
-        council["decision"]["rationale"] += " tampered"
-        atomic_write_json(self.fx.mission / "COUNCIL.json", council)
+        push = read_json(self.fx.mission / "PUSH.json")
+        push["decision"]["rationale"] += " tampered"
+        atomic_write_json(self.fx.mission / "PUSH.json", push)
         with self.assertRaises(IntegrityError):
             self.fx.runtime.prepare_slice()
 
@@ -313,11 +313,11 @@ class ConformanceTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             self.fx.runtime.roast()
 
-    def test_31_council_conflict_resolution_with_vote_basis_is_rejected(self) -> None:
+    def test_31_push_conflict_resolution_with_vote_basis_is_rejected(self) -> None:
         self.fx.valid_draft()
-        self.fx.valid_council(conflict=True, resolve=False)
-        council = read_json(self.fx.mission / "COUNCIL.json")
-        council["decision"]["conflict_resolutions"] = [
+        self.fx.valid_push(conflict=True, resolve=False)
+        push = read_json(self.fx.mission / "PUSH.json")
+        push["decision"]["conflict_resolutions"] = [
             {
                 "topic": "verdict-split",
                 "basis": "vote",
@@ -325,7 +325,7 @@ class ConformanceTests(unittest.TestCase):
                 "conclusion": "Proceed because the majority favored implementation.",
             }
         ]
-        atomic_write_json(self.fx.mission / "COUNCIL.json", council)
+        atomic_write_json(self.fx.mission / "PUSH.json", push)
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
 
