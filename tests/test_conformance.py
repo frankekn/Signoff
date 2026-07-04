@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -217,6 +218,100 @@ class ConformanceTests(unittest.TestCase):
         self.assertNotIn("modified control instructions", sealed_patch)
         self.assertNotIn("diff --git a/.signoff/", sealed_patch)
         self.assertNotIn("agent-scratch.log", sealed_patch)
+
+    def test_23_charter_tamper_after_lock_is_detected(self) -> None:
+        self.fx.lock()
+        charter = (self.fx.mission / "CHARTER.md").read_text(encoding="utf-8")
+        (self.fx.mission / "CHARTER.md").write_text(charter + "\n", encoding="utf-8")
+        with self.assertRaises(IntegrityError):
+            self.fx.runtime.prepare_slice()
+
+    def test_24_council_tamper_after_lock_is_detected(self) -> None:
+        self.fx.lock()
+        council = read_json(self.fx.mission / "COUNCIL.json")
+        council["decision"]["rationale"] += " tampered"
+        atomic_write_json(self.fx.mission / "COUNCIL.json", council)
+        with self.assertRaises(IntegrityError):
+            self.fx.runtime.prepare_slice()
+
+    def test_25_contract_tamper_after_activation_is_detected(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.activate()
+        contract = read_json(iteration / "CONTRACT.json")
+        contract["title"] = "Tampered title for test"
+        atomic_write_json(iteration / "CONTRACT.json", contract)
+        with self.assertRaises(IntegrityError):
+            self.fx.runtime.check_scope()
+
+    def test_26_forbidden_path_violation_fails_scope(self) -> None:
+        self.fx.lock()
+        self.fx.activate(forbidden_paths=[".git/**", ".signoff/**", "surprise.txt"])
+        self.fx.implement()
+        (self.fx.project / "surprise.txt").write_text("forbidden\n", encoding="utf-8")
+        scope = self.fx.runtime.check_scope()
+        self.assertEqual(scope["status"], "fail")
+        self.assertIn("surprise.txt", scope["forbidden_files"])
+        result = self.fx.runtime.verify()
+        self.assertEqual(result["status"], "fail")
+        self.assertEqual(result["scope"]["status"], "fail")
+        self.assertIn("surprise.txt", result["scope"]["forbidden_files"])
+
+    def test_27_production_file_budget_overflow_fails_scope(self) -> None:
+        self.fx.lock()
+        self.fx.activate(production_files=1)
+        self.fx.implement()
+        (self.fx.project / "extra.py").write_text("# extra production file\n", encoding="utf-8")
+        scope = self.fx.runtime.check_scope()
+        self.assertEqual(scope["status"], "fail")
+        self.assertTrue(scope["file_budget_overflow"])
+        result = self.fx.runtime.verify()
+        self.assertEqual(result["status"], "fail")
+        self.assertTrue(result["scope"]["file_budget_overflow"])
+
+    def test_28_oracle_timeout_fails_verification(self) -> None:
+        self.fx.lock()
+        self.fx.activate(
+            command=[sys.executable, "-c", "import time; time.sleep(5)"],
+            timeout_seconds=1,
+        )
+        self.fx.implement()
+        result = self.fx.runtime.verify()
+        self.assertEqual(result["status"], "fail")
+        self.assertEqual(result["checks"][0]["status"], "timeout")
+        self.assertEqual(result["phase"], "VERIFY_FAILED")
+
+    def test_29_review_with_wrong_sealed_hash_is_rejected(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        self.fx.runtime.prepare_roast()
+        self.fx.fill_roast(iteration, prepare=False)
+        review = read_json(iteration / "reviews" / "review-1.json")
+        review["artifact_hashes"]["patch"] = "0" * 64
+        atomic_write_json(iteration / "reviews" / "review-1.json", review)
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.roast()
+
+    def test_30_pass_judgment_cannot_retain_act_on_finding(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        finding = {
+            "id": "F-001",
+            "severity": "medium",
+            "acceptance_ids": ["AC-001"],
+            "claim": "A retained finding still requires action before acceptance.",
+            "evidence": "The reviewer identifies work that remains in the sealed patch.",
+            "falsifier": "A focused passing check proving the finding is already resolved.",
+            "recommended_disposition": "ACT_ON",
+        }
+        disposition = {
+            "finding_id": "F-001",
+            "disposition": "ACT_ON",
+            "rationale": "The lead agrees this must be addressed before acceptance.",
+            "evidence_ref": "",
+        }
+        self.fx.fill_roast(iteration, finding=finding, disposition=disposition, judgment_decision="PASS")
+        with self.assertRaises(ValidationError):
+            self.fx.runtime.roast()
 
 
 if __name__ == "__main__":

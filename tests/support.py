@@ -113,7 +113,17 @@ The focused unit test must pass against the sealed patch.
         self.valid_council(**council_kwargs)
         self.runtime.lock()
 
-    def activate(self, *, final: bool = True, changed_lines: int = 20, production_files: int = 1, command: list[str] | None = None) -> Path:
+    def activate(
+        self,
+        *,
+        final: bool = True,
+        changed_lines: int = 20,
+        production_files: int = 1,
+        command: list[str] | None = None,
+        timeout_seconds: int = 30,
+        allowed_paths: list[str] | None = None,
+        forbidden_paths: list[str] | None = None,
+    ) -> Path:
         self.runtime.prepare_slice()
         iteration_dir = self.mission / "iterations" / "0001"
         contract = read_json(iteration_dir / "CONTRACT.json")
@@ -123,15 +133,15 @@ The focused unit test must pass against the sealed patch.
             "model": "builder-model",
             "context_id": "builder-context",
         }
-        contract["allowed_paths"] = ["app.py", "test_app.py"]
-        contract["forbidden_paths"] = [".git/**", ".signoff/**"]
+        contract["allowed_paths"] = allowed_paths or ["app.py", "test_app.py"]
+        contract["forbidden_paths"] = forbidden_paths or [".git/**", ".signoff/**"]
         contract["exempt_paths"] = ["test_*.py"]
         contract["budgets"] = {"production_files": production_files, "changed_lines": changed_lines}
         contract["verification"] = [
             {
                 "id": "V-001",
                 "command": command or ["git", "grep", "-F", "-q", 'return "hello world"', "--", "app.py"],
-                "timeout_seconds": 30,
+                "timeout_seconds": timeout_seconds,
                 "working_directory": ".",
                 "acceptance_ids": ["AC-001"],
             }
@@ -157,6 +167,7 @@ The focused unit test must pass against the sealed patch.
         iteration_dir: Path,
         verdicts: Iterable[str] = ("PASS", "PASS"),
         *,
+        prepare: bool = True,
         reviewer_one_is_builder: bool = False,
         duplicate_context: bool = False,
         judgment_decision: str = "PASS",
@@ -164,7 +175,8 @@ The focused unit test must pass against the sealed patch.
         finding: dict | None = None,
         disposition: dict | None = None,
     ) -> None:
-        self.runtime.prepare_roast()
+        if prepare:
+            self.runtime.prepare_roast()
         for index, (path, verdict) in enumerate(zip(sorted((iteration_dir / "reviews").glob("review-*.json")), verdicts), start=1):
             review = read_json(path)
             identity = {
