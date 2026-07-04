@@ -1,4 +1,0 @@
-scenario: no window.confirm / no autosave source probe
-surface: source and generated UI bundle text
-invocation: rg -n "window\.confirm|\bconfirm\(|auto.?save|autosave" apps/web/src src/signoff/web_dist || true
-observable: no matches below this line

@@ -1,7 +1,0 @@
-scenario: cleanup/listener evidence after browser QA and gates
-surface: OS TCP listeners
-invocation: lsof -nP -iTCP:5174 -sTCP:LISTEN || true; lsof -nP -iTCP:5173 -sTCP:LISTEN || true; lsof -nP -iTCP:8765 -sTCP:LISTEN || true
----5174---
----5173---
----8765---
-observable: no listener rows printed under any port section

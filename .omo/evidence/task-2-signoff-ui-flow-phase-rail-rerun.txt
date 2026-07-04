@@ -1,4 +1,0 @@
-invocation: node /tmp/signoff-ui-flow-phase-rail-qa.mjs
-exit_code: 0
-transcript: .omo/evidence/task-2-signoff-ui-flow-phase-rail.txt
-screenshot: .omo/evidence/task-2-signoff-ui-flow-phase-rail.png

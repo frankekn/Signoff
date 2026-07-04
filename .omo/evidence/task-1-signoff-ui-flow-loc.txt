@@ -1,5 +1,0 @@
---- pure LOC ---
-src/signoff/runtime.py      764
-src/signoff/web.py      421
-tests/test_web.py      155
-apps/web/src/api.ts       99

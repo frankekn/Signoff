@@ -1,8 +1,0 @@
-scenario: Dashboard component split pure LOC
-before Dashboard.tsx pure LOC: 373 (latest gate blocker measurement before this refactor; see .omo/evidence/task-6-signoff-ui-flow-gate-review.md)
-after direct measurement command: awk '!/^[[:space:]]*$/ && !/^[[:space:]]*(\/\/|#|--)/' <file> | wc -l
-after apps/web/src/pages/Dashboard.tsx pure LOC: 245
-after apps/web/src/components/HeroPanel.tsx pure LOC: 56
-after apps/web/src/components/NextActionCard.tsx pure LOC: 78
-after apps/web/src/components/ProofCard.tsx pure LOC: 82
-after apps/web/src/components/StartMissionCard.tsx pure LOC: 37

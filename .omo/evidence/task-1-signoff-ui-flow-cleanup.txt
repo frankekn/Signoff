@@ -1,4 +1,0 @@
---- exact invocation ---
-pgrep -fl '[R]epoFixture|[c]reate_server|[s]ignoff-ui-flow-manual' || true
---- verdict ---
-No matching QA harness/server process remains after the manual probe command exited.

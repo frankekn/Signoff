@@ -1,9 +1,0 @@
-surface: generated HTML asset refs
-invocation: node <<'NODE' ... NODE
-apps/web/dist/index.html refs: /assets/index-CAbsxn7y.js, /assets/index-BV0aKj90.css
-apps/web/dist/assets/index-CAbsxn7y.js: exists
-apps/web/dist/assets/index-BV0aKj90.css: exists
-src/signoff/web_dist/index.html refs: /assets/index-CAbsxn7y.js, /assets/index-BV0aKj90.css
-src/signoff/web_dist/assets/index-CAbsxn7y.js: exists
-src/signoff/web_dist/assets/index-BV0aKj90.css: exists
-result: PASS generated asset refs still exist

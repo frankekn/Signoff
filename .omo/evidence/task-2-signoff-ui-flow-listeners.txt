@@ -1,8 +1,0 @@
-surface: local TCP listeners
-invocation: lsof -nP -iTCP:8765 -sTCP:LISTEN; lsof -nP -iTCP:5173 -sTCP:LISTEN
-
-[port 8765]
-exit_code_8765=1
-
-[port 5173]
-exit_code_5173=1

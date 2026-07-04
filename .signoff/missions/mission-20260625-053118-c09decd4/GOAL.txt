@@ -1,1 +1,0 @@
-Make contributor UI first-run install reproducible from the public npm lockfile and ensure Signoff patch receipts exclude control artifacts

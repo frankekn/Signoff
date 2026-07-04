@@ -1,6 +1,0 @@
-seeded DRAFT mission=mission-20260625-162938-0ecac583
-copy_has_mission_id=false
-copy_has_editable_paths=false
-copy_text=Read AGENTS.md. Run ./signoff status and ./signoff next. Perform exactly the legal next action. Do not edit locked artifacts or generated receipts.
-prompt_calls_after_note_action=1
-RED expected: static copy lacks mission/editable paths and note action calls window.prompt

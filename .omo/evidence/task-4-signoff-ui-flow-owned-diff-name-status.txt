@@ -1,4 +1,0 @@
-M	apps/web/src/pages/Dashboard.tsx
-M	apps/web/src/styles.css
-M	src/signoff/web.py
-M	tests/test_web.py

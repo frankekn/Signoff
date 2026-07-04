@@ -1,3 +1,0 @@
-scenario: forbidden dirty-protection mechanisms and TS escape hatches remain absent
-invocation: rg -n "window\.confirm|\bconfirm\(|autosave|as any|@ts-ignore|@ts-expect-error|eslint-disable|type: ignore" scoped UI/API files
-PASS no forbidden matches

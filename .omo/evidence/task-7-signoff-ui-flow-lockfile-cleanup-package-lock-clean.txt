@@ -1,3 +1,0 @@
-surface: git working tree path filter
-invocation: git status --short -- package-lock.json
-result: PASS package-lock clean after cleanup

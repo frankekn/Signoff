@@ -1,9 +1,0 @@
-invocation: lsof -nP -iTCP:5174 -sTCP:LISTEN; lsof -nP -iTCP:5175 -sTCP:LISTEN; lsof -nP -iTCP:8765 -sTCP:LISTEN
-checked_at: 2026-06-25T19:18:48Z
-port_5174:
-no listener
-port_5175:
-no listener
-port_8765:
-no listener
-result: PASS

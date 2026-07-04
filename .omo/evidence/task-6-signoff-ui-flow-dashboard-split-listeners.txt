@@ -1,3 +1,0 @@
-scenario: QA listener cleanup after browser dirty-switch probes
-invocation: lsof -nP -iTCP:5174 -sTCP:LISTEN; lsof -nP -iTCP:5175 -sTCP:LISTEN; lsof -nP -iTCP:8765 -sTCP:LISTEN
-PASS no listeners on QA ports 5174, 5175, or legacy check port 8765

@@ -1,3 +1,0 @@
-Invocation: lsof -nP -iTCP:5173 -iTCP:8765 -sTCP:LISTEN
-Result after QA:
-NO LISTENERS

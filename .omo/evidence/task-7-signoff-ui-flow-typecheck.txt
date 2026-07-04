@@ -1,9 +1,0 @@
-
-> signoff-workspace@0.1.0-alpha.1 typecheck
-> npm --workspace @signoff/web run typecheck
-
-
-> @signoff/web@0.1.0-alpha.1 typecheck
-> tsc -b --pretty false
-
-result: PASS

@@ -1,3 +1,0 @@
-result: PASS
-package-lock.json: restored to HEAD; no diff remains
-git diff --check: exit 0

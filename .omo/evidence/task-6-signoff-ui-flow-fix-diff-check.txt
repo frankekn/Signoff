@@ -1,2 +1,0 @@
-invocation: git diff --check -- apps/web/src/components/ArtifactPanel.tsx apps/web/src/pages/Dashboard.tsx apps/web/src/styles.css
-exit: 0

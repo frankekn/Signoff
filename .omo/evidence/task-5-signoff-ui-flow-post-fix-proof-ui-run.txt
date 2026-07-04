@@ -1,3 +1,0 @@
-scenario: post-fix browser proof UI script runner
-invocation: node .omo/evidence/task-5-signoff-ui-flow-post-fix-proof-ui.mjs 2>&1 | tee .omo/evidence/task-5-signoff-ui-flow-post-fix-proof-ui-run.txt
-result: PASS, command exited 0; detailed browser evidence written to .omo/evidence/task-5-signoff-ui-flow-post-fix-proof-ui.txt

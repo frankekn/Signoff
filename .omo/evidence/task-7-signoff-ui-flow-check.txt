@@ -1,2 +1,0 @@
-Repository check passed
-result: PASS
