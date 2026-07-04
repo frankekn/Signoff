@@ -53,12 +53,12 @@ def validate_identity(value: Any, context: str) -> dict[str, str]:
     return result
 
 
-def validate_spec(spec: dict[str, Any], *, mission_id: str, goal_sha256: str) -> dict[str, Any]:
+def validate_spec(spec: dict[str, Any], *, run_id: str, goal_sha256: str) -> dict[str, Any]:
     require_keys(
         spec,
         (
             "schema_version",
-            "mission_id",
+            "run_id",
             "goal_sha256",
             "requirements",
             "acceptance_criteria",
@@ -71,8 +71,8 @@ def validate_spec(spec: dict[str, Any], *, mission_id: str, goal_sha256: str) ->
     )
     if spec["schema_version"] != SCHEMA_VERSION:
         raise ValidationError("spec.schema_version must be 1")
-    if spec["mission_id"] != mission_id:
-        raise ValidationError("spec.mission_id does not match the active mission")
+    if spec["run_id"] != run_id:
+        raise ValidationError("spec.run_id does not match the active run")
     if spec["goal_sha256"] != goal_sha256:
         raise ValidationError("spec.goal_sha256 does not match GOAL.txt")
 
@@ -137,14 +137,14 @@ def push_conflicts(advisors: list[dict[str, Any]]) -> set[str]:
 def validate_push(
     push: dict[str, Any],
     *,
-    mission_id: str,
+    run_id: str,
     expected_hashes: dict[str, str],
 ) -> dict[str, Any]:
-    require_keys(push, ("schema_version", "mission_id", "artifact_hashes", "advisors", "decision"), "push")
+    require_keys(push, ("schema_version", "run_id", "artifact_hashes", "advisors", "decision"), "push")
     if push["schema_version"] != SCHEMA_VERSION:
         raise ValidationError("push.schema_version must be 1")
-    if push["mission_id"] != mission_id:
-        raise ValidationError("push.mission_id does not match the active mission")
+    if push["run_id"] != run_id:
+        raise ValidationError("push.run_id does not match the active run")
     hashes = _expect_object(push["artifact_hashes"], "push.artifact_hashes")
     for key, expected in expected_hashes.items():
         if hashes.get(key) != expected:
@@ -239,7 +239,7 @@ def validate_push(
 def validate_contract(
     contract: dict[str, Any],
     *,
-    mission_id: str,
+    run_id: str,
     iteration: int,
     spec_requirement_ids: set[str],
     spec_acceptance_ids: set[str],
@@ -248,7 +248,7 @@ def validate_contract(
         contract,
         (
             "schema_version",
-            "mission_id",
+            "run_id",
             "iteration",
             "title",
             "builder",
@@ -265,8 +265,8 @@ def validate_contract(
     )
     if contract["schema_version"] != SCHEMA_VERSION:
         raise ValidationError("contract.schema_version must be 1")
-    if contract["mission_id"] != mission_id or contract["iteration"] != iteration:
-        raise ValidationError("contract mission_id or iteration does not match the active slice")
+    if contract["run_id"] != run_id or contract["iteration"] != iteration:
+        raise ValidationError("contract run_id or iteration does not match the active slice")
     require_clean_text(contract["title"], "contract.title", minimum=5)
     builder = validate_identity(contract["builder"], "contract.builder")
     requirements = set(_expect_string_list(contract["requirements"], "contract.requirements", nonempty=True))
@@ -331,14 +331,14 @@ def validate_contract(
 def validate_review(
     review: dict[str, Any],
     *,
-    mission_id: str,
+    run_id: str,
     iteration: int,
     hashes: dict[str, str],
     acceptance_ids: set[str],
 ) -> dict[str, Any]:
-    require_keys(review, ("schema_version", "mission_id", "iteration", "reviewer", "artifact_hashes", "read_only", "criteria", "findings", "overall"), "review")
-    if review["schema_version"] != SCHEMA_VERSION or review["mission_id"] != mission_id or review["iteration"] != iteration:
-        raise ValidationError("review schema_version, mission_id, or iteration is wrong")
+    require_keys(review, ("schema_version", "run_id", "iteration", "reviewer", "artifact_hashes", "read_only", "criteria", "findings", "overall"), "review")
+    if review["schema_version"] != SCHEMA_VERSION or review["run_id"] != run_id or review["iteration"] != iteration:
+        raise ValidationError("review schema_version, run_id, or iteration is wrong")
     reviewer = validate_identity(review["reviewer"], "review.reviewer")
     artifact_hashes = _expect_object(review["artifact_hashes"], "review.artifact_hashes")
     for key, expected in hashes.items():
@@ -393,7 +393,7 @@ def validate_pull(
     reviews: list[dict[str, Any]],
     judgment: dict[str, Any],
     *,
-    mission_id: str,
+    run_id: str,
     iteration: int,
     hashes: dict[str, str],
     acceptance_ids: set[str],
@@ -405,7 +405,7 @@ def validate_pull(
     normalized = [
         validate_review(
             review,
-            mission_id=mission_id,
+            run_id=run_id,
             iteration=iteration,
             hashes=hashes,
             acceptance_ids=acceptance_ids,
@@ -419,9 +419,9 @@ def validate_pull(
     if builder["participant_id"] in participant_ids or builder["context_id"] in context_ids:
         raise ValidationError("the builder cannot count as an independent reviewer")
 
-    require_keys(judgment, ("schema_version", "mission_id", "iteration", "judge", "artifact_hashes", "decision", "criterion_decisions", "finding_dispositions", "conflict_resolutions", "rationale"), "judgment")
-    if judgment["schema_version"] != SCHEMA_VERSION or judgment["mission_id"] != mission_id or judgment["iteration"] != iteration:
-        raise ValidationError("judgment schema_version, mission_id, or iteration is wrong")
+    require_keys(judgment, ("schema_version", "run_id", "iteration", "judge", "artifact_hashes", "decision", "criterion_decisions", "finding_dispositions", "conflict_resolutions", "rationale"), "judgment")
+    if judgment["schema_version"] != SCHEMA_VERSION or judgment["run_id"] != run_id or judgment["iteration"] != iteration:
+        raise ValidationError("judgment schema_version, run_id, or iteration is wrong")
     judge = validate_identity(judgment["judge"], "judgment.judge")
     if judge["participant_id"] == builder["participant_id"] or judge["context_id"] == builder["context_id"]:
         raise ValidationError("the builder cannot be the lead judge")

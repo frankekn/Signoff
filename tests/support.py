@@ -27,17 +27,17 @@ class RepoFixture:
         subprocess.run(["git", "-C", str(self.project), "commit", "-qm", "initial"], check=True)
         self.runtime = Runtime(self.project)
         self.runtime.start(self.goal)
-        self.mission_id = self.runtime.status()["mission_id"]
-        self.mission = self.project / ".signoff" / "missions" / self.mission_id
+        self.run_id = self.runtime.status()["run_id"]
+        self.run = self.project / ".signoff" / "runs" / self.run_id
 
     def close(self) -> None:
         self.tmp.cleanup()
 
     def valid_draft(self) -> None:
-        (self.mission / "CHARTER.md").write_text(
-            f"""# Mission Charter
+        (self.run / "CHARTER.md").write_text(
+            f"""# Run Charter
 
-- Mission: `{self.mission_id}`
+- Run: `{self.run_id}`
 - Exact user outcome (immutable):
 
 > {self.goal}
@@ -59,15 +59,15 @@ The focused unit test must pass against the sealed patch.
 """,
             encoding="utf-8",
         )
-        spec = read_json(self.mission / "SPEC.json")
+        spec = read_json(self.run / "SPEC.json")
         spec["acceptance_criteria"][0]["observable"] = "Calling greet returns exactly hello world."
         spec["acceptance_criteria"][0]["oracle"]["description"] = "A focused unit test asserts the exact return value."
         spec["non_goals"] = ["Do not refactor unrelated files."]
-        atomic_write_json(self.mission / "SPEC.json", spec)
+        atomic_write_json(self.run / "SPEC.json", spec)
 
     def valid_push(self, *, conflict: bool = False, resolve: bool = False, duplicate_context: bool = False) -> None:
         self.runtime.prepare_push()
-        push = read_json(self.mission / "PUSH.json")
+        push = read_json(self.run / "PUSH.json")
         for index, advisor in enumerate(push["advisors"], start=1):
             advisor["identity"] = {
                 "participant_id": f"advisor-{index}",
@@ -100,7 +100,7 @@ The focused unit test must pass against the sealed patch.
                     "conclusion": "Proceed with the smallest implementation slice.",
                 }
             ]
-        atomic_write_json(self.mission / "PUSH.json", push)
+        atomic_write_json(self.run / "PUSH.json", push)
 
     def lock(self, **push_kwargs) -> None:
         self.valid_draft()
@@ -119,7 +119,7 @@ The focused unit test must pass against the sealed patch.
         forbidden_paths: list[str] | None = None,
     ) -> Path:
         self.runtime.prepare_slice()
-        iteration_dir = self.mission / "iterations" / "0001"
+        iteration_dir = self.run / "iterations" / "0001"
         contract = read_json(iteration_dir / "CONTRACT.json")
         contract["builder"] = {
             "participant_id": "builder",

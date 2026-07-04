@@ -58,7 +58,7 @@ const phasePresentation: Record<string, PhasePresentation> = {
 export function PhaseRail({ phase }: { readonly phase: string }): ReactElement {
   const presentation = phasePresentation[phase] ?? { activeIndex: stepIndex.define, status: 'paused', steps: withStepLabel(stepIndex.define, phase) }
   return (
-    <ol className="phase-rail" aria-label="Mission progress">
+    <ol className="phase-rail" aria-label="Run progress">
       {presentation.steps.map((step, index) => (
         <li
           key={step.id}

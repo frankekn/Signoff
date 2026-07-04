@@ -126,8 +126,8 @@ def main() -> int:
                     state=project/".signoff"/"state.json"
                     if state.exists():
                         try:
-                            rs=json.loads(state.read_text()); mid=rs.get("active_mission_id")
-                            if mid: signoff_phase=json.loads((project/".signoff"/"missions"/mid/"STATE.json").read_text()).get("phase")
+                            rs=json.loads(state.read_text()); mid=rs.get("active_run_id")
+                            if mid: signoff_phase=json.loads((project/".signoff"/"runs"/mid/"STATE.json").read_text()).get("phase")
                         except Exception: signoff_phase="INVALID_STATE"
                     results.append({"case_id":case["id"],"mode":mode,"repetition":repetition,"agent":agent,"hidden_checks":hidden,"task_success":hidden_success,"claimed_completion":claimed,"false_completion":bool(claimed and not hidden_success),"spec_retention_score":weighted_pass/weighted_total,"signoff_terminal_outcome":signoff_phase,"unnecessary_changed_files":unnecessary,"slop_file_ratio":len(unnecessary)/max(1,metrics["changed_file_count"]),**metrics})
     summary={}

@@ -24,7 +24,7 @@ from .runtime import Runtime
 from .state import ledger_path
 from .util import atomic_write_text
 from .web_artifacts import assert_editable_artifact, list_artifacts, safe_artifact_path
-from .web_overview import build_overview, require_known_mission
+from .web_overview import build_overview, require_known_run
 
 MAX_BODY_BYTES = 2 * 1024 * 1024
 
@@ -147,22 +147,22 @@ class CourtRequestHandler(BaseHTTPRequestHandler):
                 self._json(HTTPStatus.OK, {"ok": True, "product": "Signoff", "version": __version__})
                 return
             if parsed.path == "/api/overview":
-                inspect_mission_id = query.get("inspectMissionId", [""])[0] or None
+                inspect_run_id = query.get("inspectRunId", [""])[0] or None
                 self._json(
                     HTTPStatus.OK,
-                    {"ok": True, "data": build_overview(self.server.project, self.server.runtime, inspect_mission_id)},
+                    {"ok": True, "data": build_overview(self.server.project, self.server.runtime, inspect_run_id)},
                 )
                 return
             if parsed.path == "/api/artifacts":
-                mission_id = query.get("missionId", [""])[0]
-                if not mission_id:
+                run_id = query.get("runId", [""])[0]
+                if not run_id:
                     status = self.server.runtime.status()
-                    mission_id = str(status.get("mission_id") or "")
-                if not mission_id:
+                    run_id = str(status.get("run_id") or "")
+                if not run_id:
                     self._json(HTTPStatus.OK, {"ok": True, "data": []})
                     return
-                mission_id = require_known_mission(self.server.project, mission_id)
-                self._json(HTTPStatus.OK, {"ok": True, "data": list_artifacts(self.server.project, mission_id)})
+                run_id = require_known_run(self.server.project, run_id)
+                self._json(HTTPStatus.OK, {"ok": True, "data": list_artifacts(self.server.project, run_id)})
                 return
             if parsed.path == "/api/artifact":
                 relative = query.get("path", [""])[0]
@@ -176,13 +176,13 @@ class CourtRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             if parsed.path == "/api/events":
-                mission_id = query.get("missionId", [""])[0]
-                if not mission_id:
+                run_id = query.get("runId", [""])[0]
+                if not run_id:
                     status = self.server.runtime.status()
-                    mission_id = str(status.get("mission_id") or "")
-                if mission_id:
-                    mission_id = require_known_mission(self.server.project, mission_id)
-                records = read_and_verify(ledger_path(self.server.project, mission_id)) if mission_id else []
+                    run_id = str(status.get("run_id") or "")
+                if run_id:
+                    run_id = require_known_run(self.server.project, run_id)
+                records = read_and_verify(ledger_path(self.server.project, run_id)) if run_id else []
                 self._json(HTTPStatus.OK, {"ok": True, "data": records})
                 return
             self._serve_static(parsed.path)
@@ -196,7 +196,7 @@ class CourtRequestHandler(BaseHTTPRequestHandler):
         try:
             payload = self._body()
             with self.server.mutation_lock:
-                if parsed.path == "/api/missions":
+                if parsed.path == "/api/runs":
                     goal = str(payload.get("goal", ""))
                     result = self.server.runtime.start(goal)
                     self._json(HTTPStatus.CREATED, {"ok": True, "data": result})

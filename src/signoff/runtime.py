@@ -15,16 +15,16 @@ from .ledger import append as append_ledger
 from .schemas import validate_contract, validate_push, validate_pull, validate_spec
 from .state import (
     TERMINAL_PHASES,
-    active_mission,
+    active_run,
     control_root,
     current_iteration_dir,
     ledger_path,
-    mission_dir,
-    read_mission_state,
+    run_dir,
+    read_run_state,
     read_root_state,
     require_phase,
     verify_lock,
-    write_mission_state,
+    write_run_state,
     write_root_state,
 )
 from .templates import (
@@ -58,15 +58,15 @@ def _artifact_hashes(base: Path, names: dict[str, str]) -> dict[str, str]:
 
 
 def _spec_info(project: Path, state: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
-    base = mission_dir(project, state["mission_id"])
+    base = run_dir(project, state["run_id"])
     goal = (base / "GOAL.txt").read_text(encoding="utf-8").rstrip("\n")
     spec = read_json(base / "SPEC.json")
-    info = validate_spec(spec, mission_id=state["mission_id"], goal_sha256=sha256_text(goal))
+    info = validate_spec(spec, run_id=state["run_id"], goal_sha256=sha256_text(goal))
     return spec, info
 
 
 def _validate_charter(project: Path, state: dict[str, Any]) -> str:
-    base = mission_dir(project, state["mission_id"])
+    base = run_dir(project, state["run_id"])
     goal = (base / "GOAL.txt").read_text(encoding="utf-8").rstrip("\n")
     try:
         charter = (base / "CHARTER.md").read_text(encoding="utf-8")
@@ -87,7 +87,7 @@ def _contract_and_info(project: Path, state: dict[str, Any]) -> tuple[dict[str, 
     del spec
     info = validate_contract(
         contract,
-        mission_id=state["mission_id"],
+        run_id=state["run_id"],
         iteration=state["current"]["iteration"],
         spec_requirement_ids=spec_info["requirement_ids"],
         spec_acceptance_ids=spec_info["acceptance_ids"],
@@ -167,17 +167,17 @@ class Runtime:
         except OSError as exc:
             checks.append({"name": "repository-write", "status": "fail", "detail": str(exc)})
         root = read_root_state(self.project)
-        active_id = root.get("active_mission_id")
+        active_id = root.get("active_run_id")
         if active_id:
             try:
-                state = read_mission_state(self.project, active_id)
+                state = read_run_state(self.project, active_id)
                 if state.get("lock"):
                     verify_lock(self.project, state)
-                checks.append({"name": "mission-integrity", "status": "pass", "detail": f"{active_id}: {state['phase']}"})
+                checks.append({"name": "run-integrity", "status": "pass", "detail": f"{active_id}: {state['phase']}"})
             except SignoffError as exc:
-                checks.append({"name": "mission-integrity", "status": "fail", "detail": str(exc)})
+                checks.append({"name": "run-integrity", "status": "fail", "detail": str(exc)})
         else:
-            checks.append({"name": "mission-integrity", "status": "pass", "detail": "no active mission"})
+            checks.append({"name": "run-integrity", "status": "pass", "detail": "no active run"})
         return {"status": "pass" if all(item["status"] == "pass" for item in checks) else "fail", "checks": checks}
 
     def start(self, goal: str) -> dict[str, Any]:
@@ -186,27 +186,27 @@ class Runtime:
         if not goal:
             raise ValidationError("goal must be the user's exact non-empty outcome")
         root = read_root_state(self.project)
-        active_id = root.get("active_mission_id")
+        active_id = root.get("active_run_id")
         if active_id:
-            active = read_mission_state(self.project, active_id)
+            active = read_run_state(self.project, active_id)
             if active.get("phase") not in RESTARTABLE_PHASES:
-                raise StateError(f"mission {active_id} is still active in phase {active['phase']}")
-        mission_id = short_id("mission", goal)
-        base = mission_dir(self.project, mission_id)
+                raise StateError(f"run {active_id} is still active in phase {active['phase']}")
+        run_id = short_id("run", goal)
+        base = run_dir(self.project, run_id)
         base.mkdir(parents=True, exist_ok=False)
         goal_sha = sha256_text(goal)
         atomic_write_text(base / "GOAL.txt", goal + "\n")
-        atomic_write_text(base / "CHARTER.md", charter_template(mission_id, goal))
-        atomic_write_json(base / "SPEC.json", spec_template(mission_id, goal_sha, goal))
-        baseline = snapshot_commit(self.project, f"Signoff mission baseline {mission_id}")
+        atomic_write_text(base / "CHARTER.md", charter_template(run_id, goal))
+        atomic_write_json(base / "SPEC.json", spec_template(run_id, goal_sha, goal))
+        baseline = snapshot_commit(self.project, f"Signoff run baseline {run_id}")
         state = {
             "schema_version": 1,
-            "mission_id": mission_id,
+            "run_id": run_id,
             "phase": "DRAFT",
             "created_at": now_utc(),
             "updated_at": now_utc(),
             "goal_sha256": goal_sha,
-            "mission_baseline": baseline,
+            "run_baseline": baseline,
             "iteration": 0,
             "accepted_criteria": [],
             "history": [],
@@ -215,19 +215,19 @@ class Runtime:
             "current": None,
             "revision": 1,
         }
-        write_mission_state(self.project, state)
-        root["active_mission_id"] = mission_id
-        if mission_id not in root["missions"]:
-            root["missions"].append(mission_id)
+        write_run_state(self.project, state)
+        root["active_run_id"] = run_id
+        if run_id not in root["runs"]:
+            root["runs"].append(run_id)
         root["updated_at"] = now_utc()
         write_root_state(self.project, root)
         append_ledger(
-            ledger_path(self.project, mission_id),
-            "mission.started",
-            {"mission_id": mission_id, "goal_sha256": goal_sha, "baseline": baseline},
+            ledger_path(self.project, run_id),
+            "run.started",
+            {"run_id": run_id, "goal_sha256": goal_sha, "baseline": baseline},
         )
         return {
-            "mission_id": mission_id,
+            "run_id": run_id,
             "phase": "DRAFT",
             "goal_path": str((base / "GOAL.txt").relative_to(self.project)),
             "charter_path": str((base / "CHARTER.md").relative_to(self.project)),
@@ -236,35 +236,35 @@ class Runtime:
         }
 
     def prepare_push(self) -> dict[str, Any]:
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         require_phase(state, {"DRAFT", "PUSH"})
         _validate_charter(self.project, state)
         _spec, spec_info = _spec_info(self.project, state)
         del spec_info
-        base = mission_dir(self.project, state["mission_id"])
+        base = run_dir(self.project, state["run_id"])
         hashes = _artifact_hashes(base, {"goal": "GOAL.txt", "charter": "CHARTER.md", "spec": "SPEC.json"})
         push_path = base / "PUSH.json"
         if push_path.exists() and state["phase"] == "PUSH":
             existing = read_json(push_path)
             if existing.get("advisors") and not any("REPLACE_ME" in json.dumps(x) for x in existing.get("advisors", [])):
                 raise StateError("PUSH.json already contains advisor work; do not overwrite it")
-        atomic_write_json(push_path, push_template(state["mission_id"], hashes))
+        atomic_write_json(push_path, push_template(state["run_id"], hashes))
         state["phase"] = "PUSH"
         state["updated_at"] = now_utc()
-        write_mission_state(self.project, state)
-        append_ledger(ledger_path(self.project, state["mission_id"]), "push.prepared", {"artifact_hashes": hashes})
+        write_run_state(self.project, state)
+        append_ledger(ledger_path(self.project, state["run_id"]), "push.prepared", {"artifact_hashes": hashes})
         return {"phase": "PUSH", "push_path": str(push_path.relative_to(self.project)), "artifact_hashes": hashes, "next": self.next_action()}
 
     def lock(self) -> dict[str, Any]:
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         require_phase(state, {"PUSH"})
         _validate_charter(self.project, state)
         spec, spec_info = _spec_info(self.project, state)
-        base = mission_dir(self.project, state["mission_id"])
+        base = run_dir(self.project, state["run_id"])
         hashes = _artifact_hashes(base, {"goal": "GOAL.txt", "charter": "CHARTER.md", "spec": "SPEC.json"})
         push_path = base / "PUSH.json"
         push = read_json(push_path)
-        push_result = validate_push(push, mission_id=state["mission_id"], expected_hashes=hashes)
+        push_result = validate_push(push, run_id=state["run_id"], expected_hashes=hashes)
         push_sha = sha256_file(push_path)
         verdict = push_result["verdict"]
         if verdict != "PROCEED":
@@ -272,12 +272,12 @@ class Runtime:
             state["phase"] = terminal
             state["updated_at"] = now_utc()
             state["terminal_reason"] = push["decision"]["rationale"]
-            write_mission_state(self.project, state)
-            append_ledger(ledger_path(self.project, state["mission_id"]), "mission.concluded", {"phase": terminal, "push_sha256": push_sha})
+            write_run_state(self.project, state)
+            append_ledger(ledger_path(self.project, state["run_id"]), "run.concluded", {"phase": terminal, "push_sha256": push_sha})
             return {"phase": terminal, "verdict": verdict, "reason": state["terminal_reason"]}
         lock = {
             "schema_version": 1,
-            "mission_id": state["mission_id"],
+            "run_id": state["run_id"],
             "revision": state["revision"],
             "locked_at": now_utc(),
             "goal_sha256": hashes["goal"],
@@ -297,39 +297,39 @@ class Runtime:
         state["updated_at"] = now_utc()
         state["max_iterations"] = spec_info["max_iterations"]
         state["push_first_slice"] = push["decision"]["first_slice"]
-        write_mission_state(self.project, state)
+        write_run_state(self.project, state)
         append_ledger(
-            ledger_path(self.project, state["mission_id"]),
-            "mission.locked",
+            ledger_path(self.project, state["run_id"]),
+            "run.locked",
             {"lock_sha256": state["lock_file_sha256"], "push_sha256": push_sha},
         )
         del spec
         return {"phase": "LOCKED", "lock_path": str(lock_path.relative_to(self.project)), "lock_sha256": state["lock_file_sha256"], "next": self.next_action()}
 
     def prepare_slice(self) -> dict[str, Any]:
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         require_phase(state, {"LOCKED"})
         verify_lock(self.project, state)
         if state["iteration"] >= state["max_iterations"]:
             state["phase"] = "PUSH_REVIEW"
             state["updated_at"] = now_utc()
-            write_mission_state(self.project, state)
+            write_run_state(self.project, state)
             raise StateError("iteration budget exhausted; Push must STOP or authorize a pivot")
         spec, _ = _spec_info(self.project, state)
         iteration = state["iteration"] + 1
-        iteration_dir = mission_dir(self.project, state["mission_id"]) / "iterations" / f"{iteration:04d}"
+        iteration_dir = run_dir(self.project, state["run_id"]) / "iterations" / f"{iteration:04d}"
         iteration_dir.mkdir(parents=True, exist_ok=False)
         first_slice = state.get("push_first_slice", "") if iteration == 1 else ""
-        atomic_write_json(iteration_dir / "CONTRACT.json", contract_template(state["mission_id"], iteration, spec, first_slice))
+        atomic_write_json(iteration_dir / "CONTRACT.json", contract_template(state["run_id"], iteration, spec, first_slice))
         state["current"] = {"iteration": iteration, "attempt": 1, "root_causes": []}
         state["phase"] = "SLICE_DRAFT"
         state["updated_at"] = now_utc()
-        write_mission_state(self.project, state)
-        append_ledger(ledger_path(self.project, state["mission_id"]), "slice.prepared", {"iteration": iteration})
+        write_run_state(self.project, state)
+        append_ledger(ledger_path(self.project, state["run_id"]), "slice.prepared", {"iteration": iteration})
         return {"phase": "SLICE_DRAFT", "iteration": iteration, "contract_path": str((iteration_dir / "CONTRACT.json").relative_to(self.project)), "next": self.next_action()}
 
     def activate_slice(self) -> dict[str, Any]:
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         require_phase(state, {"SLICE_DRAFT"})
         verify_lock(self.project, state)
         contract, info, contract_path = _contract_and_info(self.project, state)
@@ -348,23 +348,23 @@ class Runtime:
         )
         state["phase"] = "IMPLEMENTING"
         state["updated_at"] = now_utc()
-        write_mission_state(self.project, state)
+        write_run_state(self.project, state)
         atomic_write_json(current_iteration_dir(self.project, state) / "GUARD.json", state["current"])
         append_ledger(
-            ledger_path(self.project, state["mission_id"]),
+            ledger_path(self.project, state["run_id"]),
             "slice.activated",
             {"iteration": state["current"]["iteration"], "contract_sha256": contract_sha, "baseline": baseline},
         )
         return {"phase": "IMPLEMENTING", "iteration": state["current"]["iteration"], "contract_sha256": contract_sha, "builder": info["builder"], "next": self.next_action()}
 
     def check_scope(self) -> dict[str, Any]:
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         require_phase(state, {"IMPLEMENTING", "VERIFY_FAILED", "VERIFIED", "REVIEWING", "REVIEWED"})
         _contract, info, _path = _contract_and_info(self.project, state)
         return _scope(self.project, state["current"]["baseline"], info)
 
     def verify(self) -> dict[str, Any]:
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         require_phase(state, {"IMPLEMENTING", "VERIFY_FAILED"})
         contract, info, contract_path = _contract_and_info(self.project, state)
         iteration_dir = current_iteration_dir(self.project, state)
@@ -443,7 +443,7 @@ class Runtime:
         status = "pass" if all_checks_pass and pre_scope["status"] == "pass" and post_scope["status"] == "pass" and not mutated else "fail"
         evidence = {
             "schema_version": 1,
-            "mission_id": state["mission_id"],
+            "run_id": state["run_id"],
             "iteration": state["current"]["iteration"],
             "generated_at": now_utc(),
             "contract_sha256": sha256_file(contract_path),
@@ -470,16 +470,16 @@ class Runtime:
         )
         state["phase"] = "VERIFIED" if status == "pass" else "VERIFY_FAILED"
         state["updated_at"] = now_utc()
-        write_mission_state(self.project, state)
+        write_run_state(self.project, state)
         append_ledger(
-            ledger_path(self.project, state["mission_id"]),
+            ledger_path(self.project, state["run_id"]),
             "slice.verified",
             {"iteration": state["current"]["iteration"], "status": status, "evidence_sha256": state["current"]["evidence_sha256"], "patch_sha256": patch_after_sha},
         )
         return {"phase": state["phase"], "status": status, "checks": [{"id": x["id"], "status": x["status"], "exit_code": x["exit_code"]} for x in check_results], "scope": post_scope, "verification_mutated_patch": mutated, "evidence_path": str((iteration_dir / "EVIDENCE.json").relative_to(self.project)), "next": self.next_action()}
 
     def prepare_pull(self, count: int = 2) -> dict[str, Any]:
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         require_phase(state, {"VERIFIED", "REVIEWING"})
         if state["current"].get("verification_status") != "pass":
             raise StateError("Pull cannot begin without passing executable evidence")
@@ -500,20 +500,20 @@ class Runtime:
             path = reviews_dir / f"review-{index}.json"
             if path.exists() and "REPLACE_ME" not in path.read_text(encoding="utf-8"):
                 raise StateError(f"refusing to overwrite completed review: {path}")
-            atomic_write_json(path, review_template(state["mission_id"], state["current"]["iteration"], hashes, sorted(info["acceptance"]), index))
+            atomic_write_json(path, review_template(state["run_id"], state["current"]["iteration"], hashes, sorted(info["acceptance"]), index))
         judgment_path = iteration_dir / "JUDGMENT.json"
         if judgment_path.exists() and "REPLACE_ME" not in judgment_path.read_text(encoding="utf-8"):
             raise StateError("refusing to overwrite completed JUDGMENT.json")
-        atomic_write_json(judgment_path, judgment_template(state["mission_id"], state["current"]["iteration"], hashes, sorted(info["acceptance"])))
+        atomic_write_json(judgment_path, judgment_template(state["run_id"], state["current"]["iteration"], hashes, sorted(info["acceptance"])))
         state["phase"] = "REVIEWING"
         state["current"]["review_template_count"] = count
         state["updated_at"] = now_utc()
-        write_mission_state(self.project, state)
-        append_ledger(ledger_path(self.project, state["mission_id"]), "pull.prepared", {"iteration": state["current"]["iteration"], "reviewer_slots": count, "artifact_hashes": hashes})
+        write_run_state(self.project, state)
+        append_ledger(ledger_path(self.project, state["run_id"]), "pull.prepared", {"iteration": state["current"]["iteration"], "reviewer_slots": count, "artifact_hashes": hashes})
         return {"phase": "REVIEWING", "reviews_dir": str(reviews_dir.relative_to(self.project)), "judgment_path": str(judgment_path.relative_to(self.project)), "artifact_hashes": hashes, "next": self.next_action()}
 
     def pull(self) -> dict[str, Any]:
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         require_phase(state, {"REVIEWING"})
         _contract, info, _path = _contract_and_info(self.project, state)
         iteration_dir = current_iteration_dir(self.project, state)
@@ -526,7 +526,7 @@ class Runtime:
         result = validate_pull(
             reviews,
             judgment,
-            mission_id=state["mission_id"],
+            run_id=state["run_id"],
             iteration=state["current"]["iteration"],
             hashes=hashes,
             acceptance_ids=info["acceptance"],
@@ -535,7 +535,7 @@ class Runtime:
         )
         gate = {
             "schema_version": 1,
-            "mission_id": state["mission_id"],
+            "run_id": state["run_id"],
             "iteration": state["current"]["iteration"],
             "generated_at": now_utc(),
             "artifact_hashes": hashes,
@@ -553,15 +553,15 @@ class Runtime:
             }
         )
         state["updated_at"] = now_utc()
-        write_mission_state(self.project, state)
-        append_ledger(ledger_path(self.project, state["mission_id"]), "pull.decided", {"iteration": state["current"]["iteration"], "decision": result["decision"], "proof_level": result["proof_level"], "gate_sha256": state["current"]["review_gate_sha256"]})
+        write_run_state(self.project, state)
+        append_ledger(ledger_path(self.project, state["run_id"]), "pull.decided", {"iteration": state["current"]["iteration"], "decision": result["decision"], "proof_level": result["proof_level"], "gate_sha256": state["current"]["review_gate_sha256"]})
         return {"phase": "REVIEWED", **result, "gate_path": str((iteration_dir / "REVIEW_GATE.json").relative_to(self.project)), "next": self.next_action()}
 
     def finish(self, decision: str, *, root_cause: str = "", note: str = "") -> dict[str, Any]:
         decision = decision.lower()
         if decision not in {"accepted", "done", "rework", "blocked", "stopped", "pivot"}:
             raise ValidationError("finish decision must be accepted, done, rework, blocked, stopped, or pivot")
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         if decision in {"accepted", "done", "rework"}:
             require_phase(state, {"REVIEWED"})
             _contract, info, _ = _contract_and_info(self.project, state)
@@ -607,25 +607,25 @@ class Runtime:
                 else:
                     state["phase"] = "IMPLEMENTING"
                 state["updated_at"] = now_utc()
-                write_mission_state(self.project, state)
-                append_ledger(ledger_path(self.project, state["mission_id"]), "slice.rework", {"iteration": state["current"]["iteration"], "root_cause": root_cause, "next_phase": state["phase"]})
+                write_run_state(self.project, state)
+                append_ledger(ledger_path(self.project, state["run_id"]), "slice.rework", {"iteration": state["current"]["iteration"], "root_cause": root_cause, "next_phase": state["phase"]})
                 return {"phase": state["phase"], "decision": "REWORK", "root_cause": root_cause, "next": self.next_action()}
             state["history"].append(record)
             state["iteration"] = state["current"]["iteration"]
             state["accepted_criteria"] = sorted(set(state.get("accepted_criteria", [])) | set(state["current"]["acceptance_criteria"]))
             final_payload: dict[str, Any] | None = None
             if decision == "done":
-                base = mission_dir(self.project, state["mission_id"])
-                final_patch = patch(self.project, state["mission_baseline"])
+                base = run_dir(self.project, state["run_id"])
+                final_patch = patch(self.project, state["run_baseline"])
                 final_patch_path = base / "FINAL_PATCH.diff"
                 atomic_write_text(final_patch_path, final_patch)
                 final_receipt = {
                     "schema_version": 1,
-                    "mission_id": state["mission_id"],
+                    "run_id": state["run_id"],
                     "generated_at": now_utc(),
                     "goal_sha256": state["goal_sha256"],
                     "lock_file_sha256": state["lock_file_sha256"],
-                    "mission_baseline": state["mission_baseline"],
+                    "run_baseline": state["run_baseline"],
                     "final_patch_sha256": sha256_text(final_patch),
                     "accepted_criteria": state["accepted_criteria"],
                     "final_iteration": record,
@@ -644,9 +644,9 @@ class Runtime:
             state["current"] = None
             state["phase"] = "DONE" if decision == "done" else "LOCKED"
             state["updated_at"] = now_utc()
-            write_mission_state(self.project, state)
+            write_run_state(self.project, state)
             append_ledger(
-                ledger_path(self.project, state["mission_id"]),
+                ledger_path(self.project, state["run_id"]),
                 f"slice.{decision}",
                 {**record, **(final_payload or {})},
             )
@@ -665,15 +665,15 @@ class Runtime:
         state["phase"] = phase
         state["terminal_reason"] = require_clean_text(note or root_cause, "reason", minimum=4)
         state["updated_at"] = now_utc()
-        write_mission_state(self.project, state)
-        append_ledger(ledger_path(self.project, state["mission_id"]), "mission.concluded" if phase in TERMINAL_PHASES else "mission.pivot_requested", {"phase": phase, "reason": state["terminal_reason"]})
+        write_run_state(self.project, state)
+        append_ledger(ledger_path(self.project, state["run_id"]), "run.concluded" if phase in TERMINAL_PHASES else "run.pivot_requested", {"phase": phase, "reason": state["terminal_reason"]})
         return {"phase": phase, "reason": state["terminal_reason"], "next": self.next_action()}
 
     def authorize_pivot(self, reason: str) -> dict[str, Any]:
-        _, state = active_mission(self.project)
+        _, state = active_run(self.project)
         require_phase(state, {"PUSH_REVIEW", "PIVOT"})
         reason = require_clean_text(reason, "pivot reason", minimum=8)
-        base = mission_dir(self.project, state["mission_id"])
+        base = run_dir(self.project, state["run_id"])
         revision_dir = base / "revisions" / f"revision-{state['revision']:04d}"
         revision_dir.mkdir(parents=True, exist_ok=False)
         for name in ("CHARTER.md", "SPEC.json", "PUSH.json", "LOCK.json"):
@@ -681,8 +681,8 @@ class Runtime:
             if source.exists():
                 source.replace(revision_dir / name)
         goal = (base / "GOAL.txt").read_text(encoding="utf-8").rstrip("\n")
-        atomic_write_text(base / "CHARTER.md", charter_template(state["mission_id"], goal))
-        atomic_write_json(base / "SPEC.json", spec_template(state["mission_id"], sha256_text(goal), goal))
+        atomic_write_text(base / "CHARTER.md", charter_template(state["run_id"], goal))
+        atomic_write_json(base / "SPEC.json", spec_template(state["run_id"], sha256_text(goal), goal))
         state.setdefault("lock_history", []).append(state.get("lock"))
         state["revision"] += 1
         state["lock"] = None
@@ -691,22 +691,22 @@ class Runtime:
         state["phase"] = "DRAFT"
         state["updated_at"] = now_utc()
         state["pivot_reason"] = reason
-        write_mission_state(self.project, state)
-        append_ledger(ledger_path(self.project, state["mission_id"]), "mission.pivot_authorized", {"revision": state["revision"], "reason": reason, "archived_to": str(revision_dir.relative_to(self.project))})
+        write_run_state(self.project, state)
+        append_ledger(ledger_path(self.project, state["run_id"]), "run.pivot_authorized", {"revision": state["revision"], "reason": reason, "archived_to": str(revision_dir.relative_to(self.project))})
         return {"phase": "DRAFT", "revision": state["revision"], "archived_to": str(revision_dir.relative_to(self.project)), "next": self.next_action()}
 
     def integrity(self) -> dict[str, Any]:
-        root, state = active_mission(self.project)
+        root, state = active_run(self.project)
         del root
-        result: dict[str, Any] = {"mission_id": state["mission_id"], "phase": state["phase"], "ledger": "pass"}
-        # read_mission_state already verified the ledger.
+        result: dict[str, Any] = {"run_id": state["run_id"], "phase": state["phase"], "ledger": "pass"}
+        # read_run_state already verified the ledger.
         if state.get("lock"):
             result["lock_hashes"] = verify_lock(self.project, state)
             result["lock"] = "pass"
         else:
             result["lock"] = "unlocked"
         verified_history = 0
-        base = mission_dir(self.project, state["mission_id"])
+        base = run_dir(self.project, state["run_id"])
         for record in state.get("history", []):
             if record.get("decision") not in {"ACCEPTED", "DONE"}:
                 continue
@@ -749,12 +749,12 @@ class Runtime:
 
     def status(self) -> dict[str, Any]:
         root = read_root_state(self.project)
-        mission_id = root.get("active_mission_id")
-        if not mission_id:
-            return {"phase": "IDLE", "active_mission_id": None, "next": "Run ./signoff start \"<exact user-visible outcome>\""}
-        state = read_mission_state(self.project, mission_id)
+        run_id = root.get("active_run_id")
+        if not run_id:
+            return {"phase": "IDLE", "active_run_id": None, "next": "Run ./signoff start \"<exact user-visible outcome>\""}
+        state = read_run_state(self.project, run_id)
         result = {
-            "mission_id": mission_id,
+            "run_id": run_id,
             "phase": state["phase"],
             "revision": state["revision"],
             "iteration": state["iteration"],
@@ -770,12 +770,12 @@ class Runtime:
 
     def next_action(self) -> str:
         root = read_root_state(self.project)
-        mission_id = root.get("active_mission_id")
-        if not mission_id:
+        run_id = root.get("active_run_id")
+        if not run_id:
             return 'Run ./signoff start "<the user’s exact outcome>".'
-        state = read_mission_state(self.project, mission_id)
+        state = read_run_state(self.project, run_id)
         phase = state["phase"]
-        base = mission_dir(self.project, mission_id).relative_to(self.project)
+        base = run_dir(self.project, run_id).relative_to(self.project)
         slice_draft_action = "Complete the active CONTRACT.json, then run ./signoff slice."
         if state.get("current"):
             slice_draft_action = (
@@ -793,9 +793,9 @@ class Runtime:
             "REVIEWING": "Fill every review and JUDGMENT.json against the sealed hashes; then run ./signoff pull.",
             "REVIEWED": "Follow the deterministic gate: ./signoff finish accepted, ./signoff finish done, or ./signoff finish rework --root-cause \"...\".",
             "PUSH_REVIEW": "Implementation is paused. Run ./signoff pivot --reason \"<evidence-based reason>\" or ./signoff finish stopped --note \"<reason>\".",
-            "DONE": "Terminal result: DONE. Do not continue implementation under this mission.",
-            "STOPPED": "Terminal result: STOPPED. Do not continue implementation under this mission.",
-            "PIVOT": "Terminal result: PIVOT. Start a revised mission only through the pivot gate.",
-            "BLOCKED": "Terminal result: BLOCKED. Resolve the external blocker before starting a new mission.",
+            "DONE": "Terminal result: DONE. Do not continue implementation under this run.",
+            "STOPPED": "Terminal result: STOPPED. Do not continue implementation under this run.",
+            "PIVOT": "Terminal result: PIVOT. Start a revised run only through the pivot gate.",
+            "BLOCKED": "Terminal result: BLOCKED. Resolve the external blocker before starting a new run.",
         }
         return actions.get(phase, f"Unknown phase {phase}; run ./signoff integrity and inspect STATE.json.")

@@ -4,10 +4,10 @@ from __future__ import annotations
 from typing import Any
 
 
-def charter_template(mission_id: str, goal: str) -> str:
-    return f"""# Mission Charter
+def charter_template(run_id: str, goal: str) -> str:
+    return f"""# Run Charter
 
-- Mission: `{mission_id}`
+- Run: `{run_id}`
 - Exact user outcome (immutable):
 
 > {goal}
@@ -34,10 +34,10 @@ def charter_template(mission_id: str, goal: str) -> str:
 """
 
 
-def spec_template(mission_id: str, goal_sha256: str, goal: str) -> dict[str, Any]:
+def spec_template(run_id: str, goal_sha256: str, goal: str) -> dict[str, Any]:
     return {
         "schema_version": 1,
-        "mission_id": mission_id,
+        "run_id": run_id,
         "goal_sha256": goal_sha256,
         "requirements": [
             {
@@ -65,7 +65,7 @@ def spec_template(mission_id: str, goal_sha256: str, goal: str) -> dict[str, Any
     }
 
 
-def push_template(mission_id: str, hashes: dict[str, str]) -> dict[str, Any]:
+def push_template(run_id: str, hashes: dict[str, str]) -> dict[str, Any]:
     def advisor(index: int) -> dict[str, Any]:
         return {
             "identity": {
@@ -87,7 +87,7 @@ def push_template(mission_id: str, hashes: dict[str, str]) -> dict[str, Any]:
 
     return {
         "schema_version": 1,
-        "mission_id": mission_id,
+        "run_id": run_id,
         "artifact_hashes": hashes,
         "advisors": [advisor(1), advisor(2)],
         "decision": {
@@ -105,12 +105,12 @@ def push_template(mission_id: str, hashes: dict[str, str]) -> dict[str, Any]:
     }
 
 
-def contract_template(mission_id: str, iteration: int, spec: dict[str, Any], first_slice: str) -> dict[str, Any]:
+def contract_template(run_id: str, iteration: int, spec: dict[str, Any], first_slice: str) -> dict[str, Any]:
     requirement_ids = [item["id"] for item in spec["requirements"]]
     acceptance_ids = [item["id"] for item in spec["acceptance_criteria"]]
     return {
         "schema_version": 1,
-        "mission_id": mission_id,
+        "run_id": run_id,
         "iteration": iteration,
         "title": first_slice or "REPLACE_ME with one bounded slice",
         "builder": {
@@ -139,7 +139,7 @@ def contract_template(mission_id: str, iteration: int, spec: dict[str, Any], fir
 
 
 def review_template(
-    mission_id: str,
+    run_id: str,
     iteration: int,
     hashes: dict[str, str],
     acceptance_ids: list[str],
@@ -147,7 +147,7 @@ def review_template(
 ) -> dict[str, Any]:
     return {
         "schema_version": 1,
-        "mission_id": mission_id,
+        "run_id": run_id,
         "iteration": iteration,
         "reviewer": {
             "participant_id": f"REPLACE_ME-reviewer-{index}",
@@ -171,10 +171,10 @@ def review_template(
     }
 
 
-def judgment_template(mission_id: str, iteration: int, hashes: dict[str, str], acceptance_ids: list[str]) -> dict[str, Any]:
+def judgment_template(run_id: str, iteration: int, hashes: dict[str, str], acceptance_ids: list[str]) -> dict[str, Any]:
     return {
         "schema_version": 1,
-        "mission_id": mission_id,
+        "run_id": run_id,
         "iteration": iteration,
         "judge": {
             "participant_id": "REPLACE_ME-judge",

@@ -132,11 +132,11 @@ main { width: min(1220px, calc(100% - 40px)); margin: 34px auto 64px; }
 .workspace-head { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; border-bottom: 1px solid var(--border); }
 .workspace-head h2 { margin-bottom: 0; }
 .workspace-controls { display: flex; align-items: center; justify-content: flex-end; gap: 12px; min-width: 0; }
-.mission-selector { display: flex; gap: 4px; max-width: 440px; overflow-x: auto; padding: 3px; background: #0e1311; border: 1px solid #28302d; border-radius: 10px; }
-.mission-selector button { min-width: 92px; border: 0; color: var(--muted); background: transparent; padding: 7px 10px; border-radius: 7px; text-align: left; }
-.mission-selector button.active { color: var(--ink); background: #252d2a; }
-.mission-selector span { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--quiet); }
-.mission-selector strong { display: block; margin-top: 3px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.run-selector { display: flex; gap: 4px; max-width: 440px; overflow-x: auto; padding: 3px; background: #0e1311; border: 1px solid #28302d; border-radius: 10px; }
+.run-selector button { min-width: 92px; border: 0; color: var(--muted); background: transparent; padding: 7px 10px; border-radius: 7px; text-align: left; }
+.run-selector button.active { color: var(--ink); background: #252d2a; }
+.run-selector span { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--quiet); }
+.run-selector strong { display: block; margin-top: 3px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .segmented { background: #0e1311; border: 1px solid #28302d; border-radius: 10px; padding: 3px; display: flex; }
 .segmented button { border: 0; color: var(--muted); background: transparent; padding: 8px 12px; border-radius: 7px; font-size: 12px; }
 .segmented button.active { color: var(--ink); background: #252d2a; }
@@ -203,7 +203,7 @@ footer { width: min(1220px, calc(100% - 40px)); margin: 0 auto; padding: 20px 0 
   .agent-bridge code { white-space: normal; }
   .workspace-head { align-items: flex-start; gap: 16px; flex-direction: column; }
   .workspace-controls { width: 100%; justify-content: space-between; align-items: stretch; flex-direction: column; }
-  .mission-selector { max-width: 100%; }
+  .run-selector { max-width: 100%; }
   .artifact-layout { display: block; }
   .artifact-list { border-right: 0; border-bottom: 1px solid var(--border); max-height: 220px; }
   .editor-shell textarea { min-height: 420px; }

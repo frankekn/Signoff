@@ -71,4 +71,4 @@ After filling `PUSH.json`, run:
 
 The runtime—not the chair's prose—decides whether the artifact is valid.
 
-General-purpose prompt references remain in `references/`, but Signoff's generated JSON and hashes take precedence during a mission.
+General-purpose prompt references remain in `references/`, but Signoff's generated JSON and hashes take precedence during a run.

@@ -13,15 +13,15 @@ class WebApiTests(WebServerTestCase):
         self.assertEqual(status, 200)
         self.assertEqual(payload["data"]["status"]["phase"], "DRAFT")
         self.assertEqual(payload["data"]["product"], "Signoff")
-        self.assertFalse(payload["data"]["canStartMission"])
+        self.assertFalse(payload["data"]["canStartRun"])
 
-        mission_id = payload["data"]["status"]["mission_id"]
-        status, payload = self.request(f"/api/artifacts?missionId={mission_id}")
+        run_id = payload["data"]["status"]["run_id"]
+        status, payload = self.request(f"/api/artifacts?runId={run_id}")
         self.assertEqual(status, 200)
         charter = next(item for item in payload["data"] if item["name"] == "CHARTER.md")
         self.assertTrue(charter["editable"])
 
-        updated = (self.fx.mission / "CHARTER.md").read_text(encoding="utf-8").replace(
+        updated = (self.fx.run / "CHARTER.md").read_text(encoding="utf-8").replace(
             "[fill the observable end state in language a non-technical user can verify]",
             "Calling greet returns exactly hello world for the user.",
         )
@@ -32,22 +32,22 @@ class WebApiTests(WebServerTestCase):
         )
         self.assertEqual(status, 200)
         self.assertTrue(payload["data"]["saved"])
-        self.assertIn("hello world for the user", (self.fx.mission / "CHARTER.md").read_text(encoding="utf-8"))
+        self.assertIn("hello world for the user", (self.fx.run / "CHARTER.md").read_text(encoding="utf-8"))
 
-    def test_terminal_overview_can_start_next_mission(self) -> None:
+    def test_terminal_overview_can_start_next_run(self) -> None:
         status, payload = self.request("/api/action", method="POST", body={"action": "finish_stopped", "note": "done for test"})
         self.assertEqual(status, 200)
         self.assertEqual(payload["data"]["phase"], "STOPPED")
 
         status, payload = self.request("/api/overview")
         self.assertEqual(status, 200)
-        self.assertTrue(payload["data"]["canStartMission"])
+        self.assertTrue(payload["data"]["canStartRun"])
 
     def test_pivot_and_blocked_are_not_restartable(self) -> None:
         self.fx.runtime.finish("stopped", note="done for test")
         status, payload = self.request("/api/overview")
         self.assertEqual(status, 200)
-        self.assertTrue(payload["data"]["canStartMission"])
+        self.assertTrue(payload["data"]["canStartRun"])
 
         self.restart_fixture()
         self.fx.lock()
@@ -57,31 +57,31 @@ class WebApiTests(WebServerTestCase):
         self.fx.runtime.finish("done")
         status, payload = self.request("/api/overview")
         self.assertEqual(status, 200)
-        self.assertTrue(payload["data"]["canStartMission"])
+        self.assertTrue(payload["data"]["canStartRun"])
 
         self.restart_fixture()
         self.conclude_from_push("PIVOT")
         status, payload = self.request("/api/overview")
-        create_status, create_payload = self.request("/api/missions", method="POST", body={"goal": "Start after pivot"})
+        create_status, create_payload = self.request("/api/runs", method="POST", body={"goal": "Start after pivot"})
         self.assertEqual(status, 200)
-        self.assertFalse(payload["data"]["canStartMission"])
+        self.assertFalse(payload["data"]["canStartRun"])
         self.assertEqual(create_status, 400)
         self.assertFalse(create_payload["ok"])
 
         self.restart_fixture()
         self.conclude_from_push("INSUFFICIENT_QUORUM")
         status, payload = self.request("/api/overview")
-        create_status, create_payload = self.request("/api/missions", method="POST", body={"goal": "Start after blocked"})
+        create_status, create_payload = self.request("/api/runs", method="POST", body={"goal": "Start after blocked"})
         self.assertEqual(status, 200)
-        self.assertFalse(payload["data"]["canStartMission"])
+        self.assertFalse(payload["data"]["canStartRun"])
         self.assertEqual(create_status, 400)
         self.assertFalse(create_payload["ok"])
 
     def test_hard_integrity_failure_blocks_actions(self) -> None:
         self.fx.lock()
-        spec = read_json(self.fx.mission / "SPEC.json")
+        spec = read_json(self.fx.run / "SPEC.json")
         spec["constraints"].append("Tampered after lock")
-        atomic_write_json(self.fx.mission / "SPEC.json", spec)
+        atomic_write_json(self.fx.run / "SPEC.json", spec)
 
         status, payload = self.request("/api/overview")
         self.assertEqual(status, 200)

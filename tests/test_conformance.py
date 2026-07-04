@@ -27,8 +27,8 @@ class ConformanceTests(unittest.TestCase):
         result = self.fx.runtime.pull()
         self.assertEqual(result["decision"], "PASS")
         self.assertEqual(self.fx.runtime.finish("done")["phase"], "DONE")
-        self.assertTrue((self.fx.mission / "FINAL_PATCH.diff").is_file())
-        self.assertTrue((self.fx.mission / "FINAL_RECEIPT.json").is_file())
+        self.assertTrue((self.fx.run / "FINAL_PATCH.diff").is_file())
+        self.assertTrue((self.fx.run / "FINAL_RECEIPT.json").is_file())
         integrity = self.fx.runtime.integrity()
         self.assertEqual(integrity["ledger"], "pass")
         self.assertEqual(integrity["final_receipt"], "pass")
@@ -39,18 +39,18 @@ class ConformanceTests(unittest.TestCase):
 
     def test_03_locked_spec_tamper_is_detected(self) -> None:
         self.fx.lock()
-        spec = read_json(self.fx.mission / "SPEC.json")
+        spec = read_json(self.fx.run / "SPEC.json")
         spec["constraints"].append("Quietly changed after lock")
-        atomic_write_json(self.fx.mission / "SPEC.json", spec)
+        atomic_write_json(self.fx.run / "SPEC.json", spec)
         with self.assertRaises(IntegrityError):
             self.fx.runtime.prepare_slice()
 
     def test_04_advisor_with_empty_falsifiable_criteria_is_rejected(self) -> None:
         self.fx.valid_draft()
         self.fx.valid_push()
-        push = read_json(self.fx.mission / "PUSH.json")
+        push = read_json(self.fx.run / "PUSH.json")
         push["advisors"][0]["falsifiable_criteria"] = []
-        atomic_write_json(self.fx.mission / "PUSH.json", push)
+        atomic_write_json(self.fx.run / "PUSH.json", push)
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
 
@@ -163,7 +163,7 @@ class ConformanceTests(unittest.TestCase):
 
     def test_18_ledger_tamper_is_detected(self) -> None:
         self.fx.lock()
-        ledger = self.fx.mission / "LEDGER.jsonl"
+        ledger = self.fx.run / "LEDGER.jsonl"
         lines = ledger.read_text(encoding="utf-8").splitlines()
         record = json.loads(lines[0])
         record["payload"]["goal_sha256"] = "0" * 64
@@ -221,16 +221,16 @@ class ConformanceTests(unittest.TestCase):
 
     def test_23_charter_tamper_after_lock_is_detected(self) -> None:
         self.fx.lock()
-        charter = (self.fx.mission / "CHARTER.md").read_text(encoding="utf-8")
-        (self.fx.mission / "CHARTER.md").write_text(charter + "\n", encoding="utf-8")
+        charter = (self.fx.run / "CHARTER.md").read_text(encoding="utf-8")
+        (self.fx.run / "CHARTER.md").write_text(charter + "\n", encoding="utf-8")
         with self.assertRaises(IntegrityError):
             self.fx.runtime.prepare_slice()
 
     def test_24_push_tamper_after_lock_is_detected(self) -> None:
         self.fx.lock()
-        push = read_json(self.fx.mission / "PUSH.json")
+        push = read_json(self.fx.run / "PUSH.json")
         push["decision"]["rationale"] += " tampered"
-        atomic_write_json(self.fx.mission / "PUSH.json", push)
+        atomic_write_json(self.fx.run / "PUSH.json", push)
         with self.assertRaises(IntegrityError):
             self.fx.runtime.prepare_slice()
 
@@ -316,7 +316,7 @@ class ConformanceTests(unittest.TestCase):
     def test_31_push_conflict_resolution_with_vote_basis_is_rejected(self) -> None:
         self.fx.valid_draft()
         self.fx.valid_push(conflict=True, resolve=False)
-        push = read_json(self.fx.mission / "PUSH.json")
+        push = read_json(self.fx.run / "PUSH.json")
         push["decision"]["conflict_resolutions"] = [
             {
                 "topic": "verdict-split",
@@ -325,7 +325,7 @@ class ConformanceTests(unittest.TestCase):
                 "conclusion": "Proceed because the majority favored implementation.",
             }
         ]
-        atomic_write_json(self.fx.mission / "PUSH.json", push)
+        atomic_write_json(self.fx.run / "PUSH.json", push)
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
 

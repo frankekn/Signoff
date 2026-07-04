@@ -20,11 +20,11 @@ function priority(path: string) {
 }
 
 interface ArtifactPanelProps {
-  missionId?: string
+  runId?: string
   onDirtyChange?: (dirty: boolean) => void
 }
 
-export function ArtifactPanel({ missionId, onDirtyChange }: ArtifactPanelProps) {
+export function ArtifactPanel({ runId, onDirtyChange }: ArtifactPanelProps) {
   const queryClient = useQueryClient()
   const [selectedPath, setSelectedPath] = useState('')
   const [draft, setDraft] = useState('')
@@ -33,9 +33,9 @@ export function ArtifactPanel({ missionId, onDirtyChange }: ArtifactPanelProps) 
   const dirty = dirtyPath === selectedPath
 
   const artifactsQuery = useQuery({
-    queryKey: ['artifacts', missionId],
-    queryFn: () => api.artifacts(missionId),
-    enabled: Boolean(missionId),
+    queryKey: ['artifacts', runId],
+    queryFn: () => api.artifacts(runId),
+    enabled: Boolean(runId),
     refetchInterval: 3_000,
   })
 
@@ -84,7 +84,7 @@ export function ArtifactPanel({ missionId, onDirtyChange }: ArtifactPanelProps) 
   const selected: Artifact | undefined = artifacts.find((item) => item.path === selectedPath)
   const selectArtifact = (path: string): void => {
     if (dirtyPath && dirtyPath !== path) {
-      setDirtyWarning('Save or discard the current draft before switching artifacts or missions.')
+      setDirtyWarning('Save or discard the current draft before switching artifacts or runs.')
       return
     }
     setDirtyWarning('')
@@ -97,13 +97,13 @@ export function ArtifactPanel({ missionId, onDirtyChange }: ArtifactPanelProps) 
     onDirtyChange?.(false)
   }
 
-  if (!missionId) {
-    return <div className="empty-state">Start a mission to see its contract, evidence, and receipts.</div>
+  if (!runId) {
+    return <div className="empty-state">Start a run to see its contract, evidence, and receipts.</div>
   }
 
   return (
     <div className="artifact-layout">
-      <aside className="artifact-list" aria-label="Mission artifacts">
+      <aside className="artifact-list" aria-label="Run artifacts">
         {artifacts.map((artifact) => (
           <button
             type="button"
@@ -113,7 +113,7 @@ export function ArtifactPanel({ missionId, onDirtyChange }: ArtifactPanelProps) 
           >
             <span>
               <strong>{artifact.name}</strong>
-              <small>{artifact.path.replace(/^\.signoff\/missions\/[^/]+\//, '')}</small>
+              <small>{artifact.path.replace(/^\.signoff\/runs\/[^/]+\//, '')}</small>
             </span>
             <span className={artifact.editable ? 'edit-pill' : 'read-pill'}>{artifact.editable ? 'Edit' : prettySize(artifact.size)}</span>
           </button>

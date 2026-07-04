@@ -7,11 +7,11 @@ import { Mark } from '../components/Mark'
 import { NextActionCard } from '../components/NextActionCard'
 import { PhaseRail } from '../components/PhaseRail'
 import { ProofCard } from '../components/ProofCard'
-import { StartMissionCard } from '../components/StartMissionCard'
+import { StartRunCard } from '../components/StartRunCard'
 import { Timeline } from '../components/Timeline'
 
 const phaseCopy: Record<string, { title: string; note: string }> = {
-  IDLE: { title: 'Ready for a mission', note: 'Describe the outcome. Signoff will preserve it as the immutable target.' },
+  IDLE: { title: 'Ready for a run', note: 'Describe the outcome. Signoff will preserve it as the immutable target.' },
   DRAFT: { title: 'Define what success means', note: 'Complete the charter and falsifiable acceptance criteria before implementation begins.' },
   PUSH: { title: 'Challenge the route', note: 'Independent agents answer the same claims and expose what would prove them wrong.' },
   LOCKED: { title: 'The goal is locked', note: 'Create one small implementation slice with explicit scope and executable checks.' },
@@ -42,36 +42,36 @@ export function Dashboard(): ReactElement {
   const [noteAction, setNoteAction] = useState<CourtAction | null>(null)
   const [note, setNote] = useState('')
   const [noteError, setNoteError] = useState('')
-  const [selectedMissionId, setSelectedMissionId] = useState<string | undefined>()
+  const [selectedRunId, setSelectedRunId] = useState<string | undefined>()
   const [artifactDirty, setArtifactDirty] = useState(false)
-  const [missionWarning, setMissionWarning] = useState('')
+  const [runWarning, setRunWarning] = useState('')
 
   const overviewQuery = useQuery({
-    queryKey: ['overview', selectedMissionId],
-    queryFn: () => api.overview(selectedMissionId),
+    queryKey: ['overview', selectedRunId],
+    queryFn: () => api.overview(selectedRunId),
     refetchInterval: 2_000,
   })
   const overview = overviewQuery.data
   const phase = overview?.status.phase ?? 'IDLE'
-  const canStartMission = overview?.canStartMission ?? false
+  const canStartRun = overview?.canStartRun ?? false
   const actionCount = overview?.actions.length ?? 0
-  const showNextCard = phase !== 'IDLE' && (!canStartMission || actionCount > 0)
+  const showNextCard = phase !== 'IDLE' && (!canStartRun || actionCount > 0)
   const copy = phaseCopy[phase] ?? { title: phase, note: overview?.next ?? '' }
-  const missionId = overview?.status.mission_id
-  const missionIds = useMemo(() => overview?.missions.map((mission) => mission.missionId) ?? [], [overview])
+  const runId = overview?.status.run_id
+  const runIds = useMemo(() => overview?.runs.map((run) => run.runId) ?? [], [overview])
 
   useEffect(() => {
     if (!overview) return
-    if (!selectedMissionId || !missionIds.includes(selectedMissionId)) {
-      setSelectedMissionId(missionId)
+    if (!selectedRunId || !runIds.includes(selectedRunId)) {
+      setSelectedRunId(runId)
     }
-  }, [missionId, missionIds, overview, selectedMissionId])
+  }, [runId, runIds, overview, selectedRunId])
 
   const createMutation = useMutation({
-    mutationFn: () => api.createMission(goal),
+    mutationFn: () => api.createRun(goal),
     onSuccess: async () => {
       setGoal('')
-      setSelectedMissionId(undefined)
+      setSelectedRunId(undefined)
       await queryClient.invalidateQueries()
     },
   })
@@ -119,24 +119,24 @@ export function Dashboard(): ReactElement {
 
   const updateArtifactDirty = useCallback((dirty: boolean): void => {
     setArtifactDirty(dirty)
-    if (!dirty) setMissionWarning('')
+    if (!dirty) setRunWarning('')
   }, [])
 
-  const selectMission = (nextMissionId: string): void => {
-    if (artifactDirty && nextMissionId !== selectedMissionId) {
-      setMissionWarning('Save or discard the current draft before switching missions.')
+  const selectRun = (nextRunId: string): void => {
+    if (artifactDirty && nextRunId !== selectedRunId) {
+      setRunWarning('Save or discard the current draft before switching runs.')
       return
     }
-    setMissionWarning('')
-    setSelectedMissionId(nextMissionId)
+    setRunWarning('')
+    setSelectedRunId(nextRunId)
   }
 
   const selectTab = (nextTab: 'artifacts' | 'timeline'): void => {
     if (artifactDirty && nextTab !== tab) {
-      setMissionWarning('Save or discard the current draft before switching artifacts or missions.')
+      setRunWarning('Save or discard the current draft before switching artifacts or runs.')
       return
     }
-    setMissionWarning('')
+    setRunWarning('')
     setTab(nextTab)
   }
 
@@ -144,7 +144,7 @@ export function Dashboard(): ReactElement {
   const integrityGood = Boolean(integrity && !containsFailure(integrity))
   const accepted = overview?.status.accepted_criteria?.length ?? 0
   const proof = overview?.proofSummary
-  const inspectedMission = overview?.inspectedMission
+  const inspectedRun = overview?.inspectedRun
 
   const agentInstruction = useMemo(() => {
     if (!overview) return 'Read AGENTS.md. Wait for the live Signoff overview before editing.'
@@ -155,7 +155,7 @@ export function Dashboard(): ReactElement {
       ? overview.actions.map((action) => `- ${action.label} (${action.id}${action.requiresNote ? ', note required' : ''})`).join('\n')
       : '- No UI action is currently legal.'
     return `Read AGENTS.md.
-Mission id: ${overview.status.mission_id ?? 'none'}
+Run id: ${overview.status.run_id ?? 'none'}
 Phase: ${overview.status.phase}
 Live next action: ${overview.next}
 Editable paths:
@@ -192,17 +192,17 @@ Do not edit locked or generated artifacts. Do not edit receipts or files outside
 
         <PhaseRail phase={phase} />
 
-        {proof && <ProofCard inspectedMission={inspectedMission} proof={proof} />}
+        {proof && <ProofCard inspectedRun={inspectedRun} proof={proof} />}
 
-        {canStartMission && (
-          <StartMissionCard
-            activeMissionId={missionId}
+        {canStartRun && (
+          <StartRunCard
+            activeRunId={runId}
             goal={goal}
-            inspectingHistorical={Boolean(inspectedMission && !inspectedMission.active)}
+            inspectingHistorical={Boolean(inspectedRun && !inspectedRun.active)}
             pending={createMutation.isPending}
             phase={phase}
             onGoalChange={setGoal}
-            onStartMission={() => createMutation.mutate()}
+            onStartRun={() => createMutation.mutate()}
           />
         )}
 
@@ -234,20 +234,20 @@ Do not edit locked or generated artifacts. Do not edit receipts or files outside
           <div className="workspace-head">
             <div>
               <span className="eyebrow">Observable by default</span>
-              <h2>Mission record</h2>
+              <h2>Run record</h2>
             </div>
             <div className="workspace-controls">
-              {overview && overview.missions.length > 1 && (
-                <div className="mission-selector" aria-label="Mission history">
-                  {overview.missions.map((mission) => (
+              {overview && overview.runs.length > 1 && (
+                <div className="run-selector" aria-label="Run history">
+                  {overview.runs.map((run) => (
                     <button
                       type="button"
-                      key={mission.missionId}
-                      className={mission.missionId === selectedMissionId ? 'active' : ''}
-                      onClick={() => selectMission(mission.missionId)}
+                      key={run.runId}
+                      className={run.runId === selectedRunId ? 'active' : ''}
+                      onClick={() => selectRun(run.runId)}
                     >
-                      <span>{mission.active ? 'Active' : mission.phase.replaceAll('_', ' ')}</span>
-                      <strong>{mission.missionId.replace(/^mission-\d{8}-\d{6}-/, '')}</strong>
+                      <span>{run.active ? 'Active' : run.phase.replaceAll('_', ' ')}</span>
+                      <strong>{run.runId.replace(/^run-\d{8}-\d{6}-/, '')}</strong>
                     </button>
                   ))}
                 </div>
@@ -258,8 +258,8 @@ Do not edit locked or generated artifacts. Do not edit receipts or files outside
               </div>
             </div>
           </div>
-          {missionWarning && <div className="dirty-warning dirty-warning--workspace">{missionWarning}</div>}
-          {tab === 'artifacts' ? <ArtifactPanel missionId={selectedMissionId} onDirtyChange={updateArtifactDirty} /> : <Timeline missionId={selectedMissionId} />}
+          {runWarning && <div className="dirty-warning dirty-warning--workspace">{runWarning}</div>}
+          {tab === 'artifacts' ? <ArtifactPanel runId={selectedRunId} onDirtyChange={updateArtifactDirty} /> : <Timeline runId={selectedRunId} />}
         </section>
       </main>
 

@@ -59,7 +59,7 @@ export function NextActionCard({
             {action.label}
           </button>
         ))}
-        {actions.length === 0 && <span className="terminal-note">No further action is legal in this mission.</span>}
+        {actions.length === 0 && <span className="terminal-note">No further action is legal in this run.</span>}
       </div>
       {noteAction && (
         <form className="note-panel" onSubmit={submitNote}>

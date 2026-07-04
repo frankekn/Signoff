@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import TypeAlias, TypedDict
 
-from .state import mission_dir, read_mission_state
+from .state import run_dir, read_run_state
 from .util import read_json, sha256_file
 
 JsonScalar: TypeAlias = str | int | float | bool | None
@@ -64,7 +64,7 @@ class ContractSummary(TypedDict):
 
 
 class ProofSummary(TypedDict):
-    missionId: str
+    runId: str
     phase: str
     iteration: int | None
     commands: list[CommandSummary]
@@ -89,10 +89,10 @@ def integer(value: JsonValue | None) -> int | None:
     return value if type(value) is int else None
 
 
-def proof_summary_for(project: Path, mission_id: str) -> ProofSummary:
-    state = read_mission_state(project, mission_id)
+def proof_summary_for(project: Path, run_id: str) -> ProofSummary:
+    state = read_run_state(project, run_id)
     iteration = _current_iteration(state)
-    iteration_dir = _iteration_dir(project, mission_id, iteration)
+    iteration_dir = _iteration_dir(project, run_id, iteration)
     record = _latest_record(state)
     current_record = json_object(state.get("current")) or {}
     evidence_path = iteration_dir / "EVIDENCE.json" if iteration_dir else None
@@ -101,10 +101,10 @@ def proof_summary_for(project: Path, mission_id: str) -> ProofSummary:
     patch_hash = text(current_record.get("patch_sha256"), text(record.get("patch_sha256"), "") if record else "")
     patch_path = iteration_dir / "PATCH.diff" if iteration_dir else None
     accepted_items = _string_list(state.get("accepted_criteria"))
-    final_receipt_path = mission_dir(project, mission_id) / "FINAL_RECEIPT.json"
+    final_receipt_path = run_dir(project, run_id) / "FINAL_RECEIPT.json"
     final_receipt_hash = text(state.get("final_receipt_sha256"), "")
     return {
-        "missionId": mission_id,
+        "runId": run_id,
         "phase": text(state.get("phase"), "UNKNOWN"),
         "iteration": iteration,
         "commands": _command_summaries(evidence),
@@ -126,10 +126,10 @@ def _unknown(detail: str = "not yet produced") -> ProofStatus:
     return {"status": "UNKNOWN", "detail": detail}
 
 
-def _iteration_dir(project: Path, mission_id: str, iteration: int | None) -> Path | None:
+def _iteration_dir(project: Path, run_id: str, iteration: int | None) -> Path | None:
     if not iteration:
         return None
-    return mission_dir(project, mission_id) / "iterations" / f"{iteration:04d}"
+    return run_dir(project, run_id) / "iterations" / f"{iteration:04d}"
 
 
 def _string_list(value: JsonValue | None) -> list[str]:

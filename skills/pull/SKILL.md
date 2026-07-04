@@ -55,4 +55,4 @@ After all files are complete, run:
 
 The runtime validates identities, hashes, complete criterion coverage, finding accounting, and conflict resolution. Do not edit files merely to make the gate green; repair the underlying evidence or implementation.
 
-Detailed rubrics remain in `references/`. The generated artifact contract is authoritative during Signoff missions.
+Detailed rubrics remain in `references/`. The generated artifact contract is authoritative during Signoff runs.

@@ -1,8 +1,8 @@
 # Signoff Protocol
 
-The **Signoff Protocol** is the versioned repository-local contract between users, coding agents, reviewers, and Court. The runtime creates concrete mission artifacts from the templates embedded in `src/signoff/templates.py`. The JSON Schemas in `schemas/` document the agent-authored surfaces, while Python validators add cross-file rules that JSON Schema alone cannot enforce, including:
+The **Signoff Protocol** is the versioned repository-local contract between users, coding agents, reviewers, and Court. The runtime creates concrete run artifacts from the templates embedded in `src/signoff/templates.py`. The JSON Schemas in `schemas/` document the agent-authored surfaces, while Python validators add cross-file rules that JSON Schema alone cannot enforce, including:
 
-- exact mission and artifact hash matching;
+- exact run and artifact hash matching;
 - stable ID references across spec and contract;
 - unique real participant/context identities;
 - complete canonical Push topic coverage;

@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": [
     "schema_version",
-    "mission_id",
+    "run_id",
     "artifact_hashes",
     "advisors",
     "decision"
@@ -15,7 +15,7 @@
     "schema_version": {
       "const": 1
     },
-    "mission_id": {
+    "run_id": {
       "type": "string"
     },
     "artifact_hashes": {

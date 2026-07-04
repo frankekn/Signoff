@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
-import type { MissionSummary, ProofSummary } from '../api'
+import type { RunSummary, ProofSummary } from '../api'
 
 type ProofCardProps = {
-  readonly inspectedMission: MissionSummary | null | undefined
+  readonly inspectedRun: RunSummary | null | undefined
   readonly proof: ProofSummary
 }
 
@@ -24,15 +24,15 @@ function contractFinalLabel(proof: ProofSummary): string {
   return 'UNKNOWN'
 }
 
-export function ProofCard({ inspectedMission, proof }: ProofCardProps): ReactElement {
+export function ProofCard({ inspectedRun, proof }: ProofCardProps): ReactElement {
   return (
     <section className="proof-card">
       <div className="proof-head">
         <div>
           <span className="eyebrow">Readable proof</span>
-          <h2>{inspectedMission && !inspectedMission.active ? `Inspecting ${inspectedMission.phase.replaceAll('_', ' ')} mission` : 'Active mission proof'}</h2>
+          <h2>{inspectedRun && !inspectedRun.active ? `Inspecting ${inspectedRun.phase.replaceAll('_', ' ')} run` : 'Active run proof'}</h2>
         </div>
-        <code>{proof.missionId}</code>
+        <code>{proof.runId}</code>
       </div>
       <div className="proof-grid">
         <div className="proof-tile">

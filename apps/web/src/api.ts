@@ -7,8 +7,8 @@ export interface CourtAction {
   requiresNote?: boolean
 }
 
-export interface MissionSummary {
-  missionId: string
+export interface RunSummary {
+  runId: string
   goal: string
   phase: string
   revision?: number
@@ -19,8 +19,8 @@ export interface MissionSummary {
 }
 
 export interface CourtStatus {
-  mission_id?: string
-  active_mission_id?: string | null
+  run_id?: string
+  active_run_id?: string | null
   phase: string
   revision?: number
   iteration?: number
@@ -52,7 +52,7 @@ export interface ReviewGateProof extends ProofStatus {
 }
 
 export interface ProofSummary {
-  missionId: string
+  runId: string
   phase: string
   iteration?: number | null
   commands: ProofCommand[]
@@ -77,15 +77,15 @@ export interface Overview {
   goal: string
   status: CourtStatus
   next: string
-  canStartMission: boolean
+  canStartRun: boolean
   blockedByIntegrity: boolean
   integrityStatus: string
   integrityMessage: string
   actions: CourtAction[]
   editablePaths: string[]
-  missions: MissionSummary[]
+  runs: RunSummary[]
   proofSummary: ProofSummary | null
-  inspectedMission: MissionSummary | null
+  inspectedRun: RunSummary | null
 }
 
 export interface Artifact {
@@ -126,15 +126,15 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  overview: (inspectMissionId?: string) =>
-    request<Overview>(`/api/overview${inspectMissionId ? `?inspectMissionId=${encodeURIComponent(inspectMissionId)}` : ''}`),
-  artifacts: (missionId?: string) =>
-    request<Artifact[]>(`/api/artifacts${missionId ? `?missionId=${encodeURIComponent(missionId)}` : ''}`),
+  overview: (inspectRunId?: string) =>
+    request<Overview>(`/api/overview${inspectRunId ? `?inspectRunId=${encodeURIComponent(inspectRunId)}` : ''}`),
+  artifacts: (runId?: string) =>
+    request<Artifact[]>(`/api/artifacts${runId ? `?runId=${encodeURIComponent(runId)}` : ''}`),
   artifact: (path: string) => request<{ path: string; content: string; size: number }>(`/api/artifact?path=${encodeURIComponent(path)}`),
-  events: (missionId?: string) =>
-    request<LedgerEvent[]>(`/api/events${missionId ? `?missionId=${encodeURIComponent(missionId)}` : ''}`),
-  createMission: (goal: string) =>
-    request<Record<string, unknown>>('/api/missions', {
+  events: (runId?: string) =>
+    request<LedgerEvent[]>(`/api/events${runId ? `?runId=${encodeURIComponent(runId)}` : ''}`),
+  createRun: (goal: string) =>
+    request<Record<string, unknown>>('/api/runs', {
       method: 'POST',
       body: JSON.stringify({ goal }),
     }),

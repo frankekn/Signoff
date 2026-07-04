@@ -6,7 +6,7 @@ from typing import Literal, TypedDict
 from . import __version__
 from .errors import SignoffError, ValidationError
 from .runtime import RESTARTABLE_PHASES, Runtime
-from .state import mission_dir, read_mission_state, read_root_state
+from .state import run_dir, read_run_state, read_root_state
 from .web_proof import JsonObject, JsonValue, ProofSummary, integer, json_object, proof_summary_for, text
 
 
@@ -17,14 +17,14 @@ class CourtAction(TypedDict, total=False):
     requiresNote: bool
 
 
-class MissionSummaryRequired(TypedDict):
-    missionId: str
+class RunSummaryRequired(TypedDict):
+    runId: str
     goal: str
     phase: str
     active: bool
 
 
-class MissionSummary(MissionSummaryRequired, total=False):
+class RunSummary(RunSummaryRequired, total=False):
     revision: int
     iteration: int
     updatedAt: str
@@ -38,15 +38,15 @@ class OverviewPayload(TypedDict):
     goal: str
     status: JsonObject
     next: str
-    canStartMission: bool
+    canStartRun: bool
     blockedByIntegrity: bool
     integrityStatus: str
     integrityMessage: str
     actions: list[CourtAction]
     editablePaths: list[str]
-    missions: list[MissionSummary]
+    runs: list[RunSummary]
     proofSummary: ProofSummary | None
-    inspectedMission: MissionSummary | None
+    inspectedRun: RunSummary | None
 
 
 def allowed_actions(phase: str) -> list[CourtAction]:
@@ -54,15 +54,15 @@ def allowed_actions(phase: str) -> list[CourtAction]:
         "IDLE": [],
         "DRAFT": [
             {"id": "prepare_push", "label": "Send to Push", "tone": "primary"},
-            {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
+            {"id": "finish_stopped", "label": "Stop run", "tone": "danger", "requiresNote": True},
         ],
         "PUSH": [
             {"id": "lock", "label": "Lock decision", "tone": "primary"},
-            {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
+            {"id": "finish_stopped", "label": "Stop run", "tone": "danger", "requiresNote": True},
         ],
         "LOCKED": [
             {"id": "prepare_slice", "label": "Create next slice", "tone": "primary"},
-            {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
+            {"id": "finish_stopped", "label": "Stop run", "tone": "danger", "requiresNote": True},
         ],
         "SLICE_DRAFT": [{"id": "activate_slice", "label": "Activate slice", "tone": "primary"}],
         "IMPLEMENTING": [
@@ -82,7 +82,7 @@ def allowed_actions(phase: str) -> list[CourtAction]:
         ],
         "PUSH_REVIEW": [
             {"id": "pivot", "label": "Authorize pivot", "tone": "primary", "requiresNote": True},
-            {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
+            {"id": "finish_stopped", "label": "Stop run", "tone": "danger", "requiresNote": True},
         ],
         "DONE": [],
         "STOPPED": [],
@@ -93,8 +93,8 @@ def allowed_actions(phase: str) -> list[CourtAction]:
 
 
 def editable_paths(project: Path, state: JsonObject) -> set[str]:
-    mission_id = str(state["mission_id"])
-    base = mission_dir(project, mission_id)
+    run_id = str(state["run_id"])
+    base = run_dir(project, run_id)
     phase = state.get("phase")
     allowed: set[Path] = set()
     if phase == "DRAFT":
@@ -113,19 +113,19 @@ def editable_paths(project: Path, state: JsonObject) -> set[str]:
     return {path.relative_to(project).as_posix() for path in allowed}
 
 
-def mission_summaries(project: Path) -> list[MissionSummary]:
+def run_summaries(project: Path) -> list[RunSummary]:
     root = read_root_state(project)
-    summaries: list[MissionSummary] = []
-    for mission_id in reversed(root.get("missions", [])):
+    summaries: list[RunSummary] = []
+    for run_id in reversed(root.get("runs", [])):
         try:
-            state = read_mission_state(project, mission_id)
-            goal_path = mission_dir(project, mission_id) / "GOAL.txt"
+            state = read_run_state(project, run_id)
+            goal_path = run_dir(project, run_id) / "GOAL.txt"
             goal = goal_path.read_text(encoding="utf-8").strip() if goal_path.is_file() else ""
-            summary: MissionSummary = {
-                "missionId": mission_id,
+            summary: RunSummary = {
+                "runId": run_id,
                 "goal": goal,
                 "phase": text(state.get("phase"), "UNKNOWN"),
-                "active": mission_id == root.get("active_mission_id"),
+                "active": run_id == root.get("active_run_id"),
             }
             _add_int(summary, "revision", state.get("revision"))
             _add_int(summary, "iteration", state.get("iteration"))
@@ -136,33 +136,33 @@ def mission_summaries(project: Path) -> list[MissionSummary]:
         except SignoffError as exc:
             summaries.append(
                 {
-                    "missionId": mission_id,
+                    "runId": run_id,
                     "goal": "",
                     "phase": "INVALID",
                     "error": str(exc),
-                    "active": mission_id == root.get("active_mission_id"),
+                    "active": run_id == root.get("active_run_id"),
                 }
             )
     return summaries
 
 
-def build_overview(project: Path, runtime: Runtime, inspect_mission_id: str | None = None) -> OverviewPayload:
+def build_overview(project: Path, runtime: Runtime, inspect_run_id: str | None = None) -> OverviewPayload:
     status = runtime.status()
     phase = text(status.get("phase"), "IDLE")
-    mission_id = status.get("mission_id")
-    proof_mission_id = require_known_mission(project, inspect_mission_id) if inspect_mission_id else mission_id
+    run_id = status.get("run_id")
+    proof_run_id = require_known_run(project, inspect_run_id) if inspect_run_id else run_id
     integrity = json_object(status.get("integrity"))
     blocked_by_integrity = integrity is not None and integrity.get("status") == "fail"
     goal = ""
     editable: set[str] = set()
-    if isinstance(mission_id, str) and mission_id:
-        state = read_mission_state(project, mission_id)
-        goal_path = mission_dir(project, mission_id) / "GOAL.txt"
+    if isinstance(run_id, str) and run_id:
+        state = read_run_state(project, run_id)
+        goal_path = run_dir(project, run_id) / "GOAL.txt"
         goal = goal_path.read_text(encoding="utf-8").strip() if goal_path.is_file() else ""
         editable = editable_paths(project, state)
     actions = _legal_actions(phase, status, blocked_by_integrity)
     next_instruction = _next_instruction(status, blocked_by_integrity)
-    missions = mission_summaries(project)
+    runs = run_summaries(project)
     return {
         "product": "Signoff",
         "version": __version__,
@@ -170,26 +170,26 @@ def build_overview(project: Path, runtime: Runtime, inspect_mission_id: str | No
         "goal": goal,
         "status": status,
         "next": next_instruction,
-        "canStartMission": phase in RESTARTABLE_PHASES and not blocked_by_integrity,
+        "canStartRun": phase in RESTARTABLE_PHASES and not blocked_by_integrity,
         "blockedByIntegrity": blocked_by_integrity,
         "integrityStatus": _integrity_status(integrity, blocked_by_integrity),
         "integrityMessage": _integrity_message(integrity, blocked_by_integrity),
         "actions": actions,
         "editablePaths": sorted(editable),
-        "missions": missions,
-        "proofSummary": proof_summary_for(project, str(proof_mission_id)) if proof_mission_id else None,
-        "inspectedMission": next((mission for mission in missions if mission["missionId"] == proof_mission_id), None) if proof_mission_id else None,
+        "runs": runs,
+        "proofSummary": proof_summary_for(project, str(proof_run_id)) if proof_run_id else None,
+        "inspectedRun": next((run for run in runs if run["runId"] == proof_run_id), None) if proof_run_id else None,
     }
 
 
-def require_known_mission(project: Path, mission_id: str) -> str:
+def require_known_run(project: Path, run_id: str) -> str:
     root = read_root_state(project)
-    if mission_id not in root.get("missions", []):
-        raise ValidationError(f"unknown mission: {mission_id}")
-    return mission_id
+    if run_id not in root.get("runs", []):
+        raise ValidationError(f"unknown run: {run_id}")
+    return run_id
 
 
-def _add_int(summary: MissionSummary, key: Literal["revision", "iteration"], value: JsonValue | None) -> None:
+def _add_int(summary: RunSummary, key: Literal["revision", "iteration"], value: JsonValue | None) -> None:
     int_value = integer(value)
     if int_value is not None:
         summary[key] = int_value
@@ -219,6 +219,6 @@ def _integrity_status(integrity: JsonObject | None, blocked_by_integrity: bool) 
 
 def _integrity_message(integrity: JsonObject | None, blocked_by_integrity: bool) -> str:
     if not integrity:
-        return "No active mission."
+        return "No active run."
     message = str(integrity.get("error", "Integrity checks passed."))
     return "Inspect and repair integrity: " + message if blocked_by_integrity else message

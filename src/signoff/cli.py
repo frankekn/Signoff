@@ -36,9 +36,9 @@ def build_parser() -> argparse.ArgumentParser:
     ui.add_argument("--host", default="127.0.0.1", help="bind host (default: 127.0.0.1)")
     ui.add_argument("--port", type=int, default=8765, help="bind port (default: 8765; use 0 for any free port)")
     ui.add_argument("--no-open", action="store_true", help="do not open a browser automatically")
-    sub.add_parser("doctor", help="check prerequisites and mission integrity")
+    sub.add_parser("doctor", help="check prerequisites and run integrity")
 
-    start = sub.add_parser("start", help="start a mission from the exact user-visible outcome")
+    start = sub.add_parser("start", help="start a run from the exact user-visible outcome")
     start.add_argument("goal")
 
     sub.add_parser("prepare-push", help="validate the draft and create the shared Push packet")
@@ -52,7 +52,7 @@ def build_parser() -> argparse.ArgumentParser:
     pull_prepare.add_argument("--reviewers", type=int, default=2)
     sub.add_parser("pull", help="validate independent reviews and lead judgment")
 
-    finish = sub.add_parser("finish", help="close the current slice or mission through a guarded decision")
+    finish = sub.add_parser("finish", help="close the current slice or run through a guarded decision")
     finish.add_argument("decision", choices=["accepted", "done", "rework", "blocked", "stopped", "pivot"])
     finish.add_argument("--root-cause", default="")
     finish.add_argument("--note", default="")
@@ -60,7 +60,7 @@ def build_parser() -> argparse.ArgumentParser:
     pivot = sub.add_parser("pivot", help="archive the old lock and return to draft after Push review")
     pivot.add_argument("--reason", required=True)
 
-    sub.add_parser("status", help="show current mission, proof, scope, and next action")
+    sub.add_parser("status", help="show current run, proof, scope, and next action")
     sub.add_parser("next", help="print the one legal next action")
     sub.add_parser("integrity", help="revalidate ledger, locks, receipts, and active scope")
     sub.add_parser("benchmark", help="run the repository's deterministic conformance suite")

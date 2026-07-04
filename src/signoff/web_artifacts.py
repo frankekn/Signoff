@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Final, TypedDict
 
 from .errors import StateError, ValidationError
-from .state import mission_dir, read_mission_state, read_root_state
+from .state import run_dir, read_run_state, read_root_state
 from .util import ensure_within
 from .web_overview import editable_paths
 
@@ -19,13 +19,13 @@ class ArtifactSummary(TypedDict):
     kind: str
 
 
-def list_artifacts(project: Path, mission_id: str) -> list[ArtifactSummary]:
-    base = mission_dir(project, mission_id)
+def list_artifacts(project: Path, run_id: str) -> list[ArtifactSummary]:
+    base = run_dir(project, run_id)
     if not base.is_dir():
-        raise ValidationError(f"unknown mission: {mission_id}")
-    state = read_mission_state(project, mission_id)
+        raise ValidationError(f"unknown run: {run_id}")
+    state = read_run_state(project, run_id)
     root = read_root_state(project)
-    editable = editable_paths(project, state) if mission_id == root.get("active_mission_id") else set()
+    editable = editable_paths(project, state) if run_id == root.get("active_run_id") else set()
     artifacts: list[ArtifactSummary] = []
     for path in sorted(base.rglob("*")):
         if not path.is_file() or path.suffix.lower() not in TEXT_ARTIFACT_SUFFIXES:
@@ -45,14 +45,14 @@ def list_artifacts(project: Path, mission_id: str) -> list[ArtifactSummary]:
 
 def safe_artifact_path(project: Path, relative: str) -> Path:
     normalized = relative.strip().replace("\\", "/")
-    if not normalized.startswith(".signoff/missions/"):
-        raise ValidationError("artifact path must stay inside .signoff/missions")
+    if not normalized.startswith(".signoff/runs/"):
+        raise ValidationError("artifact path must stay inside .signoff/runs")
     candidate = ensure_within(project, project / normalized)
-    missions_root = ensure_within(project, project / ".signoff" / "missions")
+    runs_root = ensure_within(project, project / ".signoff" / "runs")
     try:
-        candidate.relative_to(missions_root)
+        candidate.relative_to(runs_root)
     except ValueError as exc:
-        raise ValidationError("artifact path escapes the mission directory") from exc
+        raise ValidationError("artifact path escapes the run directory") from exc
     if candidate.suffix.lower() not in TEXT_ARTIFACT_SUFFIXES:
         raise ValidationError("unsupported artifact type")
     return candidate
@@ -60,9 +60,9 @@ def safe_artifact_path(project: Path, relative: str) -> Path:
 
 def assert_editable_artifact(project: Path, relative: str) -> None:
     root = read_root_state(project)
-    mission_id = root.get("active_mission_id")
-    if not mission_id:
-        raise StateError("there is no active mission")
-    state = read_mission_state(project, mission_id)
+    run_id = root.get("active_run_id")
+    if not run_id:
+        raise StateError("there is no active run")
+    state = read_run_state(project, run_id)
     if relative not in editable_paths(project, state):
         raise StateError("this artifact is locked or generated in the current phase")

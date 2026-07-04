@@ -44,13 +44,13 @@ def create(destination: Path | None = None) -> Path:
     goal = "Change greet() to return exactly hello world while preserving all unrelated behavior."
     runtime.start(goal)
     status = runtime.status()
-    mission_id = status["mission_id"]
-    mission = destination / ".signoff" / "missions" / mission_id
+    run_id = status["run_id"]
+    run_path = destination / ".signoff" / "runs" / run_id
 
-    (mission / "CHARTER.md").write_text(
-        f"""# Mission Charter
+    (run_path / "CHARTER.md").write_text(
+        f"""# Run Charter
 
-- Mission: `{mission_id}`
+- Run: `{run_id}`
 - Exact user outcome (immutable):
 
 > {goal}
@@ -72,14 +72,14 @@ The focused unit test passes against a patch limited to `app.py`.
 """,
         encoding="utf-8",
     )
-    spec = read_json(mission / "SPEC.json")
+    spec = read_json(run_path / "SPEC.json")
     spec["acceptance_criteria"][0]["observable"] = "Calling greet returns exactly the string hello world."
     spec["acceptance_criteria"][0]["oracle"]["description"] = "The focused unittest checks the exact returned string."
     spec["non_goals"] = ["Do not add dependencies or refactor unrelated code."]
-    atomic_write_json(mission / "SPEC.json", spec)
+    atomic_write_json(run_path / "SPEC.json", spec)
 
     runtime.prepare_push()
-    push = read_json(mission / "PUSH.json")
+    push = read_json(run_path / "PUSH.json")
     for index, advisor in enumerate(push["advisors"], start=1):
         advisor["identity"] = {
             "participant_id": f"demo-advisor-{index}",
@@ -104,13 +104,13 @@ The focused unit test passes against a patch limited to `app.py`.
         "model": "chair",
         "context_id": "demo-chair-context",
     }
-    atomic_write_json(mission / "PUSH.json", push)
+    atomic_write_json(run_path / "PUSH.json", push)
     runtime.lock()
     runtime.prepare_slice()
 
     state = runtime.status()
     iteration = int(state["current"]["iteration"])
-    contract_path = mission / "iterations" / f"{iteration:04d}" / "CONTRACT.json"
+    contract_path = run_path / "iterations" / f"{iteration:04d}" / "CONTRACT.json"
     contract = read_json(contract_path)
     contract["title"] = "Return the exact requested greeting."
     contract["builder"] = {

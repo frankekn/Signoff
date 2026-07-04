@@ -33,11 +33,11 @@ class WebServerTestCase(unittest.TestCase):
     def conclude_from_push(self, verdict: str) -> None:
         self.fx.valid_draft()
         self.fx.valid_push()
-        push = read_json(self.fx.mission / "PUSH.json")
+        push = read_json(self.fx.run / "PUSH.json")
         push["decision"]["verdict"] = verdict
         if verdict == "INSUFFICIENT_QUORUM":
             push["advisors"] = push["advisors"][:1]
-        atomic_write_json(self.fx.mission / "PUSH.json", push)
+        atomic_write_json(self.fx.run / "PUSH.json", push)
         self.fx.runtime.lock()
 
     def request(self, path: str, *, method: str = "GET", body: JsonObject | None = None) -> tuple[int, JsonObject]:

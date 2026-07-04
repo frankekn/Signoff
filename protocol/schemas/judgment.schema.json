@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": [
     "schema_version",
-    "mission_id",
+    "run_id",
     "iteration",
     "judge",
     "artifact_hashes",
@@ -20,7 +20,7 @@
     "schema_version": {
       "const": 1
     },
-    "mission_id": {
+    "run_id": {
       "type": "string"
     },
     "iteration": {

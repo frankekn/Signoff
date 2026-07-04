@@ -8,15 +8,15 @@ function label(type: string) {
     .join(' · ')
 }
 
-export function Timeline({ missionId }: { missionId?: string }) {
+export function Timeline({ runId }: { runId?: string }) {
   const query = useQuery({
-    queryKey: ['events', missionId],
-    queryFn: () => api.events(missionId),
-    enabled: Boolean(missionId),
+    queryKey: ['events', runId],
+    queryFn: () => api.events(runId),
+    enabled: Boolean(runId),
     refetchInterval: 3_000,
   })
 
-  if (!missionId) return <div className="empty-state">Mission activity will appear here.</div>
+  if (!runId) return <div className="empty-state">Run activity will appear here.</div>
   if (query.isLoading) return <div className="empty-state">Loading history…</div>
   if (query.error) return <div className="inline-error">{query.error.message}</div>
 

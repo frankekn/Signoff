@@ -5,12 +5,12 @@ from tests.web_server import WebServerTestCase
 
 class WebProofApiTests(WebServerTestCase):
     def test_proof_summary_reports_unknown_draft_evidence(self) -> None:
-        mission_id = self.fx.mission_id
+        run_id = self.fx.run_id
         status, payload = self.request("/api/overview")
 
         self.assertEqual(status, 200)
         proof = payload["data"]["proofSummary"]
-        self.assertEqual(proof["missionId"], mission_id)
+        self.assertEqual(proof["runId"], run_id)
         self.assertEqual(proof["evidence"]["status"], "UNKNOWN")
         self.assertEqual(proof["evidence"]["detail"], "not yet produced")
         self.assertEqual(proof["scope"]["status"], "UNKNOWN")

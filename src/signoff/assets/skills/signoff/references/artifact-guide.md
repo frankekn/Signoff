@@ -1,6 +1,6 @@
 # Artifact guide
 
-The runtime creates one mission directory under `.signoff/missions/<mission-id>/`.
+The runtime creates one run directory under `.signoff/runs/<run-id>/`.
 
 Agent-authored inputs:
 
