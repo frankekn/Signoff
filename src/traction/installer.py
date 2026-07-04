@@ -93,7 +93,7 @@ def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
     elif (project / ".agents" / "skills" / "traction" / "SKILL.md").is_file():
         skills_source = project / ".agents" / "skills"
     else:
-        raise TractionError("cannot locate the bundled Traction, Push, and Pull skills")
+        raise TractionError("cannot locate the bundled Traction and loop skills")
 
     written: list[Path] = []
     runtime_destination = project / ".traction" / "runtime" / "traction"
@@ -103,7 +103,7 @@ def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
         written.extend(_copy_tree(package_source, runtime_destination))
 
     for host_dir in (project / ".agents" / "skills", project / ".claude" / "skills", project / ".gemini" / "skills"):
-        for skill_name in ("traction", "push", "pull"):
+        for skill_name in ("traction", "loop"):
             source = skills_source / skill_name
             destination = host_dir / skill_name
             if destination.exists():
@@ -140,7 +140,7 @@ def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
         "status": "installed",
         "project": str(project),
         "runtime": str(runtime_destination.relative_to(project)),
-        "skills": ["traction", "push", "pull"],
+        "skills": ["traction", "loop"],
         "managed_files": len(manifest["files"]),
         "next": "Run ./traction doctor, then ./traction start \"<the user’s exact outcome>\".",
     }

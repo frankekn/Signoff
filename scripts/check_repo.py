@@ -28,8 +28,7 @@ REQUIRED = [
     "src/traction/web_dist/index.html",
     "apps/web/src/main.tsx",
     "skills/traction/SKILL.md",
-    "skills/push/SKILL.md",
-    "skills/pull/SKILL.md",
+    "skills/loop/SKILL.md",
     "protocol/schemas/spec.schema.json",
     "tests/test_conformance.py",
     "tests/test_web.py",
@@ -76,7 +75,7 @@ if is_git_repository:
         if "node_modules" in relative.parts or ("apps" in relative.parts and "dist" in relative.parts):
             errors.append(f"tracked development build artifact: {relative}")
 
-for skill in ("traction", "push", "pull"):
+for skill in ("traction", "loop"):
     top = ROOT / "skills" / skill
     packaged = ROOT / "src" / "traction" / "assets" / "skills" / skill
     top_files = {path.relative_to(top) for path in top.rglob("*") if path.is_file()}

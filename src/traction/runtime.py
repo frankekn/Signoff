@@ -784,13 +784,13 @@ class Runtime:
             )
         actions = {
             "DRAFT": f"Complete {base}/CHARTER.md and {base}/SPEC.json, then run ./traction prepare-push.",
-            "PUSH": f"Run independent Push contexts using skills/push, fill {base}/PUSH.json, then run ./traction lock.",
+            "PUSH": f"Run independent Push contexts using skills/loop (Push mode), fill {base}/PUSH.json, then run ./traction lock.",
             "LOCKED": "Run ./traction prepare-slice to create exactly one bounded iteration contract.",
             "SLICE_DRAFT": slice_draft_action,
             "IMPLEMENTING": "Implement only the active contract; then run ./traction verify.",
             "VERIFY_FAILED": "Fix only the failed evidence or scope issue without changing locked artifacts; then run ./traction verify again.",
-            "VERIFIED": "Run ./traction prepare-pull, collect fresh read-only reviews, then run ./traction pull.",
-            "REVIEWING": "Fill every review and JUDGMENT.json against the sealed hashes; then run ./traction pull.",
+            "VERIFIED": "Run ./traction prepare-pull, then use skills/loop (Pull mode) for fresh read-only reviews; run ./traction pull.",
+            "REVIEWING": "Use skills/loop (Pull mode): fill every review and JUDGMENT.json against the sealed hashes; then run ./traction pull.",
             "REVIEWED": "Follow the deterministic gate: ./traction finish accepted, ./traction finish done, or ./traction finish rework --root-cause \"...\".",
             "PUSH_REVIEW": "Implementation is paused. Run ./traction pivot --reason \"<evidence-based reason>\" or ./traction finish stopped --note \"<reason>\".",
             "DONE": "Terminal result: DONE. Do not continue implementation under this run.",

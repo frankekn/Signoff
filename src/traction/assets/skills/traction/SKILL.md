@@ -44,7 +44,7 @@ Then run:
 
 ### PUSH
 
-Use the sibling `push` skill. Give every advisor the exact same goal, charter, spec, and hashes.
+Use the sibling `loop` skill (Push mode). Give every advisor the exact same goal, charter, spec, and hashes.
 
 Advisors answer independently before seeing peers. Fill the generated `PUSH.json`. Material verdict splits require an evidence-based resolution. If independent contexts are unavailable, return `INSUFFICIENT_QUORUM`; do not imitate extra voices.
 
@@ -88,7 +88,7 @@ Create sealed review packets:
 ./traction prepare-pull
 ```
 
-Use the sibling `pull` skill in fresh read-only contexts. Every reviewer answers every active acceptance ID with `PASS`, `FAIL`, or `UNKNOWN` against the same contract, evidence, and patch hashes. A separate lead judge accounts for every finding and conflict.
+Use the sibling `loop` skill (Pull mode) in fresh read-only contexts. Every reviewer answers every active acceptance ID with `PASS`, `FAIL`, or `UNKNOWN` against the same contract, evidence, and patch hashes. A separate lead judge accounts for every finding and conflict.
 
 Then run:
 

@@ -187,7 +187,7 @@ class ConformanceTests(unittest.TestCase):
         self.assertEqual(first["status"], "installed")
         self.assertEqual(second["status"], "installed")
         self.assertTrue((self.fx.project / "traction").is_file())
-        self.assertTrue((self.fx.project / ".agents" / "skills" / "push" / "SKILL.md").is_file())
+        self.assertTrue((self.fx.project / ".agents" / "skills" / "loop" / "SKILL.md").is_file())
         self.assertTrue((self.fx.project / ".traction" / "runtime" / "traction" / "cli.py").is_file())
 
     def test_21_historical_receipt_tamper_is_detected(self) -> None:
