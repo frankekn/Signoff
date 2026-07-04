@@ -1,0 +1,118 @@
+{
+  "acceptance_criteria": [
+    "AC-001"
+  ],
+  "allowed_paths": [
+    ".gitignore",
+    "package-lock.json",
+    "src/signoff/git.py",
+    "tests/test_conformance.py"
+  ],
+  "budgets": {
+    "changed_lines": 220,
+    "production_files": 4
+  },
+  "builder": {
+    "context_id": "codex-main-signoff-final-clean-slice",
+    "model": "gpt-5-codex",
+    "participant_id": "builder-codex-main",
+    "provider": "codex"
+  },
+  "exempt_paths": [
+    "tests/**",
+    "node_modules/**",
+    "apps/web/dist/**",
+    "apps/web/tsconfig.tsbuildinfo",
+    "**/__pycache__/**",
+    "*.py[cod]"
+  ],
+  "final": true,
+  "forbidden_paths": [
+    ".git/**",
+    ".signoff/**"
+  ],
+  "iteration": 1,
+  "mission_id": "mission-20260625-054007-4a46474f",
+  "requirements": [
+    "REQ-001"
+  ],
+  "schema_version": 1,
+  "title": "Normalize lockfile registry URLs, ignore generated dependency/build/cache outputs, make receipt patch generation apply existing control-path filtering, and add the focused conformance test.",
+  "verification": [
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "npm",
+        "ci"
+      ],
+      "id": "V-001",
+      "timeout_seconds": 180,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "id": "V-002",
+      "timeout_seconds": 120,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "npm",
+        "run",
+        "build:web"
+      ],
+      "id": "V-003",
+      "timeout_seconds": 120,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "python3",
+        "scripts/test.py"
+      ],
+      "id": "V-004",
+      "timeout_seconds": 120,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "python3",
+        "scripts/check_repo.py"
+      ],
+      "id": "V-005",
+      "timeout_seconds": 120,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "python3",
+        "-c",
+        "import subprocess, sys\nlines = subprocess.check_output(['git', 'status', '--short', '--untracked-files=all'], text=True).splitlines()\nbad = [line for line in lines if line.startswith('?? node_modules/') or line.startswith('?? apps/web/dist/') or line.startswith('?? apps/web/tsconfig.tsbuildinfo') or '__pycache__' in line or line.endswith('.pyc')]\nprint('generated-output-status=' + ('clean' if not bad else 'dirty'))\nif bad:\n    print('\\n'.join(bad))\nsys.exit(1 if bad else 0)"
+      ],
+      "id": "V-006",
+      "timeout_seconds": 30,
+      "working_directory": "."
+    }
+  ]
+}

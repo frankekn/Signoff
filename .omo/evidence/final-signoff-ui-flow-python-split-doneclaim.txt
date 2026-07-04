@@ -1,0 +1,75 @@
+DONE
+
+Changed files:
+- src/signoff/web.py
+- src/signoff/web_overview.py
+- src/signoff/web_proof.py
+- src/signoff/web_artifacts.py
+- tests/test_web.py
+- tests/test_web_missions.py
+- tests/test_web_proof.py
+- tests/web_server.py
+- .omo/evidence/final-signoff-ui-flow-python-split-tests.txt
+- .omo/evidence/final-signoff-ui-flow-python-split-check.txt
+- .omo/evidence/final-signoff-ui-flow-python-split-diff-check.txt
+- .omo/evidence/final-signoff-ui-flow-python-split-loc.txt
+- .omo/evidence/final-signoff-ui-flow-python-split-doneclaim.txt
+
+Exact split responsibilities:
+- src/signoff/web.py: HTTP server, request parsing, response writing, mutation lock, static asset serving, and action dispatch.
+- src/signoff/web_overview.py: overview payload assembly, legal UI action list, mission summaries, active editability calculation, and inspected-mission selection.
+- src/signoff/web_proof.py: proofSummary payload shaping from mission state, evidence, patch, review gate, contract, criteria, and final receipt files.
+- src/signoff/web_artifacts.py: artifact listing, artifact path safety checks, and active-mission editability enforcement.
+- tests/web_server.py: reusable local HTTP server fixture and request helper.
+- tests/test_web.py: core web API behavior.
+- tests/test_web_missions.py: mission history, inactive mission read-only artifacts, and inspected mission legality scoping.
+- tests/test_web_proof.py: proof summary API states.
+
+Baseline before editing:
+- Scenario: current behavior baseline before Python/test modular refactor.
+- Invocation: python3 scripts/test.py
+- Binary observable: exit 0; Ran 35 tests; OK; Conformance: 35/35 passed.
+- Captured in chat/tool output; recorded here because no separate baseline evidence file was in the allowed write scope.
+
+Post-refactor verification:
+- Scenario: full unittest discovery still preserves runtime/API behavior and public HTTP contracts.
+- Invocation: python3 scripts/test.py 2>&1 | tee .omo/evidence/final-signoff-ui-flow-python-split-tests.txt
+- Binary observable: exit 0; Ran 35 tests; OK; Conformance: 35/35 passed.
+- Artifact: .omo/evidence/final-signoff-ui-flow-python-split-tests.txt
+
+- Scenario: repository invariant check after split.
+- Invocation: python3 scripts/check_repo.py 2>&1 | tee .omo/evidence/final-signoff-ui-flow-python-split-check.txt
+- Binary observable: exit 0; Repository check passed.
+- Artifact: .omo/evidence/final-signoff-ui-flow-python-split-check.txt
+
+- Scenario: whitespace/conflict marker check for all diffs.
+- Invocation: git diff --check 2>&1 | tee .omo/evidence/final-signoff-ui-flow-python-split-diff-check.txt
+- Binary observable: exit 0; no git diff --check findings. A PASS marker was added because successful git diff --check emits no output.
+- Artifact: .omo/evidence/final-signoff-ui-flow-python-split-diff-check.txt
+
+- Scenario: pure LOC gate for every touched/new Python source/test/support file.
+- Invocation: awk nonblank, non-comment line count loop over touched/new Python files.
+- Binary observable: every listed file is <=250 pure LOC.
+- Artifact: .omo/evidence/final-signoff-ui-flow-python-split-loc.txt
+
+LOC results:
+- src/signoff/web.py: 241
+- src/signoff/web_overview.py: 194
+- src/signoff/web_proof.py: 199
+- src/signoff/web_artifacts.py: 57
+- tests/test_web.py: 98
+- tests/test_web_missions.py: 57
+- tests/test_web_proof.py: 73
+- tests/web_server.py: 58
+- tests/support.py: 187
+
+Risks:
+- Existing Any annotations remain in src/signoff/web.py HTTP internals only; no new extracted API uses Any/object annotations.
+- This is a modular refactor only. No schema/quorum/runtime behavior was intentionally changed; the preservation proof is the full existing test suite.
+- check_repo does not type-check the new extracted module APIs beyond repo checks; runtime contract coverage remains the existing unittest API suite.
+
+Cleanup receipt:
+- Did not edit frontend files, generated web_dist, package files, .signoff artifacts, PRODUCT.md, apps/web/.impeccable, or plan checkboxes.
+- Did not add dependencies or compatibility shims.
+- Removed moved responsibilities from src/signoff/web.py instead of leaving duplicate old/new implementations.
+- Split tests by behavior and kept unittest discovery working through scripts/test.py.

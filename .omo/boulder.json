@@ -1,0 +1,16 @@
+{
+  "schema_version": 2,
+  "active_work_id": "signoff-ui-flow",
+  "works": {
+    "signoff-ui-flow": {
+      "work_id": "signoff-ui-flow",
+      "active_plan": ".omo/plans/signoff-ui-flow.md",
+      "plan_name": "signoff-ui-flow",
+      "session_ids": [
+        "codex:019efd18-e1d9-7d42-96b2-191513b51d6b"
+      ],
+      "status": "active",
+      "worktree_path": null
+    }
+  }
+}

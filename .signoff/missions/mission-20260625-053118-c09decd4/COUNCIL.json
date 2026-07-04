@@ -1,0 +1,115 @@
+{
+  "advisors": [
+    {
+      "claims": [
+        {
+          "claim": "The mission has direct contributor value because it makes the UI first-run path reproducible from the public npm lockfile and keeps Signoff receipts focused on authorized product changes.",
+          "evidence": "The sealed Goal, Charter success, REQ-001, and AC-001 all require clone-to-npm-ci reproducibility, UI typecheck/build success, generated-output cleanliness, and PATCH.diff exclusion of .signoff control artifacts.",
+          "falsifier": "If a clean checkout already supports npm ci, typecheck, production build, generated-output cleanliness, and receipt exclusion of .signoff artifacts, the mission adds no value.",
+          "stance": "SUPPORT",
+          "topic_key": "mission-value"
+        },
+        {
+          "claim": "The work is feasible as a narrow metadata and filtering fix without changing UI behavior, protocol semantics, Python runtime dependencies, package manager, services, or install shape.",
+          "evidence": "The hard constraints allow only receipt filtering matching existing scope filtering, while the non-goals exclude UI redesign, package manager changes, services, runtime dependencies, and broad cleanup.",
+          "falsifier": "If npm reproducibility is blocked by the local environment or receipt correctness requires protocol semantic changes beyond existing scope filtering, the mission should stop or pivot.",
+          "stance": "SUPPORT",
+          "topic_key": "feasibility"
+        },
+        {
+          "claim": "The evidence standard is sufficient because it proves install reproducibility, UI build health, Python repo health, generated-output cleanliness, and PATCH.diff filtering.",
+          "evidence": "Required evidence is npm ci, npm run typecheck, npm run build:web, python3 scripts/test.py, python3 scripts/check_repo.py, generated-output git status checks, and a conformance test proving sealed PATCH.diff excludes .signoff control artifacts.",
+          "falsifier": "If the conformance test does not inspect sealed PATCH.diff for .signoff paths, or generated-output git status checks are omitted, proof is incomplete.",
+          "stance": "SUPPORT",
+          "topic_key": "proof-sufficiency"
+        },
+        {
+          "claim": "The proposed slice is minimal because it is limited to public npm lockfile reproducibility, generated-output ignore hygiene, and Signoff receipt filtering for control artifacts.",
+          "evidence": "The sealed packet has one must requirement and one acceptance criterion matching that scope, with explicit non-goals against UI redesign, new package managers, services, runtime dependencies, and broad cleanup.",
+          "falsifier": "If implementation changes UI behavior, adds install paths, adds runtime dependencies, changes package managers, introduces services, or rewrites protocol semantics, it exceeds the authorized scope.",
+          "stance": "SUPPORT",
+          "topic_key": "scope-minimality"
+        }
+      ],
+      "cut": "Cut UI redesign, package-manager changes, services, Python runtime dependencies, alternate install paths, protocol semantic changes beyond existing receipt filtering, and broad cleanup.",
+      "first_move": "Run npm ci, npm run typecheck, npm run build:web, inspect generated-output git status, then run Python checks and conformance test that inspects sealed PATCH.diff.",
+      "identity": {
+        "context_id": "council-clean-advisor-1-context",
+        "model": "current",
+        "participant_id": "advisor-clean-1",
+        "provider": "repoprompt-oracle"
+      },
+      "independent_first_round": true,
+      "null_hypothesis": "Do nothing if the current public npm lockfile already supports clean npm ci, UI typecheck, production build, generated-output cleanliness, and PATCH.diff exclusion of .signoff control artifacts.",
+      "verdict": "PROCEED"
+    },
+    {
+      "claims": [
+        {
+          "claim": "The mission directly improves first-run contributor reliability by making the UI install, typecheck, and build path reproducible from the public npm lockfile while keeping generated outputs and Signoff control artifacts out of contributor-visible receipts/status.",
+          "evidence": "The sealed goal and charter success require clone, npm ci, UI typecheck, production build from the public lockfile, generated dependency/build outputs out of git status, and PATCH.diff receipts excluding .signoff control artifacts.",
+          "falsifier": "If a clean checkout already supports npm ci, UI typecheck, production build, generated-output cleanliness, and .signoff-free PATCH.diff receipts, then the mission adds no practical value.",
+          "stance": "SUPPORT",
+          "topic_key": "mission-value"
+        },
+        {
+          "claim": "The requested change is feasible as a narrow repository metadata and receipt-filtering fix without changing UI behavior, Python runtime dependencies, install shape, services, or protocol semantics.",
+          "evidence": "The hard constraints allow only existing receipt filtering matching existing scope filtering and forbid UI behavior changes, runtime dependencies, package-manager changes, services, and broad cleanup.",
+          "falsifier": "If npm reproducibility is blocked by the local environment or PATCH.diff exclusion requires changing protocol semantics rather than applying existing control-path filtering consistently, the mission should stop or pivot.",
+          "stance": "SUPPORT",
+          "topic_key": "feasibility"
+        },
+        {
+          "claim": "The evidence plan is sufficient because it proves install reproducibility, UI correctness gates, Python repo health, generated-output cleanliness, and receipt filtering of .signoff control artifacts.",
+          "evidence": "The sealed evidence list requires npm ci, npm run typecheck, npm run build:web, python3 scripts/test.py, python3 scripts/check_repo.py, generated-output git status checks, and a conformance test proving sealed PATCH.diff excludes .signoff control artifacts.",
+          "falsifier": "If the conformance test does not inspect PATCH.diff for .signoff paths or the generated-output status check is skipped after npm/build commands, the proof is incomplete.",
+          "stance": "SUPPORT",
+          "topic_key": "proof-sufficiency"
+        },
+        {
+          "claim": "The slice is minimal because it targets only public npm lockfile reproducibility, generated-output ignore hygiene, and Signoff receipt filtering for control artifacts.",
+          "evidence": "REQ-001 and AC-001 define one must requirement matching those outcomes, while non-goals exclude UI redesign, package-manager changes, services, runtime dependencies, and broad cleanup.",
+          "falsifier": "If implementation adds a new install path, changes UI behavior, introduces runtime dependencies, rewrites protocol semantics, or performs broad cleanup outside the goal, the patch exceeds scope.",
+          "stance": "SUPPORT",
+          "topic_key": "scope-minimality"
+        }
+      ],
+      "cut": "Cut UI redesign, new package managers, services, Python runtime dependencies, broad cleanup, alternate install paths, and protocol-semantic changes beyond applying existing receipt filtering consistently.",
+      "first_move": "Run npm ci, npm run typecheck, npm run build:web, inspect git status for generated outputs, then inspect a sealed PATCH.diff to confirm whether .signoff control artifacts are present.",
+      "identity": {
+        "context_id": "council-clean-advisor-2-context",
+        "model": "current",
+        "participant_id": "advisor-clean-2",
+        "provider": "repoprompt-oracle"
+      },
+      "independent_first_round": true,
+      "null_hypothesis": "Do not proceed if the current repository already satisfies clean first-run npm ci, UI typecheck, production build, generated-output git cleanliness, and .signoff-free PATCH.diff receipts from the public lockfile.",
+      "verdict": "PROCEED"
+    }
+  ],
+  "artifact_hashes": {
+    "charter": "625500d33e1eb4c65b9f779bd0443b79f359e6eceb6202446cf9bfd708d34b7a",
+    "goal": "e95634d664448e6ed1d2369e4d7981ee6d1141ccf1198066174b54d235df36e0",
+    "spec": "09391abdd0e7d68559f1ae935929c0f3228445b3682122c0042535fd38b9fb7c"
+  },
+  "claim_registry": [
+    "mission-value",
+    "feasibility",
+    "proof-sufficiency",
+    "scope-minimality"
+  ],
+  "decision": {
+    "chair": {
+      "context_id": "council-clean-chair-context",
+      "model": "gpt-5.5-codex",
+      "participant_id": "chair-clean",
+      "provider": "codex"
+    },
+    "conflict_resolutions": [],
+    "first_slice": "Apply the saved four-file patch: ignore generated UI outputs, normalize package-lock public registry URLs, make patch receipts exclude Signoff control paths, and add the conformance test.",
+    "rationale": "Both independent advisors support proceeding. The combined slice is necessary because npm reproducibility, generated-output cleanliness, and receipt filtering are all required by the single acceptance criterion.",
+    "verdict": "PROCEED"
+  },
+  "mission_id": "mission-20260625-053118-c09decd4",
+  "schema_version": 1
+}

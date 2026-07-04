@@ -1,0 +1,106 @@
+DoneClaim {
+  todo: "Todo 2 - Make the phase rail and hero state truthful",
+  status: "done",
+  changed_files: [
+    "apps/web/src/components/PhaseRail.tsx",
+    "apps/web/src/pages/Dashboard.tsx",
+    "apps/web/src/styles.css",
+    "/tmp/signoff-ui-flow-phase-rail-qa.mjs",
+    ".omo/evidence/task-2-signoff-ui-flow-phase-rail-red.txt",
+    ".omo/evidence/task-2-signoff-ui-flow-typecheck.txt",
+    ".omo/evidence/task-2-signoff-ui-flow-phase-rail.png",
+    ".omo/evidence/task-2-signoff-ui-flow-phase-rail.txt",
+    ".omo/evidence/task-2-signoff-ui-flow-phase-rail-rerun.txt",
+    ".omo/evidence/task-2-signoff-ui-flow-dirty-scope.txt",
+    ".omo/evidence/task-2-signoff-ui-flow-diff-check.txt"
+  ],
+  implementation: {
+    phase_rail: "Replaced alias normalization with explicit presentation data for normal, failed, paused, terminal, and pending states.",
+    hero_tone: "VERIFY_FAILED and BLOCKED render bad; COUNCIL_REVIEW renders paused; STOPPED and PIVOT render terminal.",
+    scope_note: "No Todo 3/4 features, no agent handoff rewrite, no mission selector, no proof summary, no generated bundle rebuild."
+  },
+  red_first: {
+    scenario: "Current source-built UI before PhaseRail fix rendered VERIFY_FAILED via the old alias path.",
+    invocation: "node /tmp/signoff-ui-flow-phase-rail-qa.mjs 2>&1 | tee .omo/evidence/task-2-signoff-ui-flow-phase-rail-red.txt",
+    observable: "Exit 1 with 'VERIFY_FAILED: phase rail missing Failed evidence'.",
+    artifact: ".omo/evidence/task-2-signoff-ui-flow-phase-rail-red.txt"
+  },
+  tests: [
+    {
+      scenario: "TypeScript source compiles after PhaseRail/Dashboard/CSS changes.",
+      invocation: "npm run typecheck 2>&1 | tee .omo/evidence/task-2-signoff-ui-flow-typecheck.txt",
+      observable: "Exit 0 from tsc -b --pretty false.",
+      artifact: ".omo/evidence/task-2-signoff-ui-flow-typecheck.txt"
+    },
+    {
+      scenario: "Whitespace/conflict sanity for touched source files.",
+      invocation: "git diff --check -- apps/web/src/components/PhaseRail.tsx apps/web/src/pages/Dashboard.tsx apps/web/src/styles.css 2>&1 | tee .omo/evidence/task-2-signoff-ui-flow-diff-check.txt",
+      observable: "Exit 0 and empty output.",
+      artifact: ".omo/evidence/task-2-signoff-ui-flow-diff-check.txt"
+    }
+  ],
+  manual_qa: [
+    {
+      scenario: "Source-built Vite UI plus Python fixture states for VERIFY_FAILED, COUNCIL_REVIEW, STOPPED, BLOCKED, PIVOT, REVIEWED.",
+      invocation: "node /tmp/signoff-ui-flow-phase-rail-qa.mjs",
+      observable: "Exit 0; transcript records PASS for each state, exact rail classes, badge classes, and screenshot path.",
+      artifacts: [
+        ".omo/evidence/task-2-signoff-ui-flow-phase-rail.txt",
+        ".omo/evidence/task-2-signoff-ui-flow-phase-rail.png"
+      ]
+    },
+    {
+      scenario: "Determinism rerun of the same browser QA.",
+      invocation: "node /tmp/signoff-ui-flow-phase-rail-qa.mjs",
+      observable: "Exit 0 recorded in rerun artifact.",
+      artifact: ".omo/evidence/task-2-signoff-ui-flow-phase-rail-rerun.txt"
+    }
+  ],
+  adversarial_classes: {
+    dirty_worktree: {
+      status: "covered",
+      observable: "git status and generated-bundle diff names captured. Generated bundle paths were already dirty and remain unclaimed; Todo 2 did not run npm run build:web or edit dist/web_dist.",
+      artifact: ".omo/evidence/task-2-signoff-ui-flow-dirty-scope.txt"
+    },
+    stale_state: {
+      status: "covered",
+      observable: "Browser QA transcript records source_ui as Vite dev server from apps/web/src and API proxy to the Python fixture.",
+      artifact: ".omo/evidence/task-2-signoff-ui-flow-phase-rail.txt"
+    },
+    misleading_success_output: {
+      status: "covered",
+      observable: "Transcript includes exact assertions, rail item classes, badge classes, and screenshot path.",
+      artifact: ".omo/evidence/task-2-signoff-ui-flow-phase-rail.txt"
+    },
+    flaky_tests: {
+      status: "covered",
+      observable: "Browser QA passed, then reran with exit_code 0.",
+      artifact: ".omo/evidence/task-2-signoff-ui-flow-phase-rail-rerun.txt"
+    },
+    malformed_input: {
+      status: "not_applicable",
+      reason: "Todo 2 added no parsing or input boundary."
+    },
+    prompt_injection: {
+      status: "not_applicable",
+      reason: "Todo 2 changed no prompt or model-facing text generation."
+    },
+    cancel_resume: {
+      status: "covered",
+      observable: "No Boulder, plan checkbox, ledger, or generated bundle edits claimed."
+    },
+    hung_or_long_commands: {
+      status: "covered",
+      observable: "lsof checks after QA showed no listeners on 8765 or 5173."
+    }
+  },
+  cleanup: {
+    servers: "Vite and Python fixture processes terminated by the QA script; final lsof checks showed no listeners.",
+    temporary_files: "/tmp/signoff-ui-flow-phase-rail-qa.mjs and /tmp/signoff-ui-flow-playwright retained as QA artifacts/cache outside the repo."
+  },
+  risks: [
+    "RepoPrompt read-only visual QA agents failed to start with DirectorySecurityError; local screenshot inspection and Playwright assertions passed.",
+    "PIVOT fixture calls runtime.finish('pivot') first, then corrects the temp fixture phase to PIVOT because the current runtime records finish('pivot') as COUNCIL_REVIEW. Production runtime was not changed in Todo 2 scope.",
+    "apps/web/src/pages/Dashboard.tsx and apps/web/src/styles.css had pre-existing dirty edits before Todo 2; this claim covers only the added status tone/type annotations and phase rail CSS states."
+  ]
+}

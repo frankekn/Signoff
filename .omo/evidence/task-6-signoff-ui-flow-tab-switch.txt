@@ -1,0 +1,40 @@
+scenario: dirty CHARTER.md draft across Artifacts -> Timeline -> Artifacts
+invocation: node /tmp/signoff-ui-flow-tab-switch-qa.mjs
+api: http://127.0.0.1:50422
+app: http://127.0.0.1:5175/
+missionId: mission-20260625-191840-e21b421a
+binaryObservable.tabSwitchPreservedDraft: true
+binaryObservable.timelineVisibleAfterClick: false
+binaryObservable.warningCountAfterTimelineClick: 1
+binaryObservable.marker: TASK-6-TAB-SWITCH-DRAFT-MARKER
+screenshot: /Users/termtek/Github/Signoff/.omo/evidence/task-6-signoff-ui-flow-tab-switch.png
+result: PASS
+textareaAfterReturn:
+# Mission Charter
+
+- Mission: `mission-20260625-191840-e21b421a`
+- Exact user outcome (immutable):
+
+> Change greet to return hello world
+
+## User-visible success
+
+[fill the observable end state in language a non-technical user can verify]
+
+## Hard constraints
+
+[fill constraints that must never be traded away]
+
+## Non-goals
+
+[fill adjacent work that is explicitly excluded]
+
+## Stop / pivot conditions
+
+[fill conditions under which more implementation would be dishonest or wasteful]
+
+## Evidence standard
+
+[fill the minimum executable or external proof required before DONE]
+
+TASK-6-TAB-SWITCH-DRAFT-MARKER

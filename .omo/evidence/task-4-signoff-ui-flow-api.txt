@@ -1,0 +1,55 @@
+test_01_golden_path_reaches_done_with_receipts (tests.test_conformance.ConformanceTests.test_01_golden_path_reaches_done_with_receipts) ... ok
+test_02_placeholder_draft_cannot_reach_council (tests.test_conformance.ConformanceTests.test_02_placeholder_draft_cannot_reach_council) ... ok
+test_03_locked_spec_tamper_is_detected (tests.test_conformance.ConformanceTests.test_03_locked_spec_tamper_is_detected) ... ok
+test_04_council_must_answer_shared_claim_registry (tests.test_conformance.ConformanceTests.test_04_council_must_answer_shared_claim_registry) ... ok
+test_05_council_duplicate_context_is_not_quorum (tests.test_conformance.ConformanceTests.test_05_council_duplicate_context_is_not_quorum) ... ok
+test_06_council_conflict_requires_evidence_resolution (tests.test_conformance.ConformanceTests.test_06_council_conflict_requires_evidence_resolution) ... ok
+test_07_council_conflict_can_be_resolved_by_evidence (tests.test_conformance.ConformanceTests.test_07_council_conflict_can_be_resolved_by_evidence) ... ok
+test_08_unmapped_file_fails_scope (tests.test_conformance.ConformanceTests.test_08_unmapped_file_fails_scope) ... ok
+test_09_changed_line_budget_is_enforced (tests.test_conformance.ConformanceTests.test_09_changed_line_budget_is_enforced) ... ok
+test_10_failing_command_cannot_be_called_evidence (tests.test_conformance.ConformanceTests.test_10_failing_command_cannot_be_called_evidence) ... ok
+test_11_verification_mutation_invalidates_patch (tests.test_conformance.ConformanceTests.test_11_verification_mutation_invalidates_patch) ... ok
+test_12_builder_cannot_count_as_reviewer (tests.test_conformance.ConformanceTests.test_12_builder_cannot_count_as_reviewer) ... ok
+test_13_duplicate_review_context_is_not_quorum (tests.test_conformance.ConformanceTests.test_13_duplicate_review_context_is_not_quorum) ... ok
+test_14_unknown_cannot_be_promoted_to_pass (tests.test_conformance.ConformanceTests.test_14_unknown_cannot_be_promoted_to_pass) ... ok
+test_15_vote_is_not_valid_arbitration (tests.test_conformance.ConformanceTests.test_15_vote_is_not_valid_arbitration) ... ok
+test_16_evidence_can_resolve_review_disagreement (tests.test_conformance.ConformanceTests.test_16_evidence_can_resolve_review_disagreement) ... ok
+test_17_high_finding_cannot_be_silently_dismissed (tests.test_conformance.ConformanceTests.test_17_high_finding_cannot_be_silently_dismissed) ... ok
+test_18_ledger_tamper_is_detected (tests.test_conformance.ConformanceTests.test_18_ledger_tamper_is_detected) ... ok
+test_19_done_requires_cumulative_final_contract (tests.test_conformance.ConformanceTests.test_19_done_requires_cumulative_final_contract) ... ok
+test_20_install_is_idempotent_and_local (tests.test_conformance.ConformanceTests.test_20_install_is_idempotent_and_local) ... ok
+test_21_historical_receipt_tamper_is_detected (tests.test_conformance.ConformanceTests.test_21_historical_receipt_tamper_is_detected) ... ok
+test_22_patch_receipt_excludes_signoff_control_artifacts (tests.test_conformance.ConformanceTests.test_22_patch_receipt_excludes_signoff_control_artifacts) ... ok
+test_hard_integrity_failure_blocks_actions (tests.test_web.WebApiTests.test_hard_integrity_failure_blocks_actions) ... 127.0.0.1 - - [26/Jun/2026 01:03:38] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 01:03:39] "GET /api/overview HTTP/1.1" 200 -
+ok
+test_inactive_mission_artifacts_are_read_only (tests.test_web.WebApiTests.test_inactive_mission_artifacts_are_read_only) ... 127.0.0.1 - - [26/Jun/2026 01:03:40] "POST /api/missions HTTP/1.1" 201 -
+127.0.0.1 - - [26/Jun/2026 01:03:40] "GET /api/artifacts?missionId=mission-20260625-170340-4429f666 HTTP/1.1" 200 -
+ok
+test_overview_and_artifact_round_trip (tests.test_web.WebApiTests.test_overview_and_artifact_round_trip) ... 127.0.0.1 - - [26/Jun/2026 01:03:41] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 01:03:41] "GET /api/artifacts?missionId=mission-20260625-170341-56446f1d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 01:03:41] "PUT /api/artifact HTTP/1.1" 200 -
+ok
+test_overview_lists_stopped_and_next_mission (tests.test_web.WebApiTests.test_overview_lists_stopped_and_next_mission) ... 127.0.0.1 - - [26/Jun/2026 01:03:41] "POST /api/missions HTTP/1.1" 201 -
+127.0.0.1 - - [26/Jun/2026 01:03:41] "GET /api/overview HTTP/1.1" 200 -
+ok
+test_pivot_and_blocked_are_not_restartable (tests.test_web.WebApiTests.test_pivot_and_blocked_are_not_restartable) ... 127.0.0.1 - - [26/Jun/2026 01:03:42] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 01:03:43] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 01:03:44] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 01:03:44] "POST /api/missions HTTP/1.1" 400 -
+127.0.0.1 - - [26/Jun/2026 01:03:44] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 01:03:44] "POST /api/missions HTTP/1.1" 400 -
+ok
+test_static_ui_and_illegal_action_error (tests.test_web.WebApiTests.test_static_ui_and_illegal_action_error) ... 127.0.0.1 - - [26/Jun/2026 01:03:45] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 01:03:45] "POST /api/action HTTP/1.1" 400 -
+ok
+test_terminal_overview_can_start_next_mission (tests.test_web.WebApiTests.test_terminal_overview_can_start_next_mission) ... 127.0.0.1 - - [26/Jun/2026 01:03:46] "POST /api/action HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 01:03:46] "GET /api/overview HTTP/1.1" 200 -
+ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 13.509s
+
+OK
+
+Conformance: 29/29 passed

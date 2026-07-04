@@ -1,0 +1,12 @@
+surface: source path grep
+invocation: rg -n "window.prompt|Read AGENTS.md. Run ./signoff status" apps/web/src
+
+
+exit_code=1
+interpretation: no prompt/static-copy match in apps/web/src
+
+surface: packaged bundle grep
+invocation: rg -n "window.prompt|Read AGENTS.md. Run ./signoff status" src/signoff/web_dist --files-with-matches
+
+src/signoff/web_dist/assets/index-DctO2657.js
+

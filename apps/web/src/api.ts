@@ -30,6 +30,46 @@ export interface CourtStatus {
   integrity?: Record<string, unknown>
 }
 
+export interface ProofCommand {
+  id: string
+  command: string[]
+  status: string
+  exitCode?: number | null
+  acceptanceIds: string[]
+}
+
+export interface ProofStatus {
+  status: string
+  detail?: string
+  hash?: string
+  path?: string
+  patchHash?: string
+}
+
+export interface ReviewGateProof extends ProofStatus {
+  decision: string
+  proofLevel?: string
+}
+
+export interface ProofSummary {
+  missionId: string
+  phase: string
+  iteration?: number | null
+  commands: ProofCommand[]
+  scope: ProofStatus & Record<string, unknown>
+  evidence: ProofStatus
+  patch: ProofStatus
+  reviewGate: ReviewGateProof
+  acceptedCriteria: {
+    count: number
+    items: string[]
+  }
+  contract: {
+    final: boolean | null
+  }
+  finalReceipt: ProofStatus
+}
+
 export interface Overview {
   product: string
   version: string
@@ -37,9 +77,15 @@ export interface Overview {
   goal: string
   status: CourtStatus
   next: string
+  canStartMission: boolean
+  blockedByIntegrity: boolean
+  integrityStatus: string
+  integrityMessage: string
   actions: CourtAction[]
   editablePaths: string[]
   missions: MissionSummary[]
+  proofSummary: ProofSummary | null
+  inspectedMission: MissionSummary | null
 }
 
 export interface Artifact {
@@ -80,7 +126,8 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  overview: () => request<Overview>('/api/overview'),
+  overview: (inspectMissionId?: string) =>
+    request<Overview>(`/api/overview${inspectMissionId ? `?inspectMissionId=${encodeURIComponent(inspectMissionId)}` : ''}`),
   artifacts: (missionId?: string) =>
     request<Artifact[]>(`/api/artifacts${missionId ? `?missionId=${encodeURIComponent(missionId)}` : ''}`),
   artifact: (path: string) => request<{ path: string; content: string; size: number }>(`/api/artifact?path=${encodeURIComponent(path)}`),

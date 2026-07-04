@@ -1,0 +1,41 @@
+REJECT
+
+codeQualityStatus: BLOCK
+recommendation: REQUEST_CHANGES
+reportPath: .omo/evidence/final-signoff-ui-flow-code-quality.txt
+
+Skill-perspective check:
+- remove-ai-slops skill: loaded and applied for slop/overfit review. Result: production code violates the oversized-module / needless production complexity perspective.
+- programming skill: loaded core guidance plus TypeScript and Python references. Result: production code violates file-size discipline; no new frontend any/as any/type suppression/prompt/confirm violations found.
+- Test relevance check: changed tests exercise real API/runtime contracts for restartability, hard integrity blocking, historical inspection, proof summary states, and control artifact patch exclusion. I did not find deletion-only tests, requested-removal-only tests, or tautological constant-mirroring tests as the primary issue.
+
+CRITICAL:
+- None.
+
+HIGH / BLOCKER:
+1. src/signoff/web.py:247-420 and src/signoff/web.py:423-471: proof-summary projection and overview contract logic were added directly into the HTTP server module, pushing the file from HEAD 442 total / 404 pure LOC to 759 total / 661 pure LOC. This violates the repo instruction to keep files under about 500 LOC and the programming/remove-ai-slops oversized-module rule. It also concentrates TypedDict payload shapes, proof extraction, mission summaries, artifact listing, request handling, and static serving in one module. The behavior may pass, but this is new production complexity and a maintenance blocker. Split/shrink the proof payload shaping or otherwise reduce src/signoff/web.py before approval.
+
+MEDIUM / NON-BLOCKER:
+1. tests/test_web.py:97-365: the added API coverage is relevant, but the file grew from HEAD 84 total / 70 pure LOC to 380 total / 278 pure LOC. This crosses the programming skill's 250 pure LOC threshold for changed files. It is not a false-confidence test suite, but it should be split if the production blocker is being cleaned up anyway.
+
+LOW / NON-BLOCKER:
+1. src/signoff/web.py:17: the added-line grep reports `from typing import Any, TypeAlias, TypedDict`. `Any` was already present in this module before the diff, and I did not find new TypeScript `any`, `as any`, suppressions, `window.prompt`, or `window.confirm` in source or regenerated assets. This remains an existing Python typing debt, not the blocker for this review.
+
+UNCERTAIN:
+1. git status shows untracked source components and generated assets (`apps/web/src/components/HeroPanel.tsx`, `NextActionCard.tsx`, `ProofCard.tsx`, `StartMissionCard.tsx`, and new `src/signoff/web_dist/assets/*`). I reviewed the untracked source component contents, but the required `git diff -- apps/web/src src/signoff tests` command does not include untracked files. Commit/scope verification should ensure they are intentionally included.
+2. F2 did not run browser QA. Dirty edit loss, keyboard reachability, and visual proof placement need F3/manual QA evidence.
+
+Commands run:
+- `git status --short`: showed tracked edits plus untracked .omo/.signoff/PRODUCT.md, new React components, and new web_dist assets.
+- `git diff --stat`: 14 tracked files, 1051 insertions, 188 deletions. Notably src/signoff/web.py +363/-? and tests/test_web.py +298/-1.
+- `git diff -- apps/web/src src/signoff tests`: ran. Output included generated bundle content and was too large for direct terminal capture, so I also inspected focused source diffs and current source files with line numbers.
+- `npm run typecheck`: PASS (`tsc -b --pretty false` exited 0).
+- `python3 scripts/test.py`: PASS, 35/35 tests.
+- `python3 scripts/check_repo.py`: PASS (`Repository check passed`).
+- Targeted forbidden-pattern grep over `apps/web/src`, `src/signoff`, `tests`, and regenerated assets: no `window.prompt`, `window.confirm`, `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, `type: ignore`, `as any`, TS `: any`, `Array<any>`, `Promise<any>`, `Record<string, any>`, or `console.log(` matches. Added-line grep only matched the pre-existing Python `Any` import line expanded with `TypeAlias`/`TypedDict`.
+- File-size measurement: `src/signoff/web.py total=759 pure=661`; `tests/test_web.py total=380 pure=278`; `apps/web/src/pages/Dashboard.tsx total=270 pure=245`; new component files each below threshold.
+- Dependency check: `git diff -- package.json package-lock.json apps/web/package.json apps/web/package-lock.json pnpm-lock.yaml yarn.lock bun.lockb` produced no output, so no package dependency changes were detected.
+
+Residual risks:
+- Runtime/API gates are green, but code quality is blocked by new module size/scope in src/signoff/web.py.
+- Existing large files remain (`src/signoff/runtime.py` is 801 total / 764 pure LOC), but this diff only added 4 lines there; I did not charge that as a new blocker.

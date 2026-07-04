@@ -1,0 +1,11 @@
+scenario: dirty CHARTER.md draft across Artifacts -> Timeline -> Artifacts
+invocation: node /tmp/signoff-ui-flow-tab-switch-qa.mjs --expect-red
+api: http://127.0.0.1:60117
+app: http://127.0.0.1:5175/
+missionId: mission-20260625-184714-1ea61528
+binaryObservable.tabSwitchPreservedDraft: false
+binaryObservable.timelineVisibleAfterClick: false
+binaryObservable.warningCountAfterTimelineClick: 0
+binaryObservable.marker: TASK-6-TAB-SWITCH-DRAFT-MARKER
+result: RED_CONFIRMED
+textareaAfterReturn:

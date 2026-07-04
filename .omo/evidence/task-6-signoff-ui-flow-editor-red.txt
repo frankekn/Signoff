@@ -1,0 +1,46 @@
+scenario: red dirty artifact switch loses unsaved draft
+invocation: node /tmp/signoff-ui-flow-editor-qa.mjs --expect-red
+api: http://127.0.0.1:51885
+app: http://127.0.0.1:5174/
+missionIds: mission-20260625-182141-267d005c, mission-20260625-182141-62fc43d6
+binaryObservable: after clicking SPEC.json, textarea does not contain TASK-6-UNSAVED-DRAFT-MARKER
+selectedAfterClick: SPEC.json | SPEC.json | Edit
+result: RED_CONFIRMED
+
+textareaAfterSpecClick:
+{
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "observable": "REPLACE_ME with a falsifiable user-visible result",
+      "oracle": {
+        "description": "REPLACE_ME with what the verification proves",
+        "type": "command"
+      },
+      "requirement_ids": [
+        "REQ-001"
+      ]
+    }
+  ],
+  "constraints": [
+    "Preserve unrelated user work and existing behavior outside the goal"
+  ],
+  "goal_sha256": "d6653ce263c9ddeda7b2518b9a07a42aeabb629845461eff2bea432b506fe81d",
+  "max_iterations": 5,
+  "mission_id": "mission-20260625-182141-62fc43d6",
+  "non_goals": [
+    "REPLACE_ME with at least one adjacent change that is excluded"
+  ],
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "priority": "must",
+      "source": "user",
+      "statement": "Second mission outcome"
+    }
+  ],
+  "schema_version": 1,
+  "stop_conditions": [
+    "Stop or pivot when the goal cannot be proven within the iteration budget"
+  ]
+}

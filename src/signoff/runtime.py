@@ -50,6 +50,9 @@ from .util import (
 )
 
 
+RESTARTABLE_PHASES = {"IDLE", "DONE", "STOPPED"}
+
+
 def _artifact_hashes(base: Path, names: dict[str, str]) -> dict[str, str]:
     return {name: sha256_file(base / relative) for name, relative in names.items()}
 
@@ -186,7 +189,7 @@ class Runtime:
         active_id = root.get("active_mission_id")
         if active_id:
             active = read_mission_state(self.project, active_id)
-            if active.get("phase") not in TERMINAL_PHASES:
+            if active.get("phase") not in RESTARTABLE_PHASES:
                 raise StateError(f"mission {active_id} is still active in phase {active['phase']}")
         mission_id = short_id("mission", goal)
         base = mission_dir(self.project, mission_id)

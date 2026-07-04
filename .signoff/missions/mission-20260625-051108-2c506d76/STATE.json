@@ -1,0 +1,116 @@
+{
+  "accepted_criteria": [],
+  "council_first_slice": "Fix patch receipt filtering, normalize package-lock public registry URLs, ignore generated UI outputs, and prove with npm install/typecheck/build, conformance tests, repo checks, and clean generated-output status.",
+  "created_at": "2026-06-25T05:11:08+00:00",
+  "current": null,
+  "goal_sha256": "148bc4b3af3ea92cb2c525b2020726ebe21554a7cff1f43e7a0463800724287b",
+  "history": [
+    {
+      "acceptance_criteria": [
+        "AC-001"
+      ],
+      "closed_at": "2026-06-25T05:20:57+00:00",
+      "contract_sha256": "d53bc39fb410f315bf86774ec3058c9c124be945ed0f13199935996c071a5dac",
+      "decision": "REWORK",
+      "evidence_sha256": "9651b55f3c97e8308b842bb6fe7637500f45baac76c5ed62d18b4786c34d0799",
+      "iteration": 1,
+      "note": "",
+      "patch_sha256": "b441a6d76f0dc5eb530c060d7dd522576e3c3fc63d09cc2f2f1bfa5a4d30d737",
+      "proof_level": "peer-reviewed",
+      "review_gate_sha256": "5cf04a918be789c4074526c7c613c9872aaa5cd1ee50a9e05739b0832ae75b23",
+      "root_cause": "Patch receipt includes Signoff control artifacts",
+      "scope": {
+        "budgets": {
+          "changed_lines": 180,
+          "production_files": 2
+        },
+        "changed_files": [
+          ".gitignore",
+          "package-lock.json"
+        ],
+        "changed_lines": 135,
+        "file_budget_overflow": false,
+        "forbidden_files": [],
+        "line_budget_overflow": false,
+        "production_file_count": 2,
+        "production_files": [
+          ".gitignore",
+          "package-lock.json"
+        ],
+        "status": "pass",
+        "unmapped_files": []
+      }
+    }
+  ],
+  "iteration": 0,
+  "lock": {
+    "acceptance_ids": [
+      "AC-001"
+    ],
+    "charter_sha256": "1352d5d7d7caabdad301779474fbfc4bf7811dfb66e01db243722198b76cd593",
+    "council_result": {
+      "advisor_count": 2,
+      "chair": {
+        "context_id": "council-r2-chair-main-context",
+        "model": "gpt-5.5-codex",
+        "participant_id": "chair-r2",
+        "provider": "codex"
+      },
+      "conflicts": [],
+      "resolved_conflicts": [],
+      "verdict": "PROCEED"
+    },
+    "council_sha256": "170383a991138a621effcb00624710fe4dc8ef6abe58bff3536c9c3f9cd70c6b",
+    "goal_sha256": "6e7f54e476dad417eddaba260ae1ddd707fb189129ce51df2ac12432dff39d2c",
+    "locked_at": "2026-06-25T05:30:39+00:00",
+    "max_iterations": 5,
+    "mission_id": "mission-20260625-051108-2c506d76",
+    "requirement_ids": [
+      "REQ-001"
+    ],
+    "revision": 2,
+    "schema_version": 1,
+    "spec_sha256": "e3b74e06d293c8281442a0dc61deb5bc3f5197b91183a4e38f352278596dedfe"
+  },
+  "lock_file_sha256": "95d6a536ec9d1ec092aa59cf441ff898ef33f97afbd41beea8eb5a48ba3f1bfd",
+  "lock_history": [
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "charter_sha256": "1fcd550fcf39758db6a8fc8c9ab6749cc2b1dc079c6e803b0f30948741b8941d",
+      "council_result": {
+        "advisor_count": 2,
+        "chair": {
+          "context_id": "council-chair-main-context",
+          "model": "gpt-5.5-codex",
+          "participant_id": "chair",
+          "provider": "codex"
+        },
+        "conflicts": [],
+        "resolved_conflicts": [],
+        "verdict": "PROCEED"
+      },
+      "council_sha256": "d0051cf2cc3ee55d3b050df06e705a0b5020c05b5886e6e955b561c73f754331",
+      "goal_sha256": "6e7f54e476dad417eddaba260ae1ddd707fb189129ce51df2ac12432dff39d2c",
+      "locked_at": "2026-06-25T05:14:25+00:00",
+      "max_iterations": 5,
+      "mission_id": "mission-20260625-051108-2c506d76",
+      "requirement_ids": [
+        "REQ-001"
+      ],
+      "revision": 1,
+      "schema_version": 1,
+      "spec_sha256": "4c0e10c8c9b21d2b333f2620f8e0c6ebc2c139a49cf63fb5c67f74a20229c14d"
+    }
+  ],
+  "max_iterations": 5,
+  "mission_baseline": "2312365a0def32bb0eca0edf82cc9c2e31bb2744",
+  "mission_id": "mission-20260625-051108-2c506d76",
+  "phase": "STOPPED",
+  "pivot_reason": "Sealed patch receipts include Signoff control artifacts while scope excludes them; fix receipt filtering before re-running the public npm metadata milestone",
+  "revision": 2,
+  "schema_version": 1,
+  "terminal_reason": "Pivot revision cannot prepare a new slice because iterations/0001 already exists; restart a clean mission instead of editing control state",
+  "updated_at": "2026-06-25T05:31:09+00:00"
+}

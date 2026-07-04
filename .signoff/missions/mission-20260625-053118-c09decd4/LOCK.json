@@ -1,0 +1,29 @@
+{
+  "acceptance_ids": [
+    "AC-001"
+  ],
+  "charter_sha256": "625500d33e1eb4c65b9f779bd0443b79f359e6eceb6202446cf9bfd708d34b7a",
+  "council_result": {
+    "advisor_count": 2,
+    "chair": {
+      "context_id": "council-clean-chair-context",
+      "model": "gpt-5.5-codex",
+      "participant_id": "chair-clean",
+      "provider": "codex"
+    },
+    "conflicts": [],
+    "resolved_conflicts": [],
+    "verdict": "PROCEED"
+  },
+  "council_sha256": "adf5e38f469ce1bed2785c80f870851d675859a0a398be8888dd88fb7f738e6d",
+  "goal_sha256": "e95634d664448e6ed1d2369e4d7981ee6d1141ccf1198066174b54d235df36e0",
+  "locked_at": "2026-06-25T05:36:25+00:00",
+  "max_iterations": 5,
+  "mission_id": "mission-20260625-053118-c09decd4",
+  "requirement_ids": [
+    "REQ-001"
+  ],
+  "revision": 1,
+  "schema_version": 1,
+  "spec_sha256": "09391abdd0e7d68559f1ae935929c0f3228445b3682122c0042535fd38b9fb7c"
+}

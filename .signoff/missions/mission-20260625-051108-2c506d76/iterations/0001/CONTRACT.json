@@ -1,0 +1,113 @@
+{
+  "acceptance_criteria": [
+    "AC-001"
+  ],
+  "allowed_paths": [
+    ".gitignore",
+    "package-lock.json"
+  ],
+  "budgets": {
+    "changed_lines": 180,
+    "production_files": 2
+  },
+  "builder": {
+    "context_id": "main-codex-context",
+    "model": "gpt-5.5-codex",
+    "participant_id": "builder",
+    "provider": "codex"
+  },
+  "exempt_paths": [
+    ".signoff/**",
+    "node_modules/**",
+    "apps/web/dist/**"
+  ],
+  "final": true,
+  "forbidden_paths": [
+    ".git/**",
+    ".signoff/**"
+  ],
+  "iteration": 1,
+  "mission_id": "mission-20260625-051108-2c506d76",
+  "requirements": [
+    "REQ-001"
+  ],
+  "schema_version": 1,
+  "title": "Normalize package-lock resolved registry URLs and ignore generated UI dependency/build outputs; verify npm install, typecheck, build, tests, repo check, and git status.",
+  "verification": [
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "npm",
+        "ci"
+      ],
+      "id": "V-001-npm-ci",
+      "timeout_seconds": 180,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "id": "V-002-typecheck",
+      "timeout_seconds": 120,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "npm",
+        "run",
+        "build:web"
+      ],
+      "id": "V-003-build-web",
+      "timeout_seconds": 120,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "python3",
+        "scripts/test.py"
+      ],
+      "id": "V-004-runtime-tests",
+      "timeout_seconds": 120,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "python3",
+        "scripts/check_repo.py"
+      ],
+      "id": "V-005-repo-check",
+      "timeout_seconds": 120,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "python3",
+        "-c",
+        "import subprocess, sys; out = subprocess.check_output(['git', 'status', '--short', '--untracked-files=all'], text=True); bad = [line for line in out.splitlines() if line.startswith('?? node_modules/') or line.startswith('?? apps/web/dist/')]; print(out, end=''); sys.exit(1 if bad else 0)"
+      ],
+      "id": "V-006-generated-output-status",
+      "timeout_seconds": 30,
+      "working_directory": "."
+    }
+  ]
+}

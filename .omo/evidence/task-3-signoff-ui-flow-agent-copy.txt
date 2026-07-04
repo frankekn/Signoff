@@ -1,0 +1,21 @@
+seeded DRAFT mission=mission-20260625-163543-5fe8d494
+Read AGENTS.md.
+Mission id: mission-20260625-163543-5fe8d494
+Phase: DRAFT
+Live next action: Complete .signoff/missions/mission-20260625-163543-5fe8d494/CHARTER.md and .signoff/missions/mission-20260625-163543-5fe8d494/SPEC.json, then run ./signoff prepare-council.
+Editable paths:
+- .signoff/missions/mission-20260625-163543-5fe8d494/CHARTER.md
+- .signoff/missions/mission-20260625-163543-5fe8d494/SPEC.json
+Action limits:
+- Send to Council (prepare_council)
+- Stop mission (finish_stopped, note required)
+Do not edit locked or generated artifacts. Do not edit receipts or files outside editable paths.
+PASS DRAFT copied text includes mission id
+PASS DRAFT copied text includes phase
+PASS DRAFT copied text includes CHARTER.md
+PASS DRAFT copied text includes SPEC.json
+PASS DRAFT copied text includes live next action label
+PASS DRAFT copied text includes live next action value
+PASS DRAFT copied text includes action limits
+PASS DRAFT copied text includes locked/generated instruction
+screenshot=/Users/termtek/Github/Signoff/.omo/evidence/task-3-signoff-ui-flow-agent-copy.png

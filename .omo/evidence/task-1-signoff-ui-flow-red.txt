@@ -1,0 +1,30 @@
+Initial plain command failed before product import; rerun with PYTHONPATH=src for behavior-level red proof.
+
+127.0.0.1 - - [25/Jun/2026 23:34:21] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [25/Jun/2026 23:34:22] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [25/Jun/2026 23:34:23] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [25/Jun/2026 23:34:23] "POST /api/missions HTTP/1.1" 201 -
+F127.0.0.1 - - [25/Jun/2026 23:34:23] "GET /api/overview HTTP/1.1" 200 -
+E
+======================================================================
+ERROR: test_hard_integrity_failure_blocks_actions (tests.test_web.WebApiTests.test_hard_integrity_failure_blocks_actions)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/termtek/Github/Signoff/tests/test_web.py", line 171, in test_hard_integrity_failure_blocks_actions
+    self.assertTrue(payload["data"]["blockedByIntegrity"])
+                    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'blockedByIntegrity'
+
+======================================================================
+FAIL: test_pivot_and_blocked_are_not_restartable (tests.test_web.WebApiTests.test_pivot_and_blocked_are_not_restartable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/termtek/Github/Signoff/tests/test_web.py", line 141, in test_pivot_and_blocked_are_not_restartable
+    self.assertFalse(payload["data"]["canStartMission"])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.897s
+
+FAILED (failures=1, errors=1)

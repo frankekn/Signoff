@@ -1,0 +1,43 @@
+DONE
+
+Changed files for this F3 UI repair:
+- apps/web/src/components/ProofCard.tsx
+- apps/web/src/components/StartMissionCard.tsx
+- apps/web/src/pages/Dashboard.tsx
+- apps/web/src/styles.css
+- src/signoff/web_dist/index.html
+- src/signoff/web_dist/assets/index-DjluUngr.css
+- src/signoff/web_dist/assets/index-DkMphtmB.js
+- src/signoff/web_dist/assets/index-B76Cq3St.css removed by rebuild
+- src/signoff/web_dist/assets/index-BdqwdZpw.js removed by rebuild
+
+Exact UI changes:
+- DONE proof tile now keeps the literal contract.final label searchable and renders the full final receipt SHA-256 under the label "Final receipt SHA-256"; the short prefix is no longer the only visible receipt proof.
+- Start next mission card now shows an active-scope note while inspecting a historical mission: active mission id, DONE state, active-scoped control text, read-only inspected mission text, and FINAL_RECEIPT.json.
+- styles.css keeps contract.final and Final receipt SHA-256 labels untransformed so exact text search works.
+
+Verification commands and results:
+- npm run typecheck 2>&1 | tee .omo/evidence/final-signoff-ui-flow-ui-fix-typecheck.txt => PASS
+- npm run build:web 2>&1 | tee .omo/evidence/final-signoff-ui-flow-ui-fix-build.txt => PASS; copied apps/web/dist to src/signoff/web_dist
+- python3 scripts/test.py 2>&1 | tee .omo/evidence/final-signoff-ui-flow-ui-fix-tests.txt => PASS; 35/35 tests
+- python3 scripts/check_repo.py 2>&1 | tee .omo/evidence/final-signoff-ui-flow-ui-fix-check.txt => PASS
+- packaged Playwright QA against src/signoff/web_dist => PASS; transcript .omo/evidence/final-signoff-ui-flow-ui-fix-qa.txt
+
+Packaged Playwright QA binary observables:
+- static root was /Users/termtek/Github/Signoff/src/signoff/web_dist
+- seeded active DONE mission plus historical mission
+- full final receipt hash visible: c88c23615aa2cf47c60f4d9f5a444f86e9ae65be4b210aad36740ea26191c06b
+- hash label visible: Final receipt SHA-256
+- contract final visible: contract.final true
+- historical mission inspected: mission-20260625-202840-4dbe497a
+- active-scoped start visible while inspecting history: mission-20260625-202841-78de1939
+- historical artifact read-only visible
+- console/page errors: none
+
+QA artifact paths:
+- .omo/evidence/final-signoff-ui-flow-ui-fix-qa.txt
+- .omo/evidence/final-signoff-ui-flow-ui-fix.png
+
+Cleanup receipt:
+- server shutdown requested
+- child process exit captured with exit=0

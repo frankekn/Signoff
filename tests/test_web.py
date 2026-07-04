@@ -1,53 +1,19 @@
 from __future__ import annotations
 
-import json
-import threading
-import unittest
-from pathlib import Path
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
+from urllib.request import urlopen
 
-import signoff
-from signoff.web import create_server
+from signoff.util import atomic_write_json, read_json
 
-from tests.support import RepoFixture
+from tests.web_server import WebServerTestCase
 
 
-class WebApiTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.fx = RepoFixture()
-        static_root = Path(signoff.__file__).resolve().parent / "web_dist"
-        self.server = create_server(self.fx.project, host="127.0.0.1", port=0, static_root=static_root)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
-        self.thread.start()
-        host, port = self.server.server_address[:2]
-        self.base = f"http://{host}:{port}"
-
-    def tearDown(self) -> None:
-        self.server.shutdown()
-        self.server.server_close()
-        self.thread.join(timeout=3)
-        self.fx.close()
-
-    def request(self, path: str, *, method: str = "GET", body: dict | None = None) -> tuple[int, dict]:
-        data = None if body is None else json.dumps(body).encode("utf-8")
-        request = Request(
-            self.base + path,
-            data=data,
-            method=method,
-            headers={"Content-Type": "application/json"},
-        )
-        try:
-            with urlopen(request, timeout=5) as response:
-                return response.status, json.loads(response.read().decode("utf-8"))
-        except HTTPError as exc:
-            return exc.code, json.loads(exc.read().decode("utf-8"))
-
+class WebApiTests(WebServerTestCase):
     def test_overview_and_artifact_round_trip(self) -> None:
         status, payload = self.request("/api/overview")
         self.assertEqual(status, 200)
         self.assertEqual(payload["data"]["status"]["phase"], "DRAFT")
         self.assertEqual(payload["data"]["product"], "Signoff")
+        self.assertFalse(payload["data"]["canStartMission"])
 
         mission_id = payload["data"]["status"]["mission_id"]
         status, payload = self.request(f"/api/artifacts?missionId={mission_id}")
@@ -68,6 +34,77 @@ class WebApiTests(unittest.TestCase):
         self.assertTrue(payload["data"]["saved"])
         self.assertIn("hello world for the user", (self.fx.mission / "CHARTER.md").read_text(encoding="utf-8"))
 
+    def test_terminal_overview_can_start_next_mission(self) -> None:
+        status, payload = self.request("/api/action", method="POST", body={"action": "finish_stopped", "note": "done for test"})
+        self.assertEqual(status, 200)
+        self.assertEqual(payload["data"]["phase"], "STOPPED")
+
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        self.assertTrue(payload["data"]["canStartMission"])
+
+    def test_pivot_and_blocked_are_not_restartable(self) -> None:
+        self.fx.runtime.finish("stopped", note="done for test")
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        self.assertTrue(payload["data"]["canStartMission"])
+
+        self.restart_fixture()
+        self.fx.lock()
+        iteration = self.fx.passing_evidence(final=True)
+        self.fx.fill_roast(iteration)
+        self.fx.runtime.roast()
+        self.fx.runtime.finish("done")
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        self.assertTrue(payload["data"]["canStartMission"])
+
+        self.restart_fixture()
+        self.conclude_from_council("PIVOT")
+        status, payload = self.request("/api/overview")
+        create_status, create_payload = self.request("/api/missions", method="POST", body={"goal": "Start after pivot"})
+        self.assertEqual(status, 200)
+        self.assertFalse(payload["data"]["canStartMission"])
+        self.assertEqual(create_status, 400)
+        self.assertFalse(create_payload["ok"])
+
+        self.restart_fixture()
+        self.conclude_from_council("INSUFFICIENT_QUORUM")
+        status, payload = self.request("/api/overview")
+        create_status, create_payload = self.request("/api/missions", method="POST", body={"goal": "Start after blocked"})
+        self.assertEqual(status, 200)
+        self.assertFalse(payload["data"]["canStartMission"])
+        self.assertEqual(create_status, 400)
+        self.assertFalse(create_payload["ok"])
+
+    def test_hard_integrity_failure_blocks_actions(self) -> None:
+        self.fx.lock()
+        spec = read_json(self.fx.mission / "SPEC.json")
+        spec["constraints"].append("Tampered after lock")
+        atomic_write_json(self.fx.mission / "SPEC.json", spec)
+
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        self.assertTrue(payload["data"]["blockedByIntegrity"])
+        self.assertEqual(payload["data"]["integrityStatus"], "fail")
+        self.assertIn("inspect", payload["data"]["integrityMessage"].lower())
+        self.assertIn("integrity", payload["data"]["next"].lower())
+        self.assertEqual(payload["data"]["actions"], [])
+
+        self.restart_fixture()
+        self.fx.lock()
+        self.fx.activate()
+        self.fx.implement()
+        (self.fx.project / "surprise.txt").write_text("scope creep\n", encoding="utf-8")
+        verify_result = self.fx.runtime.verify()
+        self.assertEqual(verify_result["phase"], "VERIFY_FAILED")
+        self.assertEqual(verify_result["scope"]["status"], "fail")
+
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        self.assertFalse(payload["data"]["blockedByIntegrity"])
+        self.assertNotEqual(payload["data"]["integrityStatus"], "fail")
+
     def test_static_ui_and_illegal_action_error(self) -> None:
         with urlopen(self.base + "/", timeout=5) as response:
             html = response.read().decode("utf-8")
@@ -78,7 +115,3 @@ class WebApiTests(unittest.TestCase):
         self.assertEqual(status, 400)
         self.assertFalse(payload["ok"])
         self.assertIn("illegal action", payload["error"])
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -1,0 +1,8 @@
+surface: git generated asset path filter
+invocation: git status --short -- apps/web/dist src/signoff/web_dist
+ D src/signoff/web_dist/assets/index-B76Cq3St.css
+ D src/signoff/web_dist/assets/index-BdqwdZpw.js
+ M src/signoff/web_dist/index.html
+?? src/signoff/web_dist/assets/index-BV0aKj90.css
+?? src/signoff/web_dist/assets/index-CAbsxn7y.js
+result: PASS generated asset diff remains Todo 7-owned rebuilt packaged UI output

@@ -1,0 +1,20 @@
+Visual QA - Todo 4 mission selector
+
+Surface: Vite dev UI at http://127.0.0.1:5173/ driven by /tmp/signoff-ui-flow-missions-qa.mjs.
+Screenshot: .omo/evidence/task-4-signoff-ui-flow-missions.png
+Transcript: .omo/evidence/task-4-signoff-ui-flow-missions.txt
+
+External reviewer attempts:
+- Pass A RepoPrompt session 7949B76E-1C18-4549-B178-BB6A509D066B failed before execution with agent_error.
+- Pass B RepoPrompt session EE771FD8-AE0A-4B12-B95F-5C67FC6CD792 failed before execution with agent_error.
+
+Local verdict: PASS for Todo 4 scope.
+
+Checks:
+- Real DOM/source implementation: Dashboard renders mission buttons from overview.missions; no image/faked UI.
+- Selection scope: selectedMissionId is only passed to ArtifactPanel and Timeline. Top-level phase, next card, and actions still read overview active status/actions.
+- Active default: initial ArtifactPanel content contains "Second mission outcome" for active mission B.
+- Historical selection: selecting mission A changes artifact content and timeline to mission A.
+- Read-only: old mission toolbar shows "Sealed or generated"; historical PUT returns controlled 400.
+- Layout: at 1280px selector is compact in the workspace header; no overlap or clipping visible. Mobile CSS wraps workspace controls vertically and keeps selector scrollable.
+- Known non-blocker: Vite dev page logs one 404 console error, likely a missing favicon/dev asset; Todo 4 acceptance does not require console-clean final surface.

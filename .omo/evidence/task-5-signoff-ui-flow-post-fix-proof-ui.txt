@@ -1,0 +1,38 @@
+scenario: post-fix readable proof final receipt path browser assertion
+surface: browser UI DOM and screenshot
+invocation: node .omo/evidence/task-5-signoff-ui-flow-post-fix-proof-ui.mjs with playwright resolved from /tmp/signoff-pw-qa/node_modules
+app: http://127.0.0.1:5174/
+api: http://127.0.0.1:63199 routed from browser /api requests
+expectedFinalReceiptPath: .signoff/missions/mission-20260625-180637-48aa021a/FINAL_RECEIPT.json
+binaryObservable: .proof-card contains expectedFinalReceiptPath
+screenshot: /Users/termtek/Github/Signoff/.omo/evidence/task-5-signoff-ui-flow-post-fix-proof-ui.png
+result: PASS
+
+READABLE PROOF
+READABLE PROOF
+Active mission proof
+mission-20260625-180637-48aa021a
+EVIDENCE
+pass
+.signoff/missions/mission-20260625-180637-48aa021a/iterations/0001/EVIDENCE.json
+c170573e812e
+SCOPE
+pass
+2 changed lines
+PATCH
+present
+.signoff/missions/mission-20260625-180637-48aa021a/iterations/0001/PATCH.diff
+6e0e7e8f8681
+REVIEW GATE
+PASS
+diverse-reviewed
+defc8bcb364f
+ACCEPTED CRITERIA
+1
+AC-001
+CONTRACT.FINAL
+true
+.signoff/missions/mission-20260625-180637-48aa021a/FINAL_RECEIPT.json
+7c200f52b6bd
+COMMAND RESULTS
+V-001: pass exit 0 · git grep -F -q return "hello world" -- app.py

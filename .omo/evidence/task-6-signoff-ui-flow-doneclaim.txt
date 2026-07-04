@@ -1,0 +1,46 @@
+DoneClaim: Todo 6 - Prevent dirty artifact loss across artifact and mission switches
+
+Changed files intentionally owned by Todo 6:
+- apps/web/src/components/ArtifactPanel.tsx
+- apps/web/src/pages/Dashboard.tsx
+- apps/web/src/styles.css
+- .omo/plans/signoff-ui-flow.md
+- .omo/start-work/notepad.md
+- .omo/start-work/ledger.jsonl
+- .omo/evidence/task-6-signoff-ui-flow-editor-red.txt
+- .omo/evidence/task-6-signoff-ui-flow-editor.txt
+- .omo/evidence/task-6-signoff-ui-flow-editor.png
+- .omo/evidence/task-6-signoff-ui-flow-typecheck.txt
+- .omo/evidence/task-6-signoff-ui-flow-api.txt
+- .omo/evidence/task-6-signoff-ui-flow-listeners.txt
+- /tmp/signoff-ui-flow-editor-qa.mjs
+
+Behavior:
+- ArtifactPanel tracks dirty edits by selected artifact path.
+- Dirty artifact switches keep the current artifact selected and show an inline warning.
+- Dirty mission switches keep the active mission selected and show an inline warning.
+- Save still uses the existing PUT /api/artifact path.
+- Discard explicitly clears the draft and then allows artifact or mission switching.
+- No window.confirm, autosave, dependency, route, or server contract was added.
+
+Evidence:
+- Red scenario: node /tmp/signoff-ui-flow-editor-qa.mjs --expect-red
+  Artifact: .omo/evidence/task-6-signoff-ui-flow-editor-red.txt
+  Observable: after clicking SPEC.json, textarea does not contain TASK-6-UNSAVED-DRAFT-MARKER.
+- Browser QA: node /tmp/signoff-ui-flow-editor-qa.mjs
+  Artifacts: .omo/evidence/task-6-signoff-ui-flow-editor.txt, .omo/evidence/task-6-signoff-ui-flow-editor.png
+  Observables: artifactSwitchBlocked=true, missionSwitchBlocked=true, savedAfterClick=true, switchAfterSave=true, switchMissionAfterDiscard=true.
+- Typecheck: npm run typecheck 2>&1 | tee .omo/evidence/task-6-signoff-ui-flow-typecheck.txt
+  Result: exit 0.
+- API/repo gate: python3 scripts/test.py 2>&1 | tee .omo/evidence/task-6-signoff-ui-flow-api.txt
+  Result: exit 0, 35/35 passed.
+- Cleanup check: lsof -nP -iTCP:5173 -sTCP:LISTEN || true; lsof -nP -iTCP:8765 -sTCP:LISTEN || true
+  Artifact: .omo/evidence/task-6-signoff-ui-flow-listeners.txt
+  Result: no listeners reported.
+
+Generated bundle confirmation:
+- No generated bundles under src/signoff/web_dist/** or apps/web/dist/** were intentionally edited for Todo 6.
+- Those paths were already dirty before this task and remain Todo 7-owned.
+
+Risks/gaps:
+- apps/web/src/pages/Dashboard.tsx is already above the preferred pure-LOC ceiling from prior UI-flow work; no split was done because Todo 6 scope forbids broad refactors.

@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "mission_id": "mission-20260625-072341-7c1628fc",
+  "artifact_hashes": {
+    "goal": "1e7579ed3f558f15353d366d87a07c7c527885f71190709d16922c944626b360",
+    "charter": "b2ff41654f2dfb8eaecf2fc78239626c99af41b0b666975b0ed745f5f58319ae",
+    "spec": "371926ce9a0c6b6fae6967ffacb30bb954c24d0a03f0d03ed476423b84e6a098"
+  },
+  "claim_registry": [
+    "mission-value",
+    "feasibility",
+    "proof-sufficiency",
+    "scope-minimality"
+  ],
+  "advisors": [
+    {
+      "identity": {
+        "participant_id": "advisor-codex-1749b616",
+        "provider": "RepoPrompt Agent Mode",
+        "model": "Codex CLI gpt-5.5 high",
+        "context_id": "1749B616-86A3-4B90-8004-07FA3B1BF0FB"
+      },
+      "independent_first_round": true,
+      "verdict": "PROCEED",
+      "null_hypothesis": "Do not implement unless the existing /api/missions path can start a new mission after DONE without mutating or continuing the DONE mission.",
+      "first_move": "Run a browser proof on a disposable DONE project: confirm FINAL_RECEIPT is visible, submit the new mission form, then assert /api/overview is DRAFT with editable CHARTER.md and SPEC.json.",
+      "cut": "Cut runtime/protocol changes, new mission-list UX, redesign, auth/services, and any action button for continuing the DONE mission.",
+      "claims": [
+        {
+          "topic_key": "mission-value",
+          "stance": "SUPPORT",
+          "claim": "The mission fixes a real UI dead-end: DONE is terminal but users still need a visible next-mission path.",
+          "evidence": "The charter preserves DONE as terminal while requiring a visible next-mission path on the signed-off page.",
+          "falsifier": "A DONE page already exposes an obvious in-UI start-next-mission path without this change."
+        },
+        {
+          "topic_key": "feasibility",
+          "stance": "SUPPORT",
+          "claim": "Feasible by exposing the existing start form in DONE; no runtime rule change is needed.",
+          "evidence": "Runtime.start permits a new mission when the active phase is terminal, and /api/missions already calls runtime.start.",
+          "falsifier": "POST /api/missions from a DONE project fails or mutates the completed mission."
+        },
+        {
+          "topic_key": "proof-sufficiency",
+          "stance": "OPPOSE",
+          "claim": "The current diff is not yet proved sufficient until the browser proof and gates run.",
+          "evidence": "The spec requires browser proof, TypeScript typecheck, packaged UI rebuild, Python tests, and repo check.",
+          "falsifier": "Those commands and browser checks pass and show DRAFT with editable CHARTER.md and SPEC.json after submit."
+        },
+        {
+          "topic_key": "scope-minimality",
+          "stance": "SUPPORT",
+          "claim": "The current UI diff is near-minimal.",
+          "evidence": "Dashboard reuses the existing createMission mutation and start form, and keeps the terminal next-card for non-IDLE phases.",
+          "falsifier": "A smaller one-line condition change preserves the DONE receipt and gives clear start-next copy."
+        }
+      ]
+    },
+    {
+      "identity": {
+        "participant_id": "advisor-glm-05b136bc",
+        "provider": "RepoPrompt Agent Mode",
+        "model": "OpenCode GLM-5.2",
+        "context_id": "05B136BC-90D2-4FDB-AC6F-A0AC1E8FD7CA"
+      },
+      "independent_first_round": true,
+      "verdict": "PROCEED",
+      "null_hypothesis": "The existing runtime already permits starting a new mission after DONE, so the only missing piece should be UI exposure.",
+      "first_move": "Verify the regenerated bundle, then run typecheck, build, Python tests, repository check, and a browser proof that drives DONE to DRAFT through the UI.",
+      "cut": "Do not add runtime state-machine changes, new services, a mission-list redesign, or browser-based agent execution.",
+      "claims": [
+        {
+          "topic_key": "mission-value",
+          "stance": "SUPPORT",
+          "claim": "Letting a user start the next mission from a DONE page preserves the terminal contract while removing a dead-end UX.",
+          "evidence": "The DONE page can retain its signed-off receipt while exposing the existing mission start form.",
+          "falsifier": "If the inline form crowds or obscures receipt review, the route should be revised."
+        },
+        {
+          "topic_key": "feasibility",
+          "stance": "SUPPORT",
+          "claim": "The change is achievable with a UI-only diff plus a bundle rebuild.",
+          "evidence": "web.py routes POST /api/missions to Runtime.start, and the runtime already gates active terminal phases.",
+          "falsifier": "If query invalidation leaves the old DONE mission visible after submit, the UI-only route is insufficient."
+        },
+        {
+          "topic_key": "proof-sufficiency",
+          "stance": "UNKNOWN",
+          "claim": "The stated evidence standard is sufficient, but inspection alone cannot confirm the browser proof has run.",
+          "evidence": "The spec oracle requires a browser-driven DONE-to-DRAFT check with editable artifacts and no console errors.",
+          "falsifier": "A real browser proof fails to exercise a terminal DONE state or fails to assert editability of the new mission artifacts."
+        },
+        {
+          "topic_key": "scope-minimality",
+          "stance": "SUPPORT",
+          "claim": "The change is the smallest viable UI route.",
+          "evidence": "The patch adds one boolean widening, one conditional split, and one heading ternary while reusing existing form and mutation code.",
+          "falsifier": "If unrelated files are included for this mission, the slice exceeds the UI-only route."
+        }
+      ]
+    }
+  ],
+  "decision": {
+    "verdict": "PROCEED",
+    "rationale": "Both independent advisors support a UI-only slice because the runtime and API already allow starting a new mission after terminal DONE. Their proof-sufficiency concerns are valid and become required verification gates rather than reasons to change protocol semantics.",
+    "conflict_resolutions": [
+      {
+        "topic_key": "proof-sufficiency",
+        "basis": "locked_spec",
+        "evidence": "Both advisors identify browser DONE-to-DRAFT proof plus typecheck, build, Python tests, and repository check as the necessary falsifier.",
+        "conclusion": "Proceed only with a slice whose DONE decision is blocked until those checks and browser proof pass."
+      }
+    ],
+    "first_slice": "Expose the existing mission start form on DONE pages, rebuild shipped UI assets, and prove DONE-to-DRAFT behavior in a disposable Git project.",
+    "chair": {
+      "participant_id": "chair-main-codex",
+      "provider": "Codex CLI",
+      "model": "gpt-5.5",
+      "context_id": "main-session-20260625-signoff-ui"
+    }
+  }
+}

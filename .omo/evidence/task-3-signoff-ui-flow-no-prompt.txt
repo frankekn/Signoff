@@ -1,0 +1,9 @@
+seeded COUNCIL_REVIEW mission=mission-20260625-163543-5fe8d494
+PASS Authorize pivot opens inline note UI without window.prompt
+PASS Empty note submit is blocked before /api/action
+PASS Valid note posts once to /api/action
+PASS Valid note posts action=pivot
+PASS Prompt-injection-shaped note is sent as JSON data unchanged
+PASS window.prompt is never called
+PASS Pivot authorization returns/advances to DRAFT
+screenshot=/Users/termtek/Github/Signoff/.omo/evidence/task-3-signoff-ui-flow-agent-copy.png

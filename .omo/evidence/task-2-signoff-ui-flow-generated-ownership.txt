@@ -1,0 +1,50 @@
+surface: generated bundle ownership
+criterion: current generated src/signoff/web_dist/** and apps/web/dist/** changes are outside Todo 2 and must wait for Todo 7
+
+invocation: nl -ba .omo/plans/signoff-ui-flow.md | sed -n '24,45p;136,143p;154,157p'
+result:
+- Plan line 31 says web_dist is regenerated through the existing build path.
+- Plan line 39 forbids direct edits to generated UI bundles except via npm run build:web.
+- Todo 7 lines 137-142 owns rebuilding apps/web/dist and src/signoff/web_dist and running final verification.
+- Commit strategy line 156 says generated src/signoff/web_dist changes commit only after npm run build:web.
+
+invocation: nl -ba .omo/start-work/notepad.md | sed -n '18,21p'
+result:
+- Notepad lines 18-21 state generated src/signoff/web_dist/** changes were pre-existing or unrelated and must remain unclaimed until Todo 7 rebuilds through npm run build:web.
+
+invocation: git status --short --untracked-files=all -- src/signoff/web_dist apps/web/dist
+result:
+ D src/signoff/web_dist/assets/index-B76Cq3St.css
+ D src/signoff/web_dist/assets/index-BdqwdZpw.js
+ M src/signoff/web_dist/index.html
+?? src/signoff/web_dist/assets/index-BxfVyDCB.css
+?? src/signoff/web_dist/assets/index-DctO2657.js
+
+invocation: git diff --name-status -- src/signoff/web_dist apps/web/dist
+result:
+D	src/signoff/web_dist/assets/index-B76Cq3St.css
+D	src/signoff/web_dist/assets/index-BdqwdZpw.js
+M	src/signoff/web_dist/index.html
+
+invocation: git status --short --ignored --untracked-files=all -- src/signoff/web_dist apps/web/dist
+result:
+ D src/signoff/web_dist/assets/index-B76Cq3St.css
+ D src/signoff/web_dist/assets/index-BdqwdZpw.js
+ M src/signoff/web_dist/index.html
+?? src/signoff/web_dist/assets/index-BxfVyDCB.css
+?? src/signoff/web_dist/assets/index-DctO2657.js
+!! apps/web/dist/assets/index-BxfVyDCB.css
+!! apps/web/dist/assets/index-DctO2657.js
+!! apps/web/dist/index.html
+
+invocation: find src/signoff/web_dist apps/web/dist -maxdepth 3 -type f -print 2>/dev/null | sort
+result:
+apps/web/dist/assets/index-BxfVyDCB.css
+apps/web/dist/assets/index-DctO2657.js
+apps/web/dist/index.html
+src/signoff/web_dist/assets/index-BxfVyDCB.css
+src/signoff/web_dist/assets/index-DctO2657.js
+src/signoff/web_dist/index.html
+
+verdict: PASS
+conclusion: Generated bundle files exist and/or are dirty, but Todo 2 scope is phase rail and hero state only. Generated bundle ownership belongs to Todo 7 rebuild/final verification, so these generated changes must stay outside Todo 2 claims.

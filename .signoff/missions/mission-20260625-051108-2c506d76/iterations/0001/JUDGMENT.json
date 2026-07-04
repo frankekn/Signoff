@@ -1,0 +1,40 @@
+{
+  "artifact_hashes": {
+    "contract": "d53bc39fb410f315bf86774ec3058c9c124be945ed0f13199935996c071a5dac",
+    "evidence": "9651b55f3c97e8308b842bb6fe7637500f45baac76c5ed62d18b4786c34d0799",
+    "patch": "b441a6d76f0dc5eb530c060d7dd522576e3c3fc63d09cc2f2f1bfa5a4d30d737"
+  },
+  "conflict_resolutions": [],
+  "criterion_decisions": [
+    {
+      "acceptance_id": "AC-001",
+      "reason": "Command evidence passes, but the sealed patch includes forbidden .signoff control artifact churn, so the contract-bound acceptance cannot be signed off from this receipt.",
+      "verdict": "FAIL"
+    }
+  ],
+  "decision": "REWORK",
+  "finding_dispositions": [
+    {
+      "disposition": "ACT_ON",
+      "evidence_ref": "",
+      "finding_id": "F-001",
+      "rationale": "Reviewer 1 identified forbidden .signoff control artifacts in PATCH.diff that must not appear in the product patch receipt."
+    },
+    {
+      "disposition": "ACT_ON",
+      "evidence_ref": "",
+      "finding_id": "F-002",
+      "rationale": "Reviewer 2 independently identified the same mismatch between sealed PATCH.diff and scope evidence."
+    }
+  ],
+  "iteration": 1,
+  "judge": {
+    "context_id": "roast-judge-1-context",
+    "model": "current",
+    "participant_id": "judge-1",
+    "provider": "codex-multi-agent"
+  },
+  "mission_id": "mission-20260625-051108-2c506d76",
+  "rationale": "REWORK is required because two independent reviewers found the sealed patch includes forbidden .signoff control artifact churn while the scope evidence omits it. Regenerate evidence after fixing patch generation.",
+  "schema_version": 1
+}

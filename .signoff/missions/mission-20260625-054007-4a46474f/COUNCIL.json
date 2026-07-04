@@ -1,0 +1,115 @@
+{
+  "advisors": [
+    {
+      "claims": [
+        {
+          "claim": "The mission has direct contributor value because it makes the documented first-run UI path reproducible from the public npm lockfile while keeping generated artifacts and Signoff control state out of product receipts.",
+          "evidence": "The sealed goal requires public npm lockfile reproducibility, ignored generated outputs, and Signoff patch receipts excluding control artifacts; AC-001 requires npm ci, UI typecheck/build, Python checks, clean generated-output status, and PATCH.diff inspection for .signoff paths.",
+          "falsifier": "If the current repository already supports a clean public npm ci, typecheck, production build, ignored generated outputs, and .signoff-free PATCH.diff receipts, the mission would add no value.",
+          "stance": "SUPPORT",
+          "topic_key": "mission-value"
+        },
+        {
+          "claim": "The slice appears feasible as a bounded metadata and receipt-filtering change without UI behavior changes, Python runtime dependencies, package-manager changes, install-flow changes, services, or protocol semantic changes.",
+          "evidence": "The charter constrains the work to lockfile normalization, generated-output ignore hygiene, existing control-path filtering, and a regression test, while explicitly excluding dependency upgrades, version changes, new package managers, services, and quorum/protocol changes.",
+          "falsifier": "If public npm install remains blocked after lockfile normalization by external registry/network constraints, or if receipt correctness requires protocol semantic changes rather than consistent filtering of existing control paths, the mission should stop or pivot.",
+          "stance": "SUPPORT",
+          "topic_key": "feasibility"
+        },
+        {
+          "claim": "The evidence standard is sufficient because it proves both the contributor install/build path and the failure-prone receipt/status boundaries directly.",
+          "evidence": "The required proof includes npm ci, npm run typecheck, npm run build:web, python3 scripts/test.py, python3 scripts/check_repo.py, generated dependency/build/cache status evidence, and a conformance test inspecting sealed PATCH.diff for .signoff paths.",
+          "falsifier": "If verification omits git status evidence for generated outputs or only checks command success without inspecting PATCH.diff contents for .signoff paths, proof is incomplete.",
+          "stance": "SUPPORT",
+          "topic_key": "proof-sufficiency"
+        },
+        {
+          "claim": "The proposed work is minimal if limited to public lockfile reproducibility, ignore rules for generated dependency/build/cache outputs, receipt path filtering, and a focused regression test.",
+          "evidence": "The sealed charter and spec forbid UI redesign, new package managers, services, Docker, databases, auth, cloud changes, runtime deps, dependency upgrades, version changes, broad cleanup, quorum changes, and weakened gates.",
+          "falsifier": "If implementation changes UI behavior, adds alternate install paths, commits generated outputs, changes versions or dependencies unnecessarily, weakens gates, or rewrites protocol/quorum semantics, it exceeds the mission scope.",
+          "stance": "SUPPORT",
+          "topic_key": "scope-minimality"
+        }
+      ],
+      "cut": "Cut UI redesign, new package managers, services, Docker, databases, auth/cloud work, Python runtime dependencies, dependency upgrades, version changes, broad cleanup, quorum changes, protocol semantic rewrites, weakened gates, private registry requirements, and committed generated outputs.",
+      "first_move": "From a clean product baseline, run npm ci, npm run typecheck, npm run build:web, python3 scripts/test.py, and python3 scripts/check_repo.py, then inspect git status for generated dependency/build/cache noise and inspect sealed PATCH.diff for .signoff paths.",
+      "identity": {
+        "context_id": "advisor-clean-final-1-fresh-independent-context",
+        "model": "gpt-5.5-codex",
+        "participant_id": "advisor-clean-final-1",
+        "provider": "codex"
+      },
+      "independent_first_round": true,
+      "null_hypothesis": "Do not proceed if the current clean baseline already passes public npm ci, UI typecheck/build, Python checks, generated-output cleanliness, and .signoff-free PATCH.diff receipt inspection, or if the only blocker is external/private registry access outside repository metadata.",
+      "verdict": "PROCEED"
+    },
+    {
+      "claims": [
+        {
+          "claim": "The mission has clear contributor value because it makes the public first-run UI path reproducible and prevents Signoff receipts from exposing control artifacts instead of only the authorized product patch.",
+          "evidence": "The sealed goal and AC-001 require public npm ci, UI typecheck, UI production build, ignored generated dependency/build/cache outputs, and sealed PATCH.diff receipts with no .signoff paths.",
+          "falsifier": "If a clean checkout already passes npm ci, typecheck, build, Python checks, generated-output status cleanliness, and PATCH.diff excludes .signoff, then the mission has no remaining product value.",
+          "stance": "SUPPORT",
+          "topic_key": "mission-value"
+        },
+        {
+          "claim": "The mission is feasible as a bounded metadata, ignore, and filtering fix without changing runtime behavior or protocol semantics.",
+          "evidence": "The charter constrains the work to preserving one-path install, zero Python runtime deps, no UI/package-manager/install-flow/protocol/service/quorum changes, and allows metadata plus consistent control-path filtering and regression tests.",
+          "falsifier": "If public npm ci remains blocked by external registry/network after lockfile normalization, or PATCH.diff correctness requires a protocol semantic change, the mission must stop or pivot.",
+          "stance": "SUPPORT",
+          "topic_key": "feasibility"
+        },
+        {
+          "claim": "The proof standard is sufficient because it combines install/build commands, Python checks, generated-output status evidence, and a conformance test that directly inspects sealed PATCH.diff contents.",
+          "evidence": "The sealed evidence standard names npm ci, npm run typecheck, npm run build:web, python3 scripts/test.py, python3 scripts/check_repo.py, generated-output status evidence, and conformance verification that PATCH.diff excludes .signoff.",
+          "falsifier": "If verification omits clean generated-output git status or only tests receipt generation without inspecting sealed PATCH.diff for .signoff paths, proof is insufficient.",
+          "stance": "SUPPORT",
+          "topic_key": "proof-sufficiency"
+        },
+        {
+          "claim": "The minimal scope is exactly lockfile public-registry normalization, generated-output ignore coverage, receipt path filtering, and one regression test.",
+          "evidence": "The charter non-goals exclude UI redesign, new package managers, services, Docker, database, auth, cloud/runtime deps, dependency upgrades/version changes, broad cleanup, and quorum changes.",
+          "falsifier": "If the patch changes UI behavior, install protocol, package manager, service boundaries, dependency versions, quorum behavior, or commits generated outputs, it exceeds scope.",
+          "stance": "SUPPORT",
+          "topic_key": "scope-minimality"
+        }
+      ],
+      "cut": "Cut generated committed build artifacts, private-registry workarounds, compatibility shims, broad cleanup, and unrelated UI or protocol edits.",
+      "first_move": "Implement the smallest diff that normalizes the lockfile, updates ignore rules, and filters .signoff from sealed receipt patches.",
+      "identity": {
+        "context_id": "advisor-clean-final-2-fresh",
+        "model": "gpt-5.5-codex",
+        "participant_id": "advisor-clean-final-2",
+        "provider": "codex"
+      },
+      "independent_first_round": true,
+      "null_hypothesis": "Do not sign off on claims based only on code inspection; require command output plus direct PATCH.diff inspection evidence.",
+      "verdict": "PROCEED"
+    }
+  ],
+  "artifact_hashes": {
+    "charter": "fec7ecaf4bd50e1520c6a14ea890cccf63da8b25a8be0823a7539777d5286e29",
+    "goal": "40401826bb2755e490222504de616cb96918ceb993c09b814621481a5c5c4560",
+    "spec": "f27c733d5351e6276cd0c720693ed465068d8ee27c20a08912b6b717fcf3c00a"
+  },
+  "claim_registry": [
+    "mission-value",
+    "feasibility",
+    "proof-sufficiency",
+    "scope-minimality"
+  ],
+  "decision": {
+    "chair": {
+      "context_id": "codex-main-clean-final-chair",
+      "model": "gpt-5-codex",
+      "participant_id": "chair-clean-final",
+      "provider": "codex"
+    },
+    "conflict_resolutions": [],
+    "first_slice": "Normalize lockfile registry URLs, ignore generated dependency/build/cache outputs, make receipt patch generation apply existing control-path filtering, and add the focused conformance test.",
+    "rationale": "Both independent advisors support proceeding and identify the same minimal route. There is no material conflict to cross-examine; the locked proof must come from commands and direct sealed PATCH.diff inspection.",
+    "verdict": "PROCEED"
+  },
+  "mission_id": "mission-20260625-054007-4a46474f",
+  "schema_version": 1
+}

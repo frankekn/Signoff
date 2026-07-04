@@ -1,0 +1,1 @@
+Make the contributor UI first-run install reproducible from the public npm lockfile without leaving generated dependency or build outputs untracked

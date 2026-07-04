@@ -1,0 +1,21 @@
+{
+  "acceptance_criteria": [
+    "AC-001"
+  ],
+  "activated_at": "2026-06-25T05:45:55+00:00",
+  "attempt": 1,
+  "baseline": "f8d1a2716506699596236be1ceb25627becff36c",
+  "builder": {
+    "context_id": "codex-main-signoff-final-clean-slice",
+    "model": "gpt-5-codex",
+    "participant_id": "builder-codex-main",
+    "provider": "codex"
+  },
+  "contract_sha256": "f4d836ce1c1b79acad28f8178cfd4389911dc8fc204d68ff9ae618bd86ccb0bf",
+  "final": true,
+  "iteration": 1,
+  "requirements": [
+    "REQ-001"
+  ],
+  "root_causes": []
+}

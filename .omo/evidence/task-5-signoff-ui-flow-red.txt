@@ -1,0 +1,66 @@
+127.0.0.1 - - [26/Jun/2026 01:31:47] "GET /api/overview HTTP/1.1" 200 -
+E127.0.0.1 - - [26/Jun/2026 01:31:48] "GET /api/overview HTTP/1.1" 200 -
+E127.0.0.1 - - [26/Jun/2026 01:31:49] "GET /api/overview HTTP/1.1" 200 -
+E127.0.0.1 - - [26/Jun/2026 01:31:49] "GET /api/overview HTTP/1.1" 200 -
+E127.0.0.1 - - [26/Jun/2026 01:31:50] "GET /api/overview HTTP/1.1" 200 -
+E127.0.0.1 - - [26/Jun/2026 01:31:51] "POST /api/missions HTTP/1.1" 201 -
+127.0.0.1 - - [26/Jun/2026 01:31:51] "GET /api/overview?inspectMissionId=mission-20260625-173151-0e208c70 HTTP/1.1" 200 -
+E
+======================================================================
+ERROR: test_proof_summary_reports_unknown_draft_evidence (tests.test_web.WebApiTests.test_proof_summary_reports_unknown_draft_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/termtek/Github/Signoff/tests/test_web.py", line 246, in test_proof_summary_reports_unknown_draft_evidence
+    proof = payload["data"]["proofSummary"]
+            ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'proofSummary'
+
+======================================================================
+ERROR: test_proof_summary_reports_failed_verification (tests.test_web.WebApiTests.test_proof_summary_reports_failed_verification)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/termtek/Github/Signoff/tests/test_web.py", line 270, in test_proof_summary_reports_failed_verification
+    proof = payload["data"]["proofSummary"]
+            ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'proofSummary'
+
+======================================================================
+ERROR: test_proof_summary_reviewed_pass_nonfinal_keeps_signoff_unavailable (tests.test_web.WebApiTests.test_proof_summary_reviewed_pass_nonfinal_keeps_signoff_unavailable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/termtek/Github/Signoff/tests/test_web.py", line 294, in test_proof_summary_reviewed_pass_nonfinal_keeps_signoff_unavailable
+    proof = payload["data"]["proofSummary"]
+            ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'proofSummary'
+
+======================================================================
+ERROR: test_proof_summary_reviewed_pass_final_exposes_review_gate_hash (tests.test_web.WebApiTests.test_proof_summary_reviewed_pass_final_exposes_review_gate_hash)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/termtek/Github/Signoff/tests/test_web.py", line 313, in test_proof_summary_reviewed_pass_final_exposes_review_gate_hash
+    proof = payload["data"]["proofSummary"]
+            ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'proofSummary'
+
+======================================================================
+ERROR: test_proof_summary_done_exposes_final_receipt (tests.test_web.WebApiTests.test_proof_summary_done_exposes_final_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/termtek/Github/Signoff/tests/test_web.py", line 332, in test_proof_summary_done_exposes_final_receipt
+    proof = payload["data"]["proofSummary"]
+            ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'proofSummary'
+
+======================================================================
+ERROR: test_inspect_mission_keeps_active_legality_scoped_to_active_mission (tests.test_web.WebApiTests.test_inspect_mission_keeps_active_legality_scoped_to_active_mission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/termtek/Github/Signoff/tests/test_web.py", line 355, in test_inspect_mission_keeps_active_legality_scoped_to_active_mission
+    self.assertEqual(payload["data"]["proofSummary"]["missionId"], old_mission_id)
+                     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'proofSummary'
+
+----------------------------------------------------------------------
+Ran 6 tests in 5.196s
+
+FAILED (errors=6)

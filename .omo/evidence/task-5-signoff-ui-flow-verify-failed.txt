@@ -1,0 +1,30 @@
+phase=VERIFY_FAILED
+actionIds=check_scope,verify
+evidence=fail
+scope=pass
+commands=V-001:fail:exit-1
+domHasFailedCommand=true
+buttonLabels=Copy for agent|Check scope|Verify again|Artifacts|Timeline|CHARTER.md
+CHARTER.md
+521 B|SPEC.json
+SPEC.json
+934 B|COUNCIL.json
+COUNCIL.json
+4.9 KB|CONTRACT.json
+iterations/0001/CONTRACT.json
+982 B|EVIDENCE.json
+iterations/0001/EVIDENCE.json
+1.9 KB|GOAL.txt
+GOAL.txt
+35 B|GUARD.json
+iterations/0001/GUARD.json
+508 B|PATCH.diff
+iterations/0001/PATCH.diff
+0 B|LEDGER.jsonl
+LEDGER.jsonl
+2.4 KB|LOCK.json
+LOCK.json
+874 B|STATE.json
+STATE.json
+2.4 KB
+buttonsHaveSignoff=false

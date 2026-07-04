@@ -1,0 +1,3 @@
+Invocation: rg -n "proofSummary|inspectMissionId" src/signoff apps/web tests
+Result:
+NO MATCHES

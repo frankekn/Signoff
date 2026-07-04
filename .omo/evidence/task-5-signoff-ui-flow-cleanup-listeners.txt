@@ -1,0 +1,3 @@
+Invocation: lsof -nP -iTCP:5173 -sTCP:LISTEN; lsof -nP -iTCP:8765 -sTCP:LISTEN
+Result: no listeners on 5173 or 8765 after Task 5 QA reruns.
+

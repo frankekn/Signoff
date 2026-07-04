@@ -1,0 +1,180 @@
+{
+  "baseline": "b19e806d7e650ea8ea4dee9cfd50f662b3e15250",
+  "checks": [
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "npm",
+        "ci"
+      ],
+      "duration_seconds": 0.993,
+      "exit_code": 0,
+      "id": "V-001-npm-ci",
+      "status": "pass",
+      "stderr": "npm warn allow-scripts 1 package has install scripts not yet covered by allowScripts:\nnpm warn allow-scripts   fsevents@2.3.3 (install: (install scripts present))\nnpm warn allow-scripts\nnpm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.\n",
+      "stderr_sha256": "e930ff10c51f08bfe040b0bcb5d52bf20c7606f588275af44ab00e9f717a95c8",
+      "stderr_truncated": false,
+      "stdout": "\nadded 37 packages, and audited 39 packages in 866ms\n\n15 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n",
+      "stdout_sha256": "2945fc70206b0abcbd12d10684f64ffa61f617f98046500c9917a9d80a3b2c78",
+      "stdout_truncated": false,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "duration_seconds": 0.684,
+      "exit_code": 0,
+      "id": "V-002-typecheck",
+      "status": "pass",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_truncated": false,
+      "stdout": "\n> signoff-workspace@0.1.0-alpha.1 typecheck\n> npm --workspace @signoff/web run typecheck\n\n\n> @signoff/web@0.1.0-alpha.1 typecheck\n> tsc -b --pretty false\n\n",
+      "stdout_sha256": "b9730b21eace290550fce9b3268392ded191d3c8a5d9839cbfbeeb0d6ea42d66",
+      "stdout_truncated": false,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "npm",
+        "run",
+        "build:web"
+      ],
+      "duration_seconds": 0.882,
+      "exit_code": 0,
+      "id": "V-003-build-web",
+      "status": "pass",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_truncated": false,
+      "stdout": "\n> signoff-workspace@0.1.0-alpha.1 build:web\n> npm --workspace @signoff/web run build && python3 scripts/copy_web_dist.py\n\n\n> @signoff/web@0.1.0-alpha.1 build\n> tsc -b && vite build\n\nvite v8.1.0 building client environment for production...\n\u001b[2K\ntransforming...✓ 107 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.53 kB │ gzip:   0.32 kB\ndist/assets/index-B76Cq3St.css   10.66 kB │ gzip:   3.12 kB\ndist/assets/index-BdqwdZpw.js   320.59 kB │ gzip: 100.67 kB\n\n✓ built in 74ms\ncopied apps/web/dist -> src/signoff/web_dist\n",
+      "stdout_sha256": "9f74158741a1f99a166ae5acb6a89dbb40c54a05309221e593aa475ac55320e5",
+      "stdout_truncated": false,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "python3",
+        "scripts/test.py"
+      ],
+      "duration_seconds": 7.411,
+      "exit_code": 0,
+      "id": "V-004-runtime-tests",
+      "status": "pass",
+      "stderr": "test_01_golden_path_reaches_done_with_receipts (tests.test_conformance.ConformanceTests.test_01_golden_path_reaches_done_with_receipts) ... ok\ntest_02_placeholder_draft_cannot_reach_council (tests.test_conformance.ConformanceTests.test_02_placeholder_draft_cannot_reach_council) ... ok\ntest_03_locked_spec_tamper_is_detected (tests.test_conformance.ConformanceTests.test_03_locked_spec_tamper_is_detected) ... ok\ntest_04_council_must_answer_shared_claim_registry (tests.test_conformance.ConformanceTests.test_04_council_must_answer_shared_claim_registry) ... ok\ntest_05_council_duplicate_context_is_not_quorum (tests.test_conformance.ConformanceTests.test_05_council_duplicate_context_is_not_quorum) ... ok\ntest_06_council_conflict_requires_evidence_resolution (tests.test_conformance.ConformanceTests.test_06_council_conflict_requires_evidence_resolution) ... ok\ntest_07_council_conflict_can_be_resolved_by_evidence (tests.test_conformance.ConformanceTests.test_07_council_conflict_can_be_resolved_by_evidence) ... ok\ntest_08_unmapped_file_fails_scope (tests.test_conformance.ConformanceTests.test_08_unmapped_file_fails_scope) ... ok\ntest_09_changed_line_budget_is_enforced (tests.test_conformance.ConformanceTests.test_09_changed_line_budget_is_enforced) ... ok\ntest_10_failing_command_cannot_be_called_evidence (tests.test_conformance.ConformanceTests.test_10_failing_command_cannot_be_called_evidence) ... ok\ntest_11_verification_mutation_invalidates_patch (tests.test_conformance.ConformanceTests.test_11_verification_mutation_invalidates_patch) ... ok\ntest_12_builder_cannot_count_as_reviewer (tests.test_conformance.ConformanceTests.test_12_builder_cannot_count_as_reviewer) ... ok\ntest_13_duplicate_review_context_is_not_quorum (tests.test_conformance.ConformanceTests.test_13_duplicate_review_context_is_not_quorum) ... ok\ntest_14_unknown_cannot_be_promoted_to_pass (tests.test_conformance.ConformanceTests.test_14_unknown_cannot_be_promoted_to_pass) ... ok\ntest_15_vote_is_not_valid_arbitration (tests.test_conformance.ConformanceTests.test_15_vote_is_not_valid_arbitration) ... ok\ntest_16_evidence_can_resolve_review_disagreement (tests.test_conformance.ConformanceTests.test_16_evidence_can_resolve_review_disagreement) ... ok\ntest_17_high_finding_cannot_be_silently_dismissed (tests.test_conformance.ConformanceTests.test_17_high_finding_cannot_be_silently_dismissed) ... ok\ntest_18_ledger_tamper_is_detected (tests.test_conformance.ConformanceTests.test_18_ledger_tamper_is_detected) ... ok\ntest_19_done_requires_cumulative_final_contract (tests.test_conformance.ConformanceTests.test_19_done_requires_cumulative_final_contract) ... ok\ntest_20_install_is_idempotent_and_local (tests.test_conformance.ConformanceTests.test_20_install_is_idempotent_and_local) ... ok\ntest_21_historical_receipt_tamper_is_detected (tests.test_conformance.ConformanceTests.test_21_historical_receipt_tamper_is_detected) ... ok\ntest_overview_and_artifact_round_trip (tests.test_web.WebApiTests.test_overview_and_artifact_round_trip) ... 127.0.0.1 - - [25/Jun/2026 13:16:40] \"GET /api/overview HTTP/1.1\" 200 -\n127.0.0.1 - - [25/Jun/2026 13:16:40] \"GET /api/artifacts?missionId=mission-20260625-051640-16eea4ba HTTP/1.1\" 200 -\n127.0.0.1 - - [25/Jun/2026 13:16:40] \"PUT /api/artifact HTTP/1.1\" 200 -\nok\ntest_static_ui_and_illegal_action_error (tests.test_web.WebApiTests.test_static_ui_and_illegal_action_error) ... 127.0.0.1 - - [25/Jun/2026 13:16:41] \"GET / HTTP/1.1\" 200 -\n127.0.0.1 - - [25/Jun/2026 13:16:41] \"POST /api/action HTTP/1.1\" 400 -\nok\n\n----------------------------------------------------------------------\nRan 23 tests in 7.305s\n\nOK\n",
+      "stderr_sha256": "cd24a9579a247a8e9a78f64ecedd63c2c8364062314bc80f55be551e27413a29",
+      "stderr_truncated": false,
+      "stdout": "\nConformance: 23/23 passed\n",
+      "stdout_sha256": "4d06793de4d495ab35355968bbed3efbd4501b4ec1ba87f951d42f4ef5bc9920",
+      "stdout_truncated": false,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "python3",
+        "scripts/check_repo.py"
+      ],
+      "duration_seconds": 0.215,
+      "exit_code": 0,
+      "id": "V-005-repo-check",
+      "status": "pass",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_truncated": false,
+      "stdout": "Repository check passed\n",
+      "stdout_sha256": "98d1b5bb9cd2dd146b55058a1c55fd4f417c82b156c494e61bca42efa49e4635",
+      "stdout_truncated": false,
+      "working_directory": "."
+    },
+    {
+      "acceptance_ids": [
+        "AC-001"
+      ],
+      "command": [
+        "python3",
+        "-c",
+        "import subprocess, sys; out = subprocess.check_output(['git', 'status', '--short', '--untracked-files=all'], text=True); bad = [line for line in out.splitlines() if line.startswith('?? node_modules/') or line.startswith('?? apps/web/dist/')]; print(out, end=''); sys.exit(1 if bad else 0)"
+      ],
+      "duration_seconds": 0.089,
+      "exit_code": 0,
+      "id": "V-006-generated-output-status",
+      "status": "pass",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_truncated": false,
+      "stdout": " M .gitignore\n M package-lock.json\n?? .signoff/missions/mission-20260625-051108-2c506d76/CHARTER.md\n?? .signoff/missions/mission-20260625-051108-2c506d76/COUNCIL.json\n?? .signoff/missions/mission-20260625-051108-2c506d76/GOAL.txt\n?? .signoff/missions/mission-20260625-051108-2c506d76/LEDGER.jsonl\n?? .signoff/missions/mission-20260625-051108-2c506d76/LOCK.json\n?? .signoff/missions/mission-20260625-051108-2c506d76/SPEC.json\n?? .signoff/missions/mission-20260625-051108-2c506d76/STATE.json\n?? .signoff/missions/mission-20260625-051108-2c506d76/iterations/0001/CONTRACT.json\n?? .signoff/missions/mission-20260625-051108-2c506d76/iterations/0001/EVIDENCE.json\n?? .signoff/missions/mission-20260625-051108-2c506d76/iterations/0001/GUARD.json\n?? .signoff/missions/mission-20260625-051108-2c506d76/iterations/0001/PATCH.diff\n?? .signoff/state.json\n",
+      "stdout_sha256": "0130f0bf34f4c1adc9904894a0f21bd2e0b3939b384b1643fe73795291d1a33f",
+      "stdout_truncated": false,
+      "working_directory": "."
+    }
+  ],
+  "contract_sha256": "d53bc39fb410f315bf86774ec3058c9c124be945ed0f13199935996c071a5dac",
+  "generated_at": "2026-06-25T05:16:41+00:00",
+  "iteration": 1,
+  "mission_id": "mission-20260625-051108-2c506d76",
+  "patch_after_sha256": "b441a6d76f0dc5eb530c060d7dd522576e3c3fc63d09cc2f2f1bfa5a4d30d737",
+  "patch_before_sha256": "b441a6d76f0dc5eb530c060d7dd522576e3c3fc63d09cc2f2f1bfa5a4d30d737",
+  "patch_sha256": "b441a6d76f0dc5eb530c060d7dd522576e3c3fc63d09cc2f2f1bfa5a4d30d737",
+  "schema_version": 1,
+  "scope_after": {
+    "budgets": {
+      "changed_lines": 180,
+      "production_files": 2
+    },
+    "changed_files": [
+      ".gitignore",
+      "package-lock.json"
+    ],
+    "changed_lines": 135,
+    "file_budget_overflow": false,
+    "forbidden_files": [],
+    "line_budget_overflow": false,
+    "production_file_count": 2,
+    "production_files": [
+      ".gitignore",
+      "package-lock.json"
+    ],
+    "status": "pass",
+    "unmapped_files": []
+  },
+  "scope_before": {
+    "budgets": {
+      "changed_lines": 180,
+      "production_files": 2
+    },
+    "changed_files": [
+      ".gitignore",
+      "package-lock.json"
+    ],
+    "changed_lines": 135,
+    "file_budget_overflow": false,
+    "forbidden_files": [],
+    "line_budget_overflow": false,
+    "production_file_count": 2,
+    "production_files": [
+      ".gitignore",
+      "package-lock.json"
+    ],
+    "status": "pass",
+    "unmapped_files": []
+  },
+  "status": "pass",
+  "verification_mutated_patch": false
+}

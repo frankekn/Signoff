@@ -1,0 +1,62 @@
+DoneClaim {
+  todo: 3,
+  changed_files: [
+    "apps/web/src/pages/Dashboard.tsx",
+    "apps/web/src/styles.css"
+  ],
+  tests: [
+    {
+      scenario: "typecheck final Todo 3 source",
+      invocation: "npm run typecheck 2>&1 | tee .omo/evidence/task-3-signoff-ui-flow-typecheck.txt",
+      observable: "exit 0; tsc -b --pretty false completed",
+      artifact: ".omo/evidence/task-3-signoff-ui-flow-typecheck.txt"
+    }
+  ],
+  manual_qa: [
+    {
+      scenario: "red baseline before production change",
+      invocation: "node /tmp/signoff-ui-flow-agent-copy-red.mjs",
+      observable: "copy_has_mission_id=false; copy_has_editable_paths=false; prompt_calls_after_note_action=1",
+      artifact: ".omo/evidence/task-3-signoff-ui-flow-agent-copy-red.txt"
+    },
+    {
+      scenario: "DRAFT live agent handoff copy from Vite source plus Python RepoFixture API",
+      invocation: "node /tmp/signoff-ui-flow-agent-copy-qa.mjs",
+      observable: "PASS lines for mission id, DRAFT, CHARTER.md, SPEC.json, live next action, action limits, locked/generated instruction",
+      artifact: ".omo/evidence/task-3-signoff-ui-flow-agent-copy.txt"
+    },
+    {
+      scenario: "COUNCIL_REVIEW inline note flow with window.prompt monkeypatch",
+      invocation: "node /tmp/signoff-ui-flow-agent-copy-qa.mjs",
+      observable: "PASS inline note UI, empty note blocked before /api/action, valid { action: \"pivot\", note } posted once, DRAFT reached, window.prompt calls remained 0",
+      artifact: ".omo/evidence/task-3-signoff-ui-flow-no-prompt.txt"
+    },
+    {
+      scenario: "browser screenshot of final source-served UI",
+      invocation: "node /tmp/signoff-ui-flow-agent-copy-qa.mjs",
+      observable: "non-empty PNG captured from Playwright Chromium",
+      artifact: ".omo/evidence/task-3-signoff-ui-flow-agent-copy.png"
+    },
+    {
+      scenario: "flaky-tests rerun",
+      invocation: "node /tmp/signoff-ui-flow-agent-copy-qa.mjs",
+      observable: "rerun exited 0 after final source trim",
+      artifact: ".omo/evidence/task-3-signoff-ui-flow-agent-copy.txt"
+    }
+  ],
+  adversarial_classes: {
+    dirty_worktree: "Pre-existing dirty files remain: .gitignore, apps/web/src/api.ts, apps/web/src/components/PhaseRail.tsx, package-lock.json, src/signoff/*.py, tests/*.py, generated src/signoff/web_dist/**. Todo 3 only claims Dashboard.tsx and styles.css source edits; generated bundles are unclaimed for Todo 7.",
+    stale_state: "Browser QA used Vite dev source at http://127.0.0.1:5173 with Python API on 127.0.0.1:8765, not src/signoff/web_dist or apps/web/dist.",
+    misleading_success_output: "QA transcripts contain exact PASS assertions and copied handoff text.",
+    flaky_tests: "Browser QA command was rerun after final source trim and exited 0.",
+    prompt_injection: "Prompt-injection-shaped note text was asserted in the /api/action JSON payload unchanged; UI never evaluates or inserts it as HTML.",
+    malformed_input: "Blank note submit produced inline validation and no /api/action request.",
+    cancel_resume: "No plan checkbox, Boulder, ledger, generated bundle, or packaged dist edits were made for this Todo.",
+    hung_or_long_commands: "QA scripts terminate Vite, Python server, and Chromium; ports 5173 and 8765 had no listeners after cleanup."
+  },
+  cleanup: "No dev server, Python API server, or browser process left intentionally running.",
+  risks: [
+    "Dashboard.tsx was trimmed to 248 pure LOC after the programming post-write check.",
+    "No packaged web_dist rebuild was run because Todo 7 owns generated bundles."
+  ]
+}

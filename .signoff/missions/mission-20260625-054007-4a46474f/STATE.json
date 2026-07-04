@@ -1,0 +1,89 @@
+{
+  "accepted_criteria": [
+    "AC-001"
+  ],
+  "council_first_slice": "Normalize lockfile registry URLs, ignore generated dependency/build/cache outputs, make receipt patch generation apply existing control-path filtering, and add the focused conformance test.",
+  "created_at": "2026-06-25T05:40:07+00:00",
+  "current": null,
+  "final_patch_file_sha256": "099e2d5a312903ba43081603349aca8fe3cca7beff836b888901fad6e8ce57e7",
+  "final_receipt_sha256": "cc3694698f4b5085a73cd42a74dcae45492b89f7c5e7a71b5e13b54774b79937",
+  "goal_sha256": "e9107956572ffb732fb388c26be5eb8ce38793389633c3fc32d8c19d8e6afd58",
+  "history": [
+    {
+      "acceptance_criteria": [
+        "AC-001"
+      ],
+      "closed_at": "2026-06-25T05:48:56+00:00",
+      "contract_sha256": "f4d836ce1c1b79acad28f8178cfd4389911dc8fc204d68ff9ae618bd86ccb0bf",
+      "decision": "DONE",
+      "evidence_sha256": "1334f9e0069f7c8d5c380e3ec613f949f10eef69c44813a6fe343a855c3f6d11",
+      "iteration": 1,
+      "note": "",
+      "patch_sha256": "099e2d5a312903ba43081603349aca8fe3cca7beff836b888901fad6e8ce57e7",
+      "proof_level": "peer-reviewed",
+      "review_gate_sha256": "204ef25e3385a4603c8c290cca8aa8ac6a0e270463f22d43226c42307c91bebf",
+      "scope": {
+        "budgets": {
+          "changed_lines": 220,
+          "production_files": 4
+        },
+        "changed_files": [
+          ".gitignore",
+          "package-lock.json",
+          "src/signoff/git.py",
+          "tests/test_conformance.py"
+        ],
+        "changed_lines": 154,
+        "file_budget_overflow": false,
+        "forbidden_files": [],
+        "line_budget_overflow": false,
+        "production_file_count": 3,
+        "production_files": [
+          ".gitignore",
+          "package-lock.json",
+          "src/signoff/git.py"
+        ],
+        "status": "pass",
+        "unmapped_files": []
+      }
+    }
+  ],
+  "iteration": 1,
+  "lock": {
+    "acceptance_ids": [
+      "AC-001"
+    ],
+    "charter_sha256": "fec7ecaf4bd50e1520c6a14ea890cccf63da8b25a8be0823a7539777d5286e29",
+    "council_result": {
+      "advisor_count": 2,
+      "chair": {
+        "context_id": "codex-main-clean-final-chair",
+        "model": "gpt-5-codex",
+        "participant_id": "chair-clean-final",
+        "provider": "codex"
+      },
+      "conflicts": [],
+      "resolved_conflicts": [],
+      "verdict": "PROCEED"
+    },
+    "council_sha256": "d24a345d199827ea8c0c80a285f9434f5c5dbfeee61a2362bfdfcece3ab7e8d4",
+    "goal_sha256": "40401826bb2755e490222504de616cb96918ceb993c09b814621481a5c5c4560",
+    "locked_at": "2026-06-25T05:45:11+00:00",
+    "max_iterations": 5,
+    "mission_id": "mission-20260625-054007-4a46474f",
+    "requirement_ids": [
+      "REQ-001"
+    ],
+    "revision": 1,
+    "schema_version": 1,
+    "spec_sha256": "f27c733d5351e6276cd0c720693ed465068d8ee27c20a08912b6b717fcf3c00a"
+  },
+  "lock_file_sha256": "14897f0eb4fcd24b64fa120a8edac1385f8a66d28e7fdeb71b12969acd28c550",
+  "max_iterations": 5,
+  "mission_baseline": "92c5526f8de0bd0afa716758954127bfc3dbc605",
+  "mission_id": "mission-20260625-054007-4a46474f",
+  "phase": "DONE",
+  "revision": 1,
+  "schema_version": 1,
+  "updated_at": "2026-06-25T05:48:56+00:00"
+}

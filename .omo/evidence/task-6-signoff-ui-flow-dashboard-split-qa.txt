@@ -1,0 +1,22 @@
+scenario: Todo 6 dirty artifact protections after Dashboard component split
+invocation.editor: node /tmp/signoff-ui-flow-editor-qa.mjs
+artifact.editor: /Users/termtek/Github/Signoff/.omo/evidence/task-6-signoff-ui-flow-editor.txt
+screenshot.editor: /Users/termtek/Github/Signoff/.omo/evidence/task-6-signoff-ui-flow-editor.png
+binaryObservable.artifactSwitchBlocked: true
+binaryObservable.missionSwitchBlocked: true
+binaryObservable.tabSwitchBlocked: true
+binaryObservable.savedAfterClick: true
+binaryObservable.switchAfterSave: true
+binaryObservable.switchMissionAfterDiscard: true
+result.editor: PASS
+
+invocation.tabSwitch: node /tmp/signoff-ui-flow-tab-switch-qa.mjs
+artifact.tabSwitch: /Users/termtek/Github/Signoff/.omo/evidence/task-6-signoff-ui-flow-tab-switch.txt
+screenshot.tabSwitch: /Users/termtek/Github/Signoff/.omo/evidence/task-6-signoff-ui-flow-tab-switch.png
+binaryObservable.tabSwitchPreservedDraft: true
+binaryObservable.timelineVisibleAfterClick: false
+binaryObservable.warningCountAfterTimelineClick: 1
+result.tabSwitch: PASS
+
+visualSurfaceCheck: screenshots opened after QA; extracted components preserve existing classes/sections, dirty marker remains visible after blocked Timeline click, no obvious render breakage observed at 1280x900.
+listenerCleanup: /Users/termtek/Github/Signoff/.omo/evidence/task-6-signoff-ui-flow-dashboard-split-listeners.txt reports PASS after browser probes.

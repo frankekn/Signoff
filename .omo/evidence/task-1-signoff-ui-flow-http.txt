@@ -1,0 +1,52 @@
+server_pid=61588
+server_ready={"integrity": "http://127.0.0.1:63618", "pivot": "http://127.0.0.1:63619", "projects": ["/var/folders/6h/gkfdh2zd3jv3w655c3s1gxh40000gn/T/loop-test-_iex53vk", "/var/folders/6h/gkfdh2zd3jv3w655c3s1gxh40000gn/T/loop-test-cei0frr_"]}
+
+--- hard integrity overview ---
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.14.4
+Date: Thu, 25 Jun 2026 15:36:45 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 1111
+Cache-Control: no-store
+X-Content-Type-Options: nosniff
+
+{"data": {"actions": [], "blockedByIntegrity": true, "canStartMission": false, "editablePaths": [], "goal": "Change greet to return hello world", "integrityMessage": "Inspect and repair integrity: locked spec hash mismatch; use a recorded Council pivot instead of editing it", "integrityStatus": "fail", "missions": [{"active": true, "goal": "Change greet to return hello world", "iteration": 0, "missionId": "mission-20260625-153644-89b4ef73", "phase": "LOCKED", "revision": 1, "updatedAt": "2026-06-25T15:36:44+00:00"}], "next": "Inspect and repair integrity before taking another action.", "product": "Signoff", "project": "/private/var/folders/6h/gkfdh2zd3jv3w655c3s1gxh40000gn/T/loop-test-_iex53vk", "status": {"accepted_criteria": [], "current": null, "integrity": {"error": "locked spec hash mismatch; use a recorded Council pivot instead of editing it", "status": "fail"}, "iteration": 0, "mission_id": "mission-20260625-153644-89b4ef73", "next": "Run ./signoff prepare-slice to create exactly one bounded iteration contract.", "phase": "LOCKED", "revision": 1}, "version": "0.1.0-alpha.1"}, "ok": true}
+
+--- pivot overview ---
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.14.4
+Date: Thu, 25 Jun 2026 15:36:45 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 1068
+Cache-Control: no-store
+X-Content-Type-Options: nosniff
+
+{"data": {"actions": [], "blockedByIntegrity": false, "canStartMission": false, "editablePaths": [], "goal": "Change greet to return hello world", "integrityMessage": "Integrity checks passed.", "integrityStatus": "pass", "missions": [{"active": true, "goal": "Change greet to return hello world", "iteration": 0, "missionId": "mission-20260625-153644-42ac4319", "phase": "PIVOT", "revision": 1, "updatedAt": "2026-06-25T15:36:45+00:00"}], "next": "Terminal result: PIVOT. Start a revised mission only through the pivot gate.", "product": "Signoff", "project": "/private/var/folders/6h/gkfdh2zd3jv3w655c3s1gxh40000gn/T/loop-test-cei0frr_", "status": {"accepted_criteria": [], "current": null, "integrity": {"historical_receipts": 0, "ledger": "pass", "lock": "unlocked", "mission_id": "mission-20260625-153644-42ac4319", "phase": "PIVOT"}, "iteration": 0, "mission_id": "mission-20260625-153644-42ac4319", "next": "Terminal result: PIVOT. Start a revised mission only through the pivot gate.", "phase": "PIVOT", "revision": 1}, "version": "0.1.0-alpha.1"}, "ok": true}
+
+--- pivot start rejection ---
+HTTP/1.0 400 Bad Request
+Server: BaseHTTP/0.6 Python/3.14.4
+Date: Thu, 25 Jun 2026 15:36:45 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 97
+Cache-Control: no-store
+X-Content-Type-Options: nosniff
+
+{"error": "mission mission-20260625-153644-42ac4319 is still active in phase PIVOT", "ok": false}
+
+--- malformed missions payload ---
+HTTP/1.0 400 Bad Request
+Server: BaseHTTP/0.6 Python/3.14.4
+Date: Thu, 25 Jun 2026 15:36:45 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 60
+Cache-Control: no-store
+X-Content-Type-Options: nosniff
+
+{"error": "request body must be a JSON object", "ok": false}
+
+zsh:wait:104: pid 61588 is not a child of this shell
+cleanup=server_pid_61588_terminated
+
+--- cleanup verification ---
+cleanup=server_pid_61588_not_running

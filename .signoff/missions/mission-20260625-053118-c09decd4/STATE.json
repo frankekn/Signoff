@@ -1,0 +1,67 @@
+{
+  "accepted_criteria": [],
+  "council_first_slice": "Apply the saved four-file patch: ignore generated UI outputs, normalize package-lock public registry URLs, make patch receipts exclude Signoff control paths, and add the conformance test.",
+  "created_at": "2026-06-25T05:31:18+00:00",
+  "current": {
+    "acceptance_criteria": [
+      "AC-001"
+    ],
+    "activated_at": "2026-06-25T05:37:19+00:00",
+    "attempt": 1,
+    "baseline": "442834f030b9e067a5813c316da220cb6720e387",
+    "builder": {
+      "context_id": "codex-main-signoff-clean-slice",
+      "model": "gpt-5-codex",
+      "participant_id": "builder-codex-main",
+      "provider": "codex"
+    },
+    "contract_sha256": "3275e18c227175970d5f76a1bbd5eda30b87b63b7751caf17445509eed84a6f7",
+    "final": true,
+    "iteration": 1,
+    "requirements": [
+      "REQ-001"
+    ],
+    "root_causes": []
+  },
+  "goal_sha256": "1b88b7b85534131d8d1e1f0970483a327fe0e18c2ca19bf13be69d78664f9fca",
+  "history": [],
+  "iteration": 0,
+  "lock": {
+    "acceptance_ids": [
+      "AC-001"
+    ],
+    "charter_sha256": "625500d33e1eb4c65b9f779bd0443b79f359e6eceb6202446cf9bfd708d34b7a",
+    "council_result": {
+      "advisor_count": 2,
+      "chair": {
+        "context_id": "council-clean-chair-context",
+        "model": "gpt-5.5-codex",
+        "participant_id": "chair-clean",
+        "provider": "codex"
+      },
+      "conflicts": [],
+      "resolved_conflicts": [],
+      "verdict": "PROCEED"
+    },
+    "council_sha256": "adf5e38f469ce1bed2785c80f870851d675859a0a398be8888dd88fb7f738e6d",
+    "goal_sha256": "e95634d664448e6ed1d2369e4d7981ee6d1141ccf1198066174b54d235df36e0",
+    "locked_at": "2026-06-25T05:36:25+00:00",
+    "max_iterations": 5,
+    "mission_id": "mission-20260625-053118-c09decd4",
+    "requirement_ids": [
+      "REQ-001"
+    ],
+    "revision": 1,
+    "schema_version": 1,
+    "spec_sha256": "09391abdd0e7d68559f1ae935929c0f3228445b3682122c0042535fd38b9fb7c"
+  },
+  "lock_file_sha256": "386cd5238414afb75886c6457af843582a1b226d03a92acf249ae2d2c2c0eaf3",
+  "max_iterations": 5,
+  "mission_baseline": "435c0b52dc770f7ab61eaad6e31e1bc55c378e72",
+  "mission_id": "mission-20260625-053118-c09decd4",
+  "phase": "STOPPED",
+  "revision": 1,
+  "schema_version": 1,
+  "terminal_reason": "Slice guard captured Python bytecode caches before generated-output ignores were applied; restarting from a cache-free baseline",
+  "updated_at": "2026-06-25T05:39:54+00:00"
+}

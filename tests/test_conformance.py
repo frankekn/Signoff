@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -200,6 +201,22 @@ class ConformanceTests(unittest.TestCase):
         atomic_write_json(evidence, data)
         with self.assertRaises(IntegrityError):
             self.fx.runtime.integrity()
+
+    def test_22_patch_receipt_excludes_signoff_control_artifacts(self) -> None:
+        control = self.fx.project / "AGENTS.md"
+        control.write_text("initial control instructions\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(self.fx.project), "add", "AGENTS.md"], check=True)
+        subprocess.run(["git", "-C", str(self.fx.project), "commit", "-qm", "track control artifact"], check=True)
+        self.fx.lock()
+        control.write_text("modified control instructions\n", encoding="utf-8")
+        scratch = self.fx.project / ".signoff" / "agent-scratch.log"
+        scratch.write_text("untracked control noise\n", encoding="utf-8")
+        iteration = self.fx.passing_evidence(final=True)
+        sealed_patch = (iteration / "PATCH.diff").read_text(encoding="utf-8")
+        self.assertNotIn("diff --git a/AGENTS.md", sealed_patch)
+        self.assertNotIn("modified control instructions", sealed_patch)
+        self.assertNotIn("diff --git a/.signoff/", sealed_patch)
+        self.assertNotIn("agent-scratch.log", sealed_patch)
 
 
 if __name__ == "__main__":

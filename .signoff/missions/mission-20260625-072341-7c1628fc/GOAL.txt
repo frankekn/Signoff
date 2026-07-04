@@ -1,0 +1,1 @@
+UI should allow starting the next mission after a DONE mission

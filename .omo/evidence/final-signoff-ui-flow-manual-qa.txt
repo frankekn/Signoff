@@ -1,0 +1,623 @@
+APPROVE
+surface: packaged Signoff UI served by create_server(static_root=/Users/termtek/Github/Signoff/src/signoff/web_dist)
+exact invocation: cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs
+baseUrl: http://127.0.0.1:51208
+project: /var/folders/6h/gkfdh2zd3jv3w655c3s1gxh40000gn/T/loop-test-nn2firgr
+artifactRefs: /Users/termtek/Github/Signoff/.omo/evidence/final-signoff-ui-flow-desktop.png, /Users/termtek/Github/Signoff/.omo/evidence/final-signoff-ui-flow-mobile.png
+
+binary observables:
+PASS static root path: /Users/termtek/Github/Signoff/src/signoff/web_dist
+PASS packaged index exists: src/signoff/web_dist/index.html non-empty
+PASS start/reach DRAFT: phase=DRAFT mission=mission-20260625-203627-f79d7021
+PASS editable draft paths: .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md, .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json
+PASS dirty artifact switch blocked: warning visible and CHARTER draft retained
+PASS dirty tab switch blocked: warning visible after Timeline click
+PASS save permits artifact switch: SPEC selected after save
+PASS agent handoff mission id: mission-20260625-203627-f79d7021
+PASS agent handoff phase: Phase: DRAFT
+PASS agent handoff editable paths: Read AGENTS.md.
+Mission id: mission-20260625-203627-f79d7021
+Phase: DRAFT
+Live next action: Complete .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md and .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json, then run ./signoff prepare-council.
+Editable paths:
+- .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md
+- .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json
+Action limits:
+- Send to Council (prepare_council)
+- Stop mission (finish_stopped, note required)
+Do not edit locked or generated artifacts. Do not edit receipts or files outside editable paths.
+PASS agent handoff legal next action: Read AGENTS.md.
+Mission id: mission-20260625-203627-f79d7021
+Phase: DRAFT
+Live next action: Complete .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md and .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json, then run ./signoff prepare-council.
+Editable paths:
+- .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md
+- .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json
+Action limits:
+- Send to Council (prepare_council)
+- Stop mission (finish_stopped, note required)
+Do not edit locked or generated artifacts. Do not edit receipts or files outside editable paths.
+PASS fixture verify_failed: {"ok":true,"phase":"VERIFY_FAILED","result":{"phase":"VERIFY_FAILED","status":"fail","checks":[{"id":"V-001","status":"fail","exit_code":1}],"scope":{"status":"pass","changed_files":[],"unmapped_files":[],"forbidden_files":[],"production_files":[],"production_file_count":0,"changed_lines":0,"budgets":{"changed_lines":20,"production_files":1},"file_budget_overflow":false,"line_budget_overflow":false},"verification_mutated_patch":false,"evidence_path":".signoff/missions/mission-20260625-203627-f79
+PASS VERIFY_FAILED reached: phase=VERIFY_FAILED
+PASS VERIFY_FAILED not signed off: no signed-off/receipt text
+PASS VERIFY_FAILED remediation path: Check scope + Verify again visible
+PASS VERIFY_FAILED proof command: failed command visible
+PASS fixture reviewed_nonfinal: {"ok":true,"phase":"REVIEWED","result":{"phase":"REVIEWED","decision":"PASS","reviewer_count":2,"proof_level":"diverse-reviewed","conflicts":[],"resolved_nonpass":[],"act_on":[],"judge":{"participant_id":"judge","provider":"judge-provider","model":"judge-model","context_id":"judge-context"},"gate_path":".signoff/missions/mission-20260625-203639-adcc882d/iterations/0001/REVIEW_GATE.json","next":"Follow the deterministic gate: ./signoff finish accepted, ./signoff finish done, or ./signoff finish r
+PASS REVIEWED nonfinal state: phase=REVIEWED final=false
+PASS nonfinal signoff legality truthful: buttons signoff=0 accept=1 rework=1
+PASS fixture done: {"ok":true,"phase":"DONE","result":{"phase":"DONE","decision":"DONE","accepted_criteria":["AC-001"],"final_patch_file_sha256":"14f1204fef8eb3e552d9a9fd6ee1d9965a8ffbb996dd7b8889fd2970c3f40e2a","final_receipt_sha256":"7a44cb15cec9d5b06f4d1fa9091f7011253bed4ba899aa304ea4eb8adf2a7c53","next":"Terminal result: DONE. Do not continue implementation under this mission."},"missionId":"mission-20260625-203639-adcc882d"}
+PASS DONE terminal state: phase=DONE canStart=true
+PASS DONE signed-off proof visible: receiptHashPrefix=7a44cb15cec9 contract.final=true
+PASS DONE start next mission separate: separate start card visible
+PASS old artifacts read-only API: 11 old artifacts all read-only
+PASS mission history selection: old mission proof selected
+PASS active actions remain active-scoped: active DONE start remains visible while inspecting old mission
+PASS old artifacts read-only UI: textarea readOnly flags=[false,true]
+PASS keyboard reachability critical controls: BUTTON:Activeadcc882d
+PASS cleanup/listener receipt: {"ok":true,"cleanup":"shutdown_received"}
+PASS server process exited: exit=0 stderr=127.0.0.1 - - [26/Jun/2026 04:36:32] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /assets/index-DjluUngr.css HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /assets/index-DkMphtmB.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /api/artifacts?missionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /favicon.ico HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203627-f79d7021%2FCHARTER.md HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:33] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:34] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:34] "PUT /api/arti
+PASS desktop screenshot non-empty: /Users/termtek/Github/Signoff/.omo/evidence/final-signoff-ui-flow-desktop.png
+PASS mobile screenshot non-empty: /Users/termtek/Github/Signoff/.omo/evidence/final-signoff-ui-flow-mobile.png
+PASS console/page errors: none
+
+console/page errors:
+none
+
+cleanup receipt: server shutdown requested, child exit captured
+stderr:
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /assets/index-DjluUngr.css HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /assets/index-DkMphtmB.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /api/artifacts?missionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /favicon.ico HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:32] "GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203627-f79d7021%2FCHARTER.md HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:33] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:34] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:34] "PUT /api/artifact HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:34] "GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203627-f79d7021%2FCHARTER.md HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:34] "GET /api/artifacts?missionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:34] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:35] "GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203627-f79d7021%2FSPEC.json HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:37] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:37] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:37] "GET /favicon.ico HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:37] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:37] "GET /api/artifacts?missionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:37] "GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203627-f79d7021%2FCHARTER.md HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:38] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:39] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:40] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:41] "GET /api/artifacts?missionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:42] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:44] "GET /api/artifacts?missionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:44] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:44] "GET /favicon.ico HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:44] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:44] "GET /api/artifacts?missionId=mission-20260625-203639-adcc882d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:44] "GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203639-adcc882d%2FCHARTER.md HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:45] "GET /api/overview?inspectMissionId=mission-20260625-203639-adcc882d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:45] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:47] "GET /api/overview?inspectMissionId=mission-20260625-203639-adcc882d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:47] "GET /api/artifacts?missionId=mission-20260625-203639-adcc882d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:49] "GET /api/overview?inspectMissionId=mission-20260625-203639-adcc882d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:49] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:49] "GET /favicon.ico HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:49] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:49] "GET /api/artifacts?missionId=mission-20260625-203639-adcc882d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:49] "GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203639-adcc882d%2FCHARTER.md HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:49] "GET /api/overview?inspectMissionId=mission-20260625-203639-adcc882d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:50] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:50] "GET /api/artifacts?missionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:50] "GET /api/artifacts?missionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:50] "GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:50] "GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203627-f79d7021%2FCHARTER.md HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:54] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:55] "GET /assets/index-DjluUngr.css HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:55] "GET /assets/index-DkMphtmB.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:55] "GET /api/overview HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:55] "GET /favicon.ico HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:55] "GET /api/artifacts?missionId=mission-20260625-203639-adcc882d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:56] "GET /api/overview?inspectMissionId=mission-20260625-203639-adcc882d HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jun/2026 04:36:56] "GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203639-adcc882d%2FCHARTER.md HTTP/1.1" 200 -
+
+manualQa:
+{
+  "surfaceEvidence": [
+    {
+      "scenarioId": "F3-01",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS static root path: /Users/termtek/Github/Signoff/src/signoff/web_dist"
+    },
+    {
+      "scenarioId": "F3-02",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS packaged index exists: src/signoff/web_dist/index.html non-empty"
+    },
+    {
+      "scenarioId": "F3-03",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS start/reach DRAFT: phase=DRAFT mission=mission-20260625-203627-f79d7021"
+    },
+    {
+      "scenarioId": "F3-04",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS editable draft paths: .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md, .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json"
+    },
+    {
+      "scenarioId": "F3-05",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS dirty artifact switch blocked: warning visible and CHARTER draft retained"
+    },
+    {
+      "scenarioId": "F3-06",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS dirty tab switch blocked: warning visible after Timeline click"
+    },
+    {
+      "scenarioId": "F3-07",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS save permits artifact switch: SPEC selected after save"
+    },
+    {
+      "scenarioId": "F3-08",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS agent handoff mission id: mission-20260625-203627-f79d7021"
+    },
+    {
+      "scenarioId": "F3-09",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS agent handoff phase: Phase: DRAFT"
+    },
+    {
+      "scenarioId": "F3-10",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS agent handoff editable paths: Read AGENTS.md.\nMission id: mission-20260625-203627-f79d7021\nPhase: DRAFT\nLive next action: Complete .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md and .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json, then run ./signoff prepare-council.\nEditable paths:\n- .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md\n- .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json\nAction limits:\n- Send to Council (prepare_council)\n- Stop mission (finish_stopped, note required)\nDo not edit locked or generated artifacts. Do not edit receipts or files outside editable paths."
+    },
+    {
+      "scenarioId": "F3-11",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS agent handoff legal next action: Read AGENTS.md.\nMission id: mission-20260625-203627-f79d7021\nPhase: DRAFT\nLive next action: Complete .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md and .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json, then run ./signoff prepare-council.\nEditable paths:\n- .signoff/missions/mission-20260625-203627-f79d7021/CHARTER.md\n- .signoff/missions/mission-20260625-203627-f79d7021/SPEC.json\nAction limits:\n- Send to Council (prepare_council)\n- Stop mission (finish_stopped, note required)\nDo not edit locked or generated artifacts. Do not edit receipts or files outside editable paths."
+    },
+    {
+      "scenarioId": "F3-12",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS fixture verify_failed: {\"ok\":true,\"phase\":\"VERIFY_FAILED\",\"result\":{\"phase\":\"VERIFY_FAILED\",\"status\":\"fail\",\"checks\":[{\"id\":\"V-001\",\"status\":\"fail\",\"exit_code\":1}],\"scope\":{\"status\":\"pass\",\"changed_files\":[],\"unmapped_files\":[],\"forbidden_files\":[],\"production_files\":[],\"production_file_count\":0,\"changed_lines\":0,\"budgets\":{\"changed_lines\":20,\"production_files\":1},\"file_budget_overflow\":false,\"line_budget_overflow\":false},\"verification_mutated_patch\":false,\"evidence_path\":\".signoff/missions/mission-20260625-203627-f79"
+    },
+    {
+      "scenarioId": "F3-13",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS VERIFY_FAILED reached: phase=VERIFY_FAILED"
+    },
+    {
+      "scenarioId": "F3-14",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS VERIFY_FAILED not signed off: no signed-off/receipt text"
+    },
+    {
+      "scenarioId": "F3-15",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS VERIFY_FAILED remediation path: Check scope + Verify again visible"
+    },
+    {
+      "scenarioId": "F3-16",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS VERIFY_FAILED proof command: failed command visible"
+    },
+    {
+      "scenarioId": "F3-17",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS fixture reviewed_nonfinal: {\"ok\":true,\"phase\":\"REVIEWED\",\"result\":{\"phase\":\"REVIEWED\",\"decision\":\"PASS\",\"reviewer_count\":2,\"proof_level\":\"diverse-reviewed\",\"conflicts\":[],\"resolved_nonpass\":[],\"act_on\":[],\"judge\":{\"participant_id\":\"judge\",\"provider\":\"judge-provider\",\"model\":\"judge-model\",\"context_id\":\"judge-context\"},\"gate_path\":\".signoff/missions/mission-20260625-203639-adcc882d/iterations/0001/REVIEW_GATE.json\",\"next\":\"Follow the deterministic gate: ./signoff finish accepted, ./signoff finish done, or ./signoff finish r"
+    },
+    {
+      "scenarioId": "F3-18",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS REVIEWED nonfinal state: phase=REVIEWED final=false"
+    },
+    {
+      "scenarioId": "F3-19",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS nonfinal signoff legality truthful: buttons signoff=0 accept=1 rework=1"
+    },
+    {
+      "scenarioId": "F3-20",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS fixture done: {\"ok\":true,\"phase\":\"DONE\",\"result\":{\"phase\":\"DONE\",\"decision\":\"DONE\",\"accepted_criteria\":[\"AC-001\"],\"final_patch_file_sha256\":\"14f1204fef8eb3e552d9a9fd6ee1d9965a8ffbb996dd7b8889fd2970c3f40e2a\",\"final_receipt_sha256\":\"7a44cb15cec9d5b06f4d1fa9091f7011253bed4ba899aa304ea4eb8adf2a7c53\",\"next\":\"Terminal result: DONE. Do not continue implementation under this mission.\"},\"missionId\":\"mission-20260625-203639-adcc882d\"}"
+    },
+    {
+      "scenarioId": "F3-21",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS DONE terminal state: phase=DONE canStart=true"
+    },
+    {
+      "scenarioId": "F3-22",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS DONE signed-off proof visible: receiptHashPrefix=7a44cb15cec9 contract.final=true"
+    },
+    {
+      "scenarioId": "F3-23",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS DONE start next mission separate: separate start card visible"
+    },
+    {
+      "scenarioId": "F3-24",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS old artifacts read-only API: 11 old artifacts all read-only"
+    },
+    {
+      "scenarioId": "F3-25",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS mission history selection: old mission proof selected"
+    },
+    {
+      "scenarioId": "F3-26",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS active actions remain active-scoped: active DONE start remains visible while inspecting old mission"
+    },
+    {
+      "scenarioId": "F3-27",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS old artifacts read-only UI: textarea readOnly flags=[false,true]"
+    },
+    {
+      "scenarioId": "F3-28",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS keyboard reachability critical controls: BUTTON:Activeadcc882d"
+    },
+    {
+      "scenarioId": "F3-29",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS cleanup/listener receipt: {\"ok\":true,\"cleanup\":\"shutdown_received\"}"
+    },
+    {
+      "scenarioId": "F3-30",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS server process exited: exit=0 stderr=127.0.0.1 - - [26/Jun/2026 04:36:32] \"GET / HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:32] \"GET /assets/index-DjluUngr.css HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:32] \"GET /assets/index-DkMphtmB.js HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:32] \"GET /api/overview HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:32] \"GET /api/artifacts?missionId=mission-20260625-203627-f79d7021 HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:32] \"GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:32] \"GET /favicon.ico HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:32] \"GET /api/artifact?path=.signoff%2Fmissions%2Fmission-20260625-203627-f79d7021%2FCHARTER.md HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:33] \"GET /api/overview HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:34] \"GET /api/overview?inspectMissionId=mission-20260625-203627-f79d7021 HTTP/1.1\" 200 -\n127.0.0.1 - - [26/Jun/2026 04:36:34] \"PUT /api/arti"
+    },
+    {
+      "scenarioId": "F3-31",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS desktop screenshot non-empty: /Users/termtek/Github/Signoff/.omo/evidence/final-signoff-ui-flow-desktop.png"
+    },
+    {
+      "scenarioId": "F3-32",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS mobile screenshot non-empty: /Users/termtek/Github/Signoff/.omo/evidence/final-signoff-ui-flow-mobile.png"
+    },
+    {
+      "scenarioId": "F3-33",
+      "criterionReference": "F3 real manual QA",
+      "surface": "packaged UI",
+      "exactInvocation": "cd /Users/termtek/Github/Signoff && node /tmp/signoff-ui-flow-final-f3-qa.mjs",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot",
+        "mobile-screenshot"
+      ],
+      "observation": "PASS console/page errors: none"
+    }
+  ],
+  "adversarialCases": [
+    {
+      "scenarioId": "F3-A1",
+      "criterionReference": "dirty artifact/mission/tab switches",
+      "adversarialClass": "unsaved user input loss",
+      "expectedBehavior": "switch is blocked or requires explicit save/discard",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot"
+      ]
+    },
+    {
+      "scenarioId": "F3-A2",
+      "criterionReference": "VERIFY_FAILED",
+      "adversarialClass": "failed evidence misrepresented as signoff",
+      "expectedBehavior": "not signed off and remediation remains available",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot"
+      ]
+    },
+    {
+      "scenarioId": "F3-A3",
+      "criterionReference": "mission history selection",
+      "adversarialClass": "historical mission mutation / stale action scope",
+      "expectedBehavior": "old artifacts read-only while active legal actions remain active-scoped",
+      "verdict": "PASS",
+      "artifactRefs": [
+        "manual-report",
+        "desktop-screenshot"
+      ]
+    }
+  ],
+  "artifactRefs": [
+    {
+      "id": "manual-report",
+      "kind": "text",
+      "description": "F3 manual QA transcript",
+      "path": "/Users/termtek/Github/Signoff/.omo/evidence/final-signoff-ui-flow-manual-qa.txt"
+    },
+    {
+      "id": "desktop-screenshot",
+      "kind": "png",
+      "description": "Desktop packaged UI screenshot",
+      "path": "/Users/termtek/Github/Signoff/.omo/evidence/final-signoff-ui-flow-desktop.png"
+    },
+    {
+      "id": "mobile-screenshot",
+      "kind": "png",
+      "description": "Mobile packaged UI screenshot",
+      "path": "/Users/termtek/Github/Signoff/.omo/evidence/final-signoff-ui-flow-mobile.png"
+    }
+  ]
+}

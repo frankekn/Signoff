@@ -1,0 +1,5 @@
+surface: git whitespace check
+invocation: git diff --check
+
+
+exit_code=0

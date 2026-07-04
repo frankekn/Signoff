@@ -1,0 +1,18 @@
+Generated ownership decision: Todo 7-owned, not Todo 5-owned.
+
+Current dirty/stale generated bundle surface:
+- src/signoff/web_dist/assets/index-B76Cq3St.css deleted
+- src/signoff/web_dist/assets/index-BdqwdZpw.js deleted
+- src/signoff/web_dist/index.html modified
+- src/signoff/web_dist/assets/index-BxfVyDCB.css untracked
+- src/signoff/web_dist/assets/index-DctO2657.js untracked
+
+Why:
+- Todo 5 owns the readable proof/API/source UI contract: src/signoff/web.py, tests/test_web.py, apps/web/src/api.ts, apps/web/src/pages/Dashboard.tsx, and apps/web/src/styles.css.
+- Todo 5 explicitly does not own packaged generated rebuilds.
+- .omo/start-work/notepad.md says generated bundle changes must remain unclaimed by Todos 1-5 until Todo 7 rebuilds packaged UI through `npm run build:web`.
+- .omo/plans/signoff-ui-flow.md Todo 7 says to run the existing build pipeline so apps/web/dist and src/signoff/web_dist match the source UI, and the commit strategy says generated src/signoff/web_dist changes are committed only after `npm run build:web`.
+
+QA conclusion:
+- Treat current src/signoff/web_dist/ dirtiness as stale/generated Todo 7 work.
+- Do not claim it as Todo 5 evidence and do not hand-edit it for Todo 5.

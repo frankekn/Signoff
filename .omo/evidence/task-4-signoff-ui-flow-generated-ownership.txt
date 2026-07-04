@@ -1,0 +1,23 @@
+Generated ownership verdict: Todo 7-owned, not Todo 4-owned.
+
+Current dirty/stale generated bundle surface:
+- `src/signoff/web_dist/index.html`
+- `src/signoff/web_dist/assets/index-B76Cq3St.css` deleted
+- `src/signoff/web_dist/assets/index-BdqwdZpw.js` deleted
+- untracked replacement generated assets are present in `src/signoff/web_dist/assets/`
+
+Why:
+- Todo 4 explicitly owns source/API behavior for mission history selection and active-only editability.
+- Todo 4 explicitly says not to add routing or persistent selection, and does not say to rebuild packaged UI.
+- Todo 7 explicitly owns `npm run build:web`, `apps/web/dist`, and `src/signoff/web_dist` synchronization.
+- `.omo/start-work/notepad.md` says generated bundle changes must remain unclaimed by Todos 1-4 until Todo 7 rebuilds packaged UI through `npm run build:web`.
+- Fresh source-level Todo 4 QA ran against Vite and API surfaces, while the generated bundle content check remains stale/dirty and is therefore not reliable as Todo 4 proof.
+
+Supporting artifacts:
+- `.omo/evidence/task-4-signoff-ui-flow-generated-diff-name-status.txt`
+- `.omo/evidence/task-4-signoff-ui-flow-generated-diff.patch`
+- `.omo/evidence/task-4-signoff-ui-flow-generated-content-rg.txt`
+- `.omo/evidence/task-4-signoff-ui-flow-owned-diff-name-status.txt`
+
+Conclusion:
+Todo 4 may claim the source/API/manual-QA behavior. Current dirty/stale `src/signoff/web_dist/` must be claimed and resolved by Todo 7, after running the official build/copy pipeline.

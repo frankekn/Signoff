@@ -1,0 +1,14 @@
+Generated bundle ownership note for Todo 3
+
+Verdict: PASS
+
+Todo 3 owns source UI behavior for the live handoff copy and inline note flow. It does not own packaged generated assets.
+
+Evidence:
+- Plan Todo 3 acceptance and QA target the source-served browser QA: `node /tmp/signoff-ui-flow-agent-copy-qa.mjs`.
+- Plan Todo 7 explicitly owns the packaged rebuild: "Run the existing build pipeline so `apps/web/dist` and `src/signoff/web_dist` match the source UI"; its required invocation includes `npm run build:web`.
+- `.omo/start-work/notepad.md` says generated `src/signoff/web_dist/**` assets were pre-existing/unrelated dirty state and must remain unclaimed until Todo 7 rebuilds packaged UI.
+- `git diff --name-status` shows dirty generated bundle paths under `src/signoff/web_dist/**`; raw command evidence is `.omo/evidence/task-3-signoff-ui-flow-git-diff-name-status.txt`.
+- Source grep shows no `window.prompt` or old static copy in `apps/web/src`; packaged grep still finds stale generated JS in `src/signoff/web_dist/assets/index-DctO2657.js`; raw command evidence is `.omo/evidence/task-3-signoff-ui-flow-source-vs-webdist.txt`.
+
+Conclusion: stale packaged JS under `src/signoff/web_dist/**` is outside Todo 3 and assigned to Todo 7 rebuild/package verification.

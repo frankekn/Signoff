@@ -1,0 +1,12 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   196  100    83  100   113  86729   115k --:--:-- --:--:-- --:--:--  191k
+HTTP/1.0 400 Bad Request
+Server: BaseHTTP/0.6 Python/3.14.4
+Date: Thu, 25 Jun 2026 17:20:38 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 83
+Cache-Control: no-store
+X-Content-Type-Options: nosniff
+
+{"error": "this artifact is locked or generated in the current phase", "ok": false}

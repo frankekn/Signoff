@@ -1,0 +1,45 @@
+{
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "observable": "From a clean product baseline, public `npm ci`, UI typecheck, UI production build, Python checks, and Signoff scope verification pass without untracked generated dependency/build/cache outputs, and the sealed Signoff patch receipt contains no `.signoff` control artifacts.",
+      "oracle": {
+        "description": "Command evidence proves npm install/typecheck/build and Python repo checks pass; generated-output status shows dependency/build/cache outputs are ignored; the conformance suite inspects sealed PATCH.diff for `.signoff` paths.",
+        "type": "command"
+      },
+      "requirement_ids": [
+        "REQ-001"
+      ]
+    }
+  ],
+  "constraints": [
+    "Preserve unrelated user work and existing behavior outside the goal",
+    "Keep Python runtime dependencies at zero",
+    "Preserve the one-path non-technical installation experience",
+    "Do not change UI behavior, package manager, install flow, services, provider routing, or protocol semantics beyond applying existing control-path filtering consistently",
+    "Add or keep an adversarial conformance test before changing receipt filtering"
+  ],
+  "goal_sha256": "e9107956572ffb732fb388c26be5eb8ce38793389633c3fc32d8c19d8e6afd58",
+  "max_iterations": 5,
+  "mission_id": "mission-20260625-054007-4a46474f",
+  "non_goals": [
+    "UI redesign or frontend feature work",
+    "New package managers, services, Docker, databases, authentication, cloud infrastructure, or runtime dependencies",
+    "Dependency upgrades, version changes, broad cleanup, formatting churn, or agent quorum changes"
+  ],
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "priority": "must",
+      "source": "user",
+      "statement": "Make contributor UI first-run install reproducible from the public npm lockfile, keep generated outputs ignored, and ensure Signoff patch receipts exclude control artifacts"
+    }
+  ],
+  "schema_version": 1,
+  "stop_conditions": [
+    "Stop if public npm install remains blocked by external registry or network state after lockfile normalization",
+    "Pivot if receipt correctness requires a protocol semantic change rather than consistent application of existing control-path filtering",
+    "Stop if proof requires private credentials, private registries, or committing generated outputs",
+    "Stop if the patch needs files outside the locked contract"
+  ]
+}

@@ -29,6 +29,10 @@ CONTROL_GLOBS = (
 )
 
 
+def _product_pathspecs() -> list[str]:
+    return [".", *(f":(exclude){pattern}" for pattern in CONTROL_GLOBS)]
+
+
 def run_git(project: Path, args: list[str], *, check: bool = True, input_text: str | None = None) -> subprocess.CompletedProcess[str]:
     proc = subprocess.run(
         ["git", "-C", str(project), *args],
@@ -65,7 +69,8 @@ def _line_set(text: str) -> set[str]:
 
 def changed_files(project: Path, baseline: str, *, include_control: bool = False) -> list[str]:
     ensure_repository(project)
-    paths = _line_set(run_git(project, ["diff", "--name-only", "--relative", baseline, "--", "."]).stdout)
+    pathspecs = ["."] if include_control else _product_pathspecs()
+    paths = _line_set(run_git(project, ["diff", "--name-only", "--relative", baseline, "--", *pathspecs]).stdout)
     paths.update(_line_set(run_git(project, ["ls-files", "--others", "--exclude-standard"]).stdout))
     result = sorted(paths)
     if include_control:
@@ -90,7 +95,7 @@ def _untracked_patch(project: Path, path: str) -> str:
 
 
 def patch(project: Path, baseline: str) -> str:
-    tracked = run_git(project, ["diff", "--binary", "--no-ext-diff", baseline, "--", "."]).stdout
+    tracked = run_git(project, ["diff", "--binary", "--no-ext-diff", baseline, "--", *_product_pathspecs()]).stdout
     untracked = _line_set(run_git(project, ["ls-files", "--others", "--exclude-standard"]).stdout)
     chunks = [tracked]
     for path in sorted(untracked):
@@ -102,7 +107,7 @@ def patch(project: Path, baseline: str) -> str:
 def changed_line_count(project: Path, baseline: str, files: Iterable[str] | None = None) -> int:
     selected = set(files or changed_files(project, baseline))
     total = 0
-    numstat = run_git(project, ["diff", "--numstat", baseline, "--", "."]).stdout
+    numstat = run_git(project, ["diff", "--numstat", baseline, "--", *_product_pathspecs()]).stdout
     tracked_seen: set[str] = set()
     for line in numstat.splitlines():
         parts = line.split("\t")

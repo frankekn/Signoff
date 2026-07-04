@@ -1,0 +1,3 @@
+invocation.ts: rg -n "window\.confirm|confirm\(|autosave|auto-save|@ts-ignore|@ts-expect-error|eslint-disable|as any|: any" apps/web/src/components/ArtifactPanel.tsx apps/web/src/pages/Dashboard.tsx
+invocation.css: rg -n "window\.confirm|confirm\(|autosave|auto-save" apps/web/src/styles.css
+result: PASS no forbidden mechanism matches

@@ -18,191 +18,15 @@ from typing import Any
 from urllib.parse import parse_qs, unquote, urlparse
 
 from . import __version__
-from .errors import SignoffError, StateError, ValidationError
+from .errors import SignoffError, ValidationError
 from .ledger import read_and_verify
 from .runtime import Runtime
-from .state import ledger_path, mission_dir, read_mission_state, read_root_state
-from .util import atomic_write_text, ensure_within
+from .state import ledger_path
+from .util import atomic_write_text
+from .web_artifacts import assert_editable_artifact, list_artifacts, safe_artifact_path
+from .web_overview import build_overview, require_known_mission
 
 MAX_BODY_BYTES = 2 * 1024 * 1024
-TEXT_ARTIFACT_SUFFIXES = {".json", ".jsonl", ".md", ".txt", ".diff", ".log"}
-
-
-def _allowed_actions(phase: str) -> list[dict[str, Any]]:
-    actions: dict[str, list[dict[str, Any]]] = {
-        "IDLE": [],
-        "DRAFT": [
-            {"id": "prepare_council", "label": "Send to Council", "tone": "primary"},
-            {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
-        ],
-        "COUNCIL": [
-            {"id": "lock", "label": "Lock decision", "tone": "primary"},
-            {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
-        ],
-        "LOCKED": [
-            {"id": "prepare_slice", "label": "Create next slice", "tone": "primary"},
-            {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
-        ],
-        "SLICE_DRAFT": [
-            {"id": "activate_slice", "label": "Activate slice", "tone": "primary"},
-        ],
-        "IMPLEMENTING": [
-            {"id": "check_scope", "label": "Check scope", "tone": "neutral"},
-            {"id": "verify", "label": "Run verification", "tone": "primary"},
-        ],
-        "VERIFY_FAILED": [
-            {"id": "check_scope", "label": "Check scope", "tone": "neutral"},
-            {"id": "verify", "label": "Verify again", "tone": "primary"},
-        ],
-        "VERIFIED": [
-            {"id": "prepare_roast", "label": "Prepare independent review", "tone": "primary"},
-        ],
-        "REVIEWING": [
-            {"id": "roast", "label": "Seal review", "tone": "primary"},
-        ],
-        "REVIEWED": [
-            {"id": "finish_done", "label": "Sign off", "tone": "primary"},
-            {"id": "finish_accepted", "label": "Accept slice", "tone": "neutral"},
-            {"id": "finish_rework", "label": "Rework", "tone": "danger", "requiresNote": True},
-        ],
-        "COUNCIL_REVIEW": [
-            {"id": "pivot", "label": "Authorize pivot", "tone": "primary", "requiresNote": True},
-            {"id": "finish_stopped", "label": "Stop mission", "tone": "danger", "requiresNote": True},
-        ],
-        "DONE": [],
-        "STOPPED": [],
-        "PIVOT": [],
-        "BLOCKED": [],
-    }
-    return actions.get(phase, [])
-
-
-def _editable_paths(project: Path, state: dict[str, Any]) -> set[str]:
-    mission_id = state["mission_id"]
-    base = mission_dir(project, mission_id)
-    phase = state.get("phase")
-    allowed: set[Path] = set()
-    if phase == "DRAFT":
-        allowed.update({base / "CHARTER.md", base / "SPEC.json"})
-    elif phase == "COUNCIL":
-        allowed.add(base / "COUNCIL.json")
-    elif phase == "SLICE_DRAFT" and state.get("current"):
-        iteration = int(state["current"]["iteration"])
-        allowed.add(base / "iterations" / f"{iteration:04d}" / "CONTRACT.json")
-    elif phase == "REVIEWING" and state.get("current"):
-        iteration = int(state["current"]["iteration"])
-        iteration_dir = base / "iterations" / f"{iteration:04d}"
-        allowed.add(iteration_dir / "JUDGMENT.json")
-        review_dir = iteration_dir / "reviews"
-        if review_dir.is_dir():
-            allowed.update(path for path in review_dir.glob("review-*.json") if path.is_file())
-    return {str(path.relative_to(project)).replace(os.sep, "/") for path in allowed}
-
-
-def _mission_summaries(project: Path) -> list[dict[str, Any]]:
-    root = read_root_state(project)
-    summaries: list[dict[str, Any]] = []
-    for mission_id in reversed(root.get("missions", [])):
-        try:
-            state = read_mission_state(project, mission_id)
-            goal_path = mission_dir(project, mission_id) / "GOAL.txt"
-            goal = goal_path.read_text(encoding="utf-8").strip() if goal_path.is_file() else ""
-            summaries.append(
-                {
-                    "missionId": mission_id,
-                    "goal": goal,
-                    "phase": state.get("phase", "UNKNOWN"),
-                    "revision": state.get("revision", 1),
-                    "iteration": state.get("iteration", 0),
-                    "updatedAt": state.get("updated_at"),
-                    "active": mission_id == root.get("active_mission_id"),
-                }
-            )
-        except SignoffError as exc:
-            summaries.append(
-                {
-                    "missionId": mission_id,
-                    "goal": "",
-                    "phase": "INVALID",
-                    "error": str(exc),
-                    "active": mission_id == root.get("active_mission_id"),
-                }
-            )
-    return summaries
-
-
-def build_overview(project: Path, runtime: Runtime) -> dict[str, Any]:
-    status = runtime.status()
-    phase = status.get("phase", "IDLE")
-    mission_id = status.get("mission_id")
-    goal = ""
-    editable: set[str] = set()
-    if mission_id:
-        state = read_mission_state(project, mission_id)
-        goal_path = mission_dir(project, mission_id) / "GOAL.txt"
-        if goal_path.is_file():
-            goal = goal_path.read_text(encoding="utf-8").strip()
-        editable = _editable_paths(project, state)
-    actions = _allowed_actions(phase)
-    if phase == "REVIEWED" and not bool((status.get("current") or {}).get("final")):
-        actions = [action for action in actions if action["id"] != "finish_done"]
-    return {
-        "product": "Signoff",
-        "version": __version__,
-        "project": str(project),
-        "goal": goal,
-        "status": status,
-        "next": status.get("next", ""),
-        "actions": actions,
-        "editablePaths": sorted(editable),
-        "missions": _mission_summaries(project),
-    }
-
-
-
-def _require_known_mission(project: Path, mission_id: str) -> str:
-    root = read_root_state(project)
-    if mission_id not in root.get("missions", []):
-        raise ValidationError(f"unknown mission: {mission_id}")
-    return mission_id
-
-
-def _list_artifacts(project: Path, mission_id: str) -> list[dict[str, Any]]:
-    base = mission_dir(project, mission_id)
-    if not base.is_dir():
-        raise ValidationError(f"unknown mission: {mission_id}")
-    state = read_mission_state(project, mission_id)
-    editable = _editable_paths(project, state)
-    artifacts: list[dict[str, Any]] = []
-    for path in sorted(base.rglob("*")):
-        if not path.is_file() or path.suffix.lower() not in TEXT_ARTIFACT_SUFFIXES:
-            continue
-        relative = str(path.relative_to(project)).replace(os.sep, "/")
-        artifacts.append(
-            {
-                "path": relative,
-                "name": path.name,
-                "size": path.stat().st_size,
-                "editable": relative in editable,
-                "kind": path.suffix.lower().lstrip("."),
-            }
-        )
-    return artifacts
-
-
-def _safe_artifact_path(project: Path, relative: str) -> Path:
-    relative = relative.strip().replace("\\", "/")
-    if not relative.startswith(".signoff/missions/"):
-        raise ValidationError("artifact path must stay inside .signoff/missions")
-    candidate = ensure_within(project, project / relative)
-    missions_root = ensure_within(project, project / ".signoff" / "missions")
-    try:
-        candidate.relative_to(missions_root)
-    except ValueError as exc:
-        raise ValidationError("artifact path escapes the mission directory") from exc
-    if candidate.suffix.lower() not in TEXT_ARTIFACT_SUFFIXES:
-        raise ValidationError("unsupported artifact type")
-    return candidate
 
 
 def _action(runtime: Runtime, action: str, payload: dict[str, Any]) -> Any:
@@ -323,7 +147,11 @@ class CourtRequestHandler(BaseHTTPRequestHandler):
                 self._json(HTTPStatus.OK, {"ok": True, "product": "Signoff", "version": __version__})
                 return
             if parsed.path == "/api/overview":
-                self._json(HTTPStatus.OK, {"ok": True, "data": build_overview(self.server.project, self.server.runtime)})
+                inspect_mission_id = query.get("inspectMissionId", [""])[0] or None
+                self._json(
+                    HTTPStatus.OK,
+                    {"ok": True, "data": build_overview(self.server.project, self.server.runtime, inspect_mission_id)},
+                )
                 return
             if parsed.path == "/api/artifacts":
                 mission_id = query.get("missionId", [""])[0]
@@ -333,12 +161,12 @@ class CourtRequestHandler(BaseHTTPRequestHandler):
                 if not mission_id:
                     self._json(HTTPStatus.OK, {"ok": True, "data": []})
                     return
-                mission_id = _require_known_mission(self.server.project, mission_id)
-                self._json(HTTPStatus.OK, {"ok": True, "data": _list_artifacts(self.server.project, mission_id)})
+                mission_id = require_known_mission(self.server.project, mission_id)
+                self._json(HTTPStatus.OK, {"ok": True, "data": list_artifacts(self.server.project, mission_id)})
                 return
             if parsed.path == "/api/artifact":
                 relative = query.get("path", [""])[0]
-                path = _safe_artifact_path(self.server.project, relative)
+                path = safe_artifact_path(self.server.project, relative)
                 if not path.is_file():
                     raise ValidationError("artifact does not exist")
                 content = path.read_text(encoding="utf-8")
@@ -353,7 +181,7 @@ class CourtRequestHandler(BaseHTTPRequestHandler):
                     status = self.server.runtime.status()
                     mission_id = str(status.get("mission_id") or "")
                 if mission_id:
-                    mission_id = _require_known_mission(self.server.project, mission_id)
+                    mission_id = require_known_mission(self.server.project, mission_id)
                 records = read_and_verify(ledger_path(self.server.project, mission_id)) if mission_id else []
                 self._json(HTTPStatus.OK, {"ok": True, "data": records})
                 return
@@ -397,14 +225,8 @@ class CourtRequestHandler(BaseHTTPRequestHandler):
             content = payload.get("content")
             if not isinstance(content, str):
                 raise ValidationError("content must be text")
-            path = _safe_artifact_path(self.server.project, relative)
-            root = read_root_state(self.server.project)
-            mission_id = root.get("active_mission_id")
-            if not mission_id:
-                raise StateError("there is no active mission")
-            state = read_mission_state(self.server.project, mission_id)
-            if relative not in _editable_paths(self.server.project, state):
-                raise StateError("this artifact is locked or generated in the current phase")
+            path = safe_artifact_path(self.server.project, relative)
+            assert_editable_artifact(self.server.project, relative)
             if path.suffix == ".json":
                 try:
                     parsed_json = json.loads(content)

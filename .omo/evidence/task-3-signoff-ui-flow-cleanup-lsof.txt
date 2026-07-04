@@ -1,0 +1,6 @@
+surface: local TCP listeners
+invocation: lsof -i :5173 -i :8765
+
+
+exit_code=1
+interpretation: no listeners reported for ports 5173 or 8765

@@ -1,0 +1,3 @@
+scenario: scoped diff whitespace check
+invocation: git diff --check -- apps/web/src/pages/Dashboard.tsx apps/web/src/components/HeroPanel.tsx apps/web/src/components/NextActionCard.tsx apps/web/src/components/ProofCard.tsx apps/web/src/components/StartMissionCard.tsx
+PASS git diff --check found no whitespace errors
