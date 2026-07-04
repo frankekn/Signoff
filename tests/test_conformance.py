@@ -203,7 +203,7 @@ class ConformanceTests(unittest.TestCase):
         with self.assertRaises(IntegrityError):
             self.fx.runtime.integrity()
 
-    def test_22_patch_receipt_excludes_signoff_control_artifacts(self) -> None:
+    def test_22_patch_receipt_excludes_traction_control_artifacts(self) -> None:
         control = self.fx.project / "AGENTS.md"
         control.write_text("initial control instructions\n", encoding="utf-8")
         subprocess.run(["git", "-C", str(self.fx.project), "add", "AGENTS.md"], check=True)

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:signoff-protocol:schema:push:1",
-  "title": "Signoff Push Decision",
+  "$id": "urn:traction-protocol:schema:push:1",
+  "title": "Traction Push Decision",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -28,7 +28,7 @@ export function StartRunCard({ activeRunId, goal, inspectingHistorical, pending,
         {inspectingHistorical && phase === 'DONE' && (
           <p className="active-scope-note">Active run {activeRunId ?? 'unknown'} is DONE. This control is active-scoped; the inspected run remains read-only. Active receipt: FINAL_RECEIPT.json.</p>
         )}
-        <p>Use observable language. Signoff stores this exact sentence and prevents later steps from quietly rewriting it.</p>
+        <p>Use observable language. Traction stores this exact sentence and prevents later steps from quietly rewriting it.</p>
       </div>
       <form onSubmit={submitRun}>
         <textarea

@@ -1,13 +1,13 @@
 # Proof model
 
-Signoff distinguishes evidence from confidence.
+Traction distinguishes evidence from confidence.
 
 ## Proof objects
 
 A completion claim is supported by independently checkable objects:
 
 - an exact user-goal hash;
-- locked charter/spec/Council hashes;
+- locked charter/spec/Push hashes;
 - one bounded contract and builder identity;
 - a Git baseline and exact patch;
 - executed command receipts with exit codes and output hashes;

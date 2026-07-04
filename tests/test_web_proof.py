@@ -37,7 +37,7 @@ class WebProofApiTests(WebServerTestCase):
         self.assertEqual(proof["scope"]["status"], "pass")
         self.assertEqual(proof["patch"]["hash"], proof["evidence"]["patchHash"])
 
-    def test_proof_summary_reviewed_pass_nonfinal_keeps_signoff_unavailable(self) -> None:
+    def test_proof_summary_reviewed_pass_nonfinal_keeps_terminal_completion_unavailable(self) -> None:
         self.fx.lock()
         iteration_dir = self.fx.passing_evidence(final=False)
         self.fx.fill_pull(iteration_dir)

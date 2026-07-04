@@ -12,7 +12,7 @@ class WebApiTests(WebServerTestCase):
         status, payload = self.request("/api/overview")
         self.assertEqual(status, 200)
         self.assertEqual(payload["data"]["status"]["phase"], "DRAFT")
-        self.assertEqual(payload["data"]["product"], "Signoff")
+        self.assertEqual(payload["data"]["product"], "Traction")
         self.assertFalse(payload["data"]["canStartRun"])
 
         run_id = payload["data"]["status"]["run_id"]
@@ -109,7 +109,7 @@ class WebApiTests(WebServerTestCase):
         with urlopen(self.base + "/", timeout=5) as response:
             html = response.read().decode("utf-8")
             self.assertEqual(response.status, 200)
-            self.assertIn("Signoff", html)
+            self.assertIn("Traction", html)
 
         status, payload = self.request("/api/action", method="POST", body={"action": "verify"})
         self.assertEqual(status, 400)

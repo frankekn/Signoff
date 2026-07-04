@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-title: Signoff
-message: "If you use Signoff in research, cite this software and the exact commit."
+title: Traction
+message: "If you use Traction in research, cite this software and the exact commit."
 type: software
 version: 0.1.0-alpha.1
 date-released: 2026-06-25

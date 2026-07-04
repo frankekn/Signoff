@@ -11,7 +11,7 @@ import { StartRunCard } from '../components/StartRunCard'
 import { Timeline } from '../components/Timeline'
 
 const phaseCopy: Record<string, { title: string; note: string }> = {
-  IDLE: { title: 'Ready for a run', note: 'Describe the outcome. Signoff will preserve it as the immutable target.' },
+  IDLE: { title: 'Ready for a run', note: 'Describe the outcome. Traction will preserve it as the immutable target.' },
   DRAFT: { title: 'Define what success means', note: 'Complete the charter and falsifiable acceptance criteria before implementation begins.' },
   PUSH: { title: 'Challenge the route', note: 'Independent agents answer the same claims and expose what would prove them wrong.' },
   LOCKED: { title: 'The goal is locked', note: 'Create one small implementation slice with explicit scope and executable checks.' },
@@ -147,7 +147,7 @@ export function Dashboard(): ReactElement {
   const inspectedRun = overview?.inspectedRun
 
   const agentInstruction = useMemo(() => {
-    if (!overview) return 'Read AGENTS.md. Wait for the live Signoff overview before editing.'
+    if (!overview) return 'Read AGENTS.md. Wait for the live Traction overview before editing.'
     const editablePaths = overview.editablePaths.length > 0
       ? overview.editablePaths.map((path) => `- ${path}`).join('\n')
       : '- None currently editable.'
@@ -264,7 +264,7 @@ Do not edit locked or generated artifacts. Do not edit receipts or files outside
       </main>
 
       <footer>
-        <span>Signoff {overview?.version ?? ''}</span>
+        <span>Traction {overview?.version ?? ''}</span>
         <span>Local-first · No hosted account · Receipts stay in your repository</span>
       </footer>
     </div>

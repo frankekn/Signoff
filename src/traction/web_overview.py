@@ -164,7 +164,7 @@ def build_overview(project: Path, runtime: Runtime, inspect_run_id: str | None =
     next_instruction = _next_instruction(status, blocked_by_integrity)
     runs = run_summaries(project)
     return {
-        "product": "Signoff",
+        "product": "Traction",
         "version": __version__,
         "project": str(project),
         "goal": goal,

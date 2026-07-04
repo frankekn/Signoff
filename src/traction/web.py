@@ -112,7 +112,7 @@ class GripRequestHandler(BaseHTTPRequestHandler):
         if not self.server.static_root.is_dir():
             self._error(
                 HTTPStatus.SERVICE_UNAVAILABLE,
-                "web UI assets are missing; run npm run build:web from the Signoff source repository",
+                "web UI assets are missing; run npm run build:web from the Traction source repository",
             )
             return
         route = unquote(parsed_path).lstrip("/") or "index.html"
@@ -144,7 +144,7 @@ class GripRequestHandler(BaseHTTPRequestHandler):
         query = parse_qs(parsed.query)
         try:
             if parsed.path == "/api/health":
-                self._json(HTTPStatus.OK, {"ok": True, "product": "Signoff", "version": __version__})
+                self._json(HTTPStatus.OK, {"ok": True, "product": "Traction", "version": __version__})
                 return
             if parsed.path == "/api/overview":
                 inspect_run_id = query.get("inspectRunId", [""])[0] or None
@@ -252,13 +252,13 @@ def serve(project: Path, host: str = "127.0.0.1", port: int = 8765, *, open_brow
     actual_host, actual_port = server.server_address[:2]
     url_host = "127.0.0.1" if actual_host in {"0.0.0.0", "::"} else actual_host
     url = f"http://{url_host}:{actual_port}"
-    print(f"Signoff UI: {url}")
+    print(f"Traction UI: {url}")
     print(f"Project: {project.resolve()}")
     if open_browser:
         threading.Timer(0.25, lambda: webbrowser.open(url)).start()
     try:
         server.serve_forever(poll_interval=0.25)
     except KeyboardInterrupt:
-        print("\nSignoff UI stopped")
+        print("\nTraction UI stopped")
     finally:
         server.server_close()

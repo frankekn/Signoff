@@ -2,12 +2,12 @@
 
 Multi-agent debate is useful only when it creates independent error signals and converts disagreement into a discriminating observation. More agents, more turns, or stronger rhetoric do not automatically improve truth.
 
-Signoff uses two bounded debate surfaces: **Council** before implementation and **Roast** after verification.
+Traction uses two bounded debate surfaces: **Push** before implementation and **Pull** after verification.
 
 ## Shared principles
 
 1. **Blind first round.** Participants do not see peer answers or identities before forming an initial position.
-2. **Symmetric brief and question registry.** Every participant receives the same goal, constraints, evidence, artifact hashes, and canonical decision questions.
+2. **Symmetric brief and sealed packet.** Every participant receives the same goal, constraints, evidence, and artifact hashes.
 3. **Explicit null hypothesis.** “Do not build” or “the patch is not proven” must remain legitimate outcomes.
 4. **Falsifiable claims.** Every material position states what observation would change it.
 5. **One conditional cross-examination.** Only material conflicts receive a second round; there is no open-ended chat.
@@ -15,7 +15,7 @@ Signoff uses two bounded debate surfaces: **Council** before implementation and 
 7. **Evidence-based closure.** Experiments, existing receipts, or the locked spec resolve conflict. Votes do not.
 8. **Preserved dissent.** Unresolved dissent remains visible and lowers or blocks the proof claim.
 
-## Council: should we build this?
+## Push: should we build this?
 
 ### Round-one input
 
@@ -33,14 +33,13 @@ Each advisor receives:
 Each advisor returns:
 
 - `PROCEED`, `STOP`, or `PIVOT`;
-- structured answers to the same four canonical topics: `mission-value`, `feasibility`, `proof-sufficiency`, and `scope-minimality`;
-- strongest case for the null hypothesis;
-- first executable move if proceeding;
-- what should be cut;
-- strongest dissent;
-- evidence that would reverse the verdict.
+- `route` — the proposed path in plain language;
+- `falsifiable_criteria` — observable checks that would falsify the route;
+- `risk` — what could go wrong;
+- `first_move` — the first executable step if proceeding;
+- `cut` — what should be deferred or removed.
 
-The shared claim registry matters because nominally independent advisors can otherwise answer different questions and manufacture a false appearance of agreement. Optional topics are allowed only when every advisor answers the same expanded registry.
+Advisors no longer answer a fixed four-topic claim registry. Material disagreement is detected from verdict splits and substantive field conflicts instead.
 
 ### Material conflict test
 
@@ -55,11 +54,11 @@ Cross-examination is required when any of these differ materially:
 
 Stylistic differences and alternative wording are not material conflict.
 
-### Council decision
+### Push decision
 
-The chair may synthesize but does not invent a majority rule. A `PROCEED` decision must name why the null hypothesis lost, what was cut, and what dissent remains. `STOP` and `PIVOT` are normal successful outputs.
+The chair may synthesize but does not invent a majority rule. A `PROCEED` decision must name why the null hypothesis lost, what was cut, and what dissent remains. `STOP` and `PIVOT` are normal successful outputs. `INSUFFICIENT_QUORUM` is an honest degraded outcome when fewer than two heterogeneous advisors participated.
 
-## Roast: does this exact patch satisfy this exact spec?
+## Pull: does this exact patch satisfy this exact spec?
 
 ### Independent review input
 
@@ -115,7 +114,7 @@ Examples of discriminating observations:
 
 ## Why confidence and votes are excluded
 
-Confidence is model-specific and poorly calibrated across tasks. Votes amplify correlated errors when reviewers share training, prompts, tools, or an incorrect assumption. Signoff records identities for provenance but removes them from the argument packet and requires a basis tied to the claim.
+Confidence is model-specific and poorly calibrated across tasks. Votes amplify correlated errors when reviewers share training, prompts, tools, or an incorrect assumption. Traction records identities for provenance but removes them from the argument packet and requires a basis tied to the claim.
 
 ## Anti-collusion and anti-groupthink controls
 
@@ -125,7 +124,7 @@ Confidence is model-specific and poorly calibrated across tasks. Votes amplify c
 - raw first-round positions preserved before cross-examination;
 - high/blocker topics raised independently by multiple reviewers require concrete disproof to dismiss;
 - at most five `ACT_ON` root causes, preventing a consensus-generated backlog;
-- spec gaps return to Council instead of becoming unreviewed implementation scope.
+- spec gaps return to Push instead of becoming unreviewed implementation scope.
 
 ## Honest limitation
 

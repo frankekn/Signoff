@@ -20,7 +20,7 @@ const stepIndex = {
   build: 3,
   verify: 4,
   review: 5,
-  signOff: 6,
+  terminal: 6,
 } as const
 
 const phases: readonly PhaseStep[] = [
@@ -47,12 +47,12 @@ const phasePresentation: Record<string, PhasePresentation> = {
   VERIFY_FAILED: { activeIndex: stepIndex.verify, status: 'failed', steps: withStepLabel(stepIndex.verify, 'Failed evidence') },
   VERIFIED: { activeIndex: stepIndex.verify, status: 'active', steps: phases },
   REVIEWING: { activeIndex: stepIndex.review, status: 'active', steps: phases },
-  REVIEWED: { activeIndex: stepIndex.signOff, status: 'paused', steps: withStepLabel(stepIndex.signOff, 'Decision pending') },
+  REVIEWED: { activeIndex: stepIndex.terminal, status: 'paused', steps: withStepLabel(stepIndex.terminal, 'Decision pending') },
   PUSH_REVIEW: { activeIndex: stepIndex.review, status: 'paused', steps: withStepLabel(stepIndex.review, 'Paused review') },
-  DONE: { activeIndex: stepIndex.signOff, status: 'active', steps: phases },
-  STOPPED: { activeIndex: stepIndex.signOff, status: 'terminal', steps: withStepLabel(stepIndex.signOff, 'Stopped') },
-  BLOCKED: { activeIndex: stepIndex.signOff, status: 'failed', steps: withStepLabel(stepIndex.signOff, 'Blocked') },
-  PIVOT: { activeIndex: stepIndex.signOff, status: 'terminal', steps: withStepLabel(stepIndex.signOff, 'Pivot') },
+  DONE: { activeIndex: stepIndex.terminal, status: 'active', steps: phases },
+  STOPPED: { activeIndex: stepIndex.terminal, status: 'terminal', steps: withStepLabel(stepIndex.terminal, 'Stopped') },
+  BLOCKED: { activeIndex: stepIndex.terminal, status: 'failed', steps: withStepLabel(stepIndex.terminal, 'Blocked') },
+  PIVOT: { activeIndex: stepIndex.terminal, status: 'terminal', steps: withStepLabel(stepIndex.terminal, 'Pivot') },
 }
 
 export function PhaseRail({ phase }: { readonly phase: string }): ReactElement {

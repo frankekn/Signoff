@@ -1,33 +1,33 @@
 # Architecture
 
-Signoff separates probabilistic reasoning from deterministic authority.
+Traction separates probabilistic reasoning from deterministic authority.
 
 ## Layers
 
 ### 1. Human product surface
 
-The user provides one exact outcome. They do not configure a workflow graph, provider matrix, or reviewer rubric. `./signoff next` keeps the visible path linear.
+The user provides one exact outcome. They do not configure a workflow graph, provider matrix, or reviewer rubric. `./traction next` keeps the visible path linear.
 
 ### 2. Local UI and API
 
-`src/signoff/web.py` serves a localhost JSON API and the prebuilt Vite application in `web_dist/`. The UI uses TanStack Query for polling/mutations and TanStack Router for navigation.
+`src/traction/web.py` serves a localhost JSON API and the prebuilt Vite application in `web_dist/`. The UI uses TanStack Query for polling/mutations and TanStack Router for navigation.
 
-There is intentionally no separate database in the alpha. Files under `.signoff/` are the single source of truth for both CLI and UI, which avoids synchronization bugs and keeps every mission portable with the repository. The API only allows edits to artifacts that are legal in the current phase.
+There is intentionally no separate database in the alpha. Files under `.traction/` are the single source of truth for both CLI and UI, which avoids synchronization bugs and keeps every run portable with the repository. The API only allows edits to artifacts that are legal in the current phase.
 
 ### 3. Agent skills
 
-The Signoff, Council, and Roast skills tell coding agents how to author the next artifact. Skills may reason, propose, and critique. They cannot advance state on their own.
+The traction and loop skills tell coding agents how to author the next artifact. Skills may reason, propose, and critique. They cannot advance state on their own.
 
-### 4. Court engine
+### 4. Grip engine
 
-**Court** is the deterministic core mechanism. It does not generate plans or code; it validates artifacts, enforces role and evidence boundaries, and is the only component allowed to advance the mission state. `src/signoff/runtime.py` owns the legal transitions:
+**Grip** is the deterministic core mechanism. It does not generate plans or code; it validates artifacts, enforces role and evidence boundaries, and is the only component allowed to advance the run state. `src/traction/runtime.py` owns the legal transitions:
 
 ```text
-IDLE → DRAFT → COUNCIL → LOCKED → SLICE_DRAFT → IMPLEMENTING
+IDLE → DRAFT → PUSH → LOCKED → SLICE_DRAFT → IMPLEMENTING
      → VERIFIED → REVIEWING → REVIEWED → LOCKED | DONE
 ```
 
-Failure or convergence paths include `VERIFY_FAILED`, `COUNCIL_REVIEW`, `STOPPED`, `PIVOT`, and `BLOCKED`.
+Failure or convergence paths include `VERIFY_FAILED`, `PUSH_REVIEW`, `STOPPED`, `PIVOT`, and `BLOCKED`.
 
 ### 5. Artifact validators
 
@@ -35,7 +35,7 @@ Failure or convergence paths include `VERIFY_FAILED`, `COUNCIL_REVIEW`, `STOPPED
 
 ### 6. Git-backed scope
 
-Each mission and slice uses an unreachable synthetic Git commit as an exact baseline. It is built through a temporary index under `.git/signoff/`, so the user's branch, worktree, and staging area are not changed.
+Each run and slice uses an unreachable synthetic Git commit as an exact baseline. It is built through a temporary index under `.git/traction/`, so the user's branch, worktree, and staging area are not changed.
 
 Scope is computed from:
 
@@ -62,4 +62,4 @@ The runtime assumes the local process can read and write the repository. It dete
 
 ## Product vocabulary
 
-The user-facing product is **Signoff**. The repository contract is the **Signoff Protocol**. The deterministic authority described above is **Court**. Completed evidence is emitted as a **Receipt**. These names are kept separate so the product does not feel punitive while the architecture still has a precise name for its adjudication mechanism.
+The user-facing product is **Traction**. The repository contract is the **Traction Protocol**. The deterministic authority described above is **Grip**. Completed evidence is emitted as a **Receipt**. These names are kept separate so the product reads as forward motion while the architecture still has a precise name for its adjudication mechanism.
