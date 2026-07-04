@@ -23,8 +23,8 @@ class ConformanceTests(unittest.TestCase):
     def test_01_golden_path_reaches_done_with_receipts(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence(final=True)
-        self.fx.fill_roast(iteration)
-        result = self.fx.runtime.roast()
+        self.fx.fill_pull(iteration)
+        result = self.fx.runtime.pull()
         self.assertEqual(result["decision"], "PASS")
         self.assertEqual(self.fx.runtime.finish("done")["phase"], "DONE")
         self.assertTrue((self.fx.mission / "FINAL_PATCH.diff").is_file())
@@ -108,36 +108,36 @@ class ConformanceTests(unittest.TestCase):
     def test_12_builder_cannot_count_as_reviewer(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence()
-        self.fx.fill_roast(iteration, reviewer_one_is_builder=True)
+        self.fx.fill_pull(iteration, reviewer_one_is_builder=True)
         with self.assertRaises(ValidationError):
-            self.fx.runtime.roast()
+            self.fx.runtime.pull()
 
     def test_13_duplicate_review_context_is_not_quorum(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence()
-        self.fx.fill_roast(iteration, duplicate_context=True)
+        self.fx.fill_pull(iteration, duplicate_context=True)
         with self.assertRaises(ValidationError):
-            self.fx.runtime.roast()
+            self.fx.runtime.pull()
 
     def test_14_unknown_cannot_be_promoted_to_pass(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence()
-        self.fx.fill_roast(iteration, verdicts=("PASS", "UNKNOWN"))
+        self.fx.fill_pull(iteration, verdicts=("PASS", "UNKNOWN"))
         with self.assertRaises(ValidationError):
-            self.fx.runtime.roast()
+            self.fx.runtime.pull()
 
     def test_15_vote_is_not_valid_arbitration(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence()
-        self.fx.fill_roast(iteration, verdicts=("PASS", "FAIL"), resolution_basis="vote")
+        self.fx.fill_pull(iteration, verdicts=("PASS", "FAIL"), resolution_basis="vote")
         with self.assertRaises(ValidationError):
-            self.fx.runtime.roast()
+            self.fx.runtime.pull()
 
     def test_16_evidence_can_resolve_review_disagreement(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence()
-        self.fx.fill_roast(iteration, verdicts=("PASS", "FAIL"), resolution_basis="experiment")
-        self.assertEqual(self.fx.runtime.roast()["decision"], "PASS")
+        self.fx.fill_pull(iteration, verdicts=("PASS", "FAIL"), resolution_basis="experiment")
+        self.assertEqual(self.fx.runtime.pull()["decision"], "PASS")
 
     def test_17_high_finding_cannot_be_silently_dismissed(self) -> None:
         self.fx.lock()
@@ -157,9 +157,9 @@ class ConformanceTests(unittest.TestCase):
             "rationale": "The lead does not believe the reviewer.",
             "evidence_ref": "",
         }
-        self.fx.fill_roast(iteration, finding=finding, disposition=disposition)
+        self.fx.fill_pull(iteration, finding=finding, disposition=disposition)
         with self.assertRaises(ValidationError):
-            self.fx.runtime.roast()
+            self.fx.runtime.pull()
 
     def test_18_ledger_tamper_is_detected(self) -> None:
         self.fx.lock()
@@ -175,8 +175,8 @@ class ConformanceTests(unittest.TestCase):
     def test_19_done_requires_cumulative_final_contract(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence(final=False)
-        self.fx.fill_roast(iteration)
-        self.fx.runtime.roast()
+        self.fx.fill_pull(iteration)
+        self.fx.runtime.pull()
         with self.assertRaises(StateError):
             self.fx.runtime.finish("done")
 
@@ -193,8 +193,8 @@ class ConformanceTests(unittest.TestCase):
     def test_21_historical_receipt_tamper_is_detected(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence(final=True)
-        self.fx.fill_roast(iteration)
-        self.fx.runtime.roast()
+        self.fx.fill_pull(iteration)
+        self.fx.runtime.pull()
         self.fx.runtime.finish("done")
         evidence = iteration / "EVIDENCE.json"
         data = read_json(evidence)
@@ -283,13 +283,13 @@ class ConformanceTests(unittest.TestCase):
     def test_29_review_with_wrong_sealed_hash_is_rejected(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence()
-        self.fx.runtime.prepare_roast()
-        self.fx.fill_roast(iteration, prepare=False)
+        self.fx.runtime.prepare_pull()
+        self.fx.fill_pull(iteration, prepare=False)
         review = read_json(iteration / "reviews" / "review-1.json")
         review["artifact_hashes"]["patch"] = "0" * 64
         atomic_write_json(iteration / "reviews" / "review-1.json", review)
         with self.assertRaises(ValidationError):
-            self.fx.runtime.roast()
+            self.fx.runtime.pull()
 
     def test_30_pass_judgment_cannot_retain_act_on_finding(self) -> None:
         self.fx.lock()
@@ -309,9 +309,9 @@ class ConformanceTests(unittest.TestCase):
             "rationale": "The lead agrees this must be addressed before acceptance.",
             "evidence_ref": "",
         }
-        self.fx.fill_roast(iteration, finding=finding, disposition=disposition, judgment_decision="PASS")
+        self.fx.fill_pull(iteration, finding=finding, disposition=disposition, judgment_decision="PASS")
         with self.assertRaises(ValidationError):
-            self.fx.runtime.roast()
+            self.fx.runtime.pull()
 
     def test_31_push_conflict_resolution_with_vote_basis_is_rejected(self) -> None:
         self.fx.valid_draft()

@@ -48,9 +48,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("check-scope", help="show path, file, and changed-line budget status")
     sub.add_parser("verify", help="execute the locked verification commands and seal receipts")
 
-    roast_prepare = sub.add_parser("prepare-roast", help="create sealed read-only review packets")
-    roast_prepare.add_argument("--reviewers", type=int, default=2)
-    sub.add_parser("roast", help="validate independent reviews and lead judgment")
+    pull_prepare = sub.add_parser("prepare-pull", help="create sealed read-only review packets")
+    pull_prepare.add_argument("--reviewers", type=int, default=2)
+    sub.add_parser("pull", help="validate independent reviews and lead judgment")
 
     finish = sub.add_parser("finish", help="close the current slice or mission through a guarded decision")
     finish.add_argument("decision", choices=["accepted", "done", "rework", "blocked", "stopped", "pivot"])
@@ -101,10 +101,10 @@ def main(argv: list[str] | None = None) -> int:
             result = runtime.verify()
             _emit(result)
             return 0 if result["status"] == "pass" else 2
-        elif args.command == "prepare-roast":
-            _emit(runtime.prepare_roast(args.reviewers))
-        elif args.command == "roast":
-            _emit(runtime.roast())
+        elif args.command == "prepare-pull":
+            _emit(runtime.prepare_pull(args.reviewers))
+        elif args.command == "pull":
+            _emit(runtime.pull())
         elif args.command == "finish":
             _emit(runtime.finish(args.decision, root_cause=args.root_cause, note=args.note))
         elif args.command == "pivot":

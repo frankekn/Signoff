@@ -42,10 +42,10 @@ def _action(runtime: Runtime, action: str, payload: dict[str, Any]) -> Any:
         return runtime.check_scope()
     if action == "verify":
         return runtime.verify()
-    if action == "prepare_roast":
-        return runtime.prepare_roast(int(payload.get("reviewers", 2)))
-    if action == "roast":
-        return runtime.roast()
+    if action == "prepare_pull":
+        return runtime.prepare_pull(int(payload.get("reviewers", 2)))
+    if action == "pull":
+        return runtime.pull()
     if action == "finish_done":
         return runtime.finish("done", note=str(payload.get("note", "")))
     if action == "finish_accepted":

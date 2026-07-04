@@ -12,7 +12,7 @@ from typing import Any
 from .errors import IntegrityError, SignoffError, StateError, ValidationError
 from .git import changed_files, changed_line_count, ensure_repository, patch, snapshot_commit
 from .ledger import append as append_ledger
-from .schemas import validate_contract, validate_push, validate_roast, validate_spec
+from .schemas import validate_contract, validate_push, validate_pull, validate_spec
 from .state import (
     TERMINAL_PHASES,
     active_mission,
@@ -478,11 +478,11 @@ class Runtime:
         )
         return {"phase": state["phase"], "status": status, "checks": [{"id": x["id"], "status": x["status"], "exit_code": x["exit_code"]} for x in check_results], "scope": post_scope, "verification_mutated_patch": mutated, "evidence_path": str((iteration_dir / "EVIDENCE.json").relative_to(self.project)), "next": self.next_action()}
 
-    def prepare_roast(self, count: int = 2) -> dict[str, Any]:
+    def prepare_pull(self, count: int = 2) -> dict[str, Any]:
         _, state = active_mission(self.project)
         require_phase(state, {"VERIFIED", "REVIEWING"})
         if state["current"].get("verification_status") != "pass":
-            raise StateError("Roast cannot begin without passing executable evidence")
+            raise StateError("Pull cannot begin without passing executable evidence")
         if count < 2 or count > 8:
             raise ValidationError("reviewer count must be from 2 to 8")
         contract, info, _ = _contract_and_info(self.project, state)
@@ -509,21 +509,21 @@ class Runtime:
         state["current"]["review_template_count"] = count
         state["updated_at"] = now_utc()
         write_mission_state(self.project, state)
-        append_ledger(ledger_path(self.project, state["mission_id"]), "roast.prepared", {"iteration": state["current"]["iteration"], "reviewer_slots": count, "artifact_hashes": hashes})
+        append_ledger(ledger_path(self.project, state["mission_id"]), "pull.prepared", {"iteration": state["current"]["iteration"], "reviewer_slots": count, "artifact_hashes": hashes})
         return {"phase": "REVIEWING", "reviews_dir": str(reviews_dir.relative_to(self.project)), "judgment_path": str(judgment_path.relative_to(self.project)), "artifact_hashes": hashes, "next": self.next_action()}
 
-    def roast(self) -> dict[str, Any]:
+    def pull(self) -> dict[str, Any]:
         _, state = active_mission(self.project)
         require_phase(state, {"REVIEWING"})
         _contract, info, _path = _contract_and_info(self.project, state)
         iteration_dir = current_iteration_dir(self.project, state)
         evidence = read_json(iteration_dir / "EVIDENCE.json")
         if evidence.get("status") != "pass":
-            raise IntegrityError("Roast input evidence is not passing")
+            raise IntegrityError("Pull input evidence is not passing")
         hashes = _evidence_hashes(iteration_dir)
         reviews = [read_json(path) for path in sorted((iteration_dir / "reviews").glob("review-*.json"))]
         judgment = read_json(iteration_dir / "JUDGMENT.json")
-        result = validate_roast(
+        result = validate_pull(
             reviews,
             judgment,
             mission_id=state["mission_id"],
@@ -554,7 +554,7 @@ class Runtime:
         )
         state["updated_at"] = now_utc()
         write_mission_state(self.project, state)
-        append_ledger(ledger_path(self.project, state["mission_id"]), "roast.decided", {"iteration": state["current"]["iteration"], "decision": result["decision"], "proof_level": result["proof_level"], "gate_sha256": state["current"]["review_gate_sha256"]})
+        append_ledger(ledger_path(self.project, state["mission_id"]), "pull.decided", {"iteration": state["current"]["iteration"], "decision": result["decision"], "proof_level": result["proof_level"], "gate_sha256": state["current"]["review_gate_sha256"]})
         return {"phase": "REVIEWED", **result, "gate_path": str((iteration_dir / "REVIEW_GATE.json").relative_to(self.project)), "next": self.next_action()}
 
     def finish(self, decision: str, *, root_cause: str = "", note: str = "") -> dict[str, Any]:
@@ -789,8 +789,8 @@ class Runtime:
             "SLICE_DRAFT": slice_draft_action,
             "IMPLEMENTING": "Implement only the active contract; then run ./signoff verify.",
             "VERIFY_FAILED": "Fix only the failed evidence or scope issue without changing locked artifacts; then run ./signoff verify again.",
-            "VERIFIED": "Run ./signoff prepare-roast, collect fresh read-only reviews, then run ./signoff roast.",
-            "REVIEWING": "Fill every review and JUDGMENT.json against the sealed hashes; then run ./signoff roast.",
+            "VERIFIED": "Run ./signoff prepare-pull, collect fresh read-only reviews, then run ./signoff pull.",
+            "REVIEWING": "Fill every review and JUDGMENT.json against the sealed hashes; then run ./signoff pull.",
             "REVIEWED": "Follow the deterministic gate: ./signoff finish accepted, ./signoff finish done, or ./signoff finish rework --root-cause \"...\".",
             "PUSH_REVIEW": "Implementation is paused. Run ./signoff pivot --reason \"<evidence-based reason>\" or ./signoff finish stopped --note \"<reason>\".",
             "DONE": "Terminal result: DONE. Do not continue implementation under this mission.",

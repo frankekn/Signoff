@@ -73,8 +73,8 @@ def allowed_actions(phase: str) -> list[CourtAction]:
             {"id": "check_scope", "label": "Check scope", "tone": "neutral"},
             {"id": "verify", "label": "Verify again", "tone": "primary"},
         ],
-        "VERIFIED": [{"id": "prepare_roast", "label": "Prepare independent review", "tone": "primary"}],
-        "REVIEWING": [{"id": "roast", "label": "Seal review", "tone": "primary"}],
+        "VERIFIED": [{"id": "prepare_pull", "label": "Prepare independent review", "tone": "primary"}],
+        "REVIEWING": [{"id": "pull", "label": "Seal review", "tone": "primary"}],
         "REVIEWED": [
             {"id": "finish_done", "label": "Sign off", "tone": "primary"},
             {"id": "finish_accepted", "label": "Accept slice", "tone": "neutral"},

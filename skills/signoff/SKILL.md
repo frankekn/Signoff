@@ -1,6 +1,6 @@
 ---
 name: signoff
-description: "Use for engineering work that must autonomously write a specification, obtain independent Push pressure, implement one bounded slice, prove it with executable receipts, obtain independent Roast review, and continue without goal drift or AI slop. The ./signoff state machine is authoritative."
+description: "Use for engineering work that must autonomously write a specification, obtain independent Push pressure, implement one bounded slice, prove it with executable receipts, obtain independent Pull review, and continue without goal drift or AI slop. The ./signoff state machine is authoritative."
 disable-model-invocation: true
 ---
 
@@ -85,15 +85,15 @@ A failed command, scope breach, budget overflow, timeout, or verification-induce
 Create sealed review packets:
 
 ```sh
-./signoff prepare-roast
+./signoff prepare-pull
 ```
 
-Use the sibling `roast` skill in fresh read-only contexts. Every reviewer answers every active acceptance ID with `PASS`, `FAIL`, or `UNKNOWN` against the same contract, evidence, and patch hashes. A separate lead judge accounts for every finding and conflict.
+Use the sibling `pull` skill in fresh read-only contexts. Every reviewer answers every active acceptance ID with `PASS`, `FAIL`, or `UNKNOWN` against the same contract, evidence, and patch hashes. A separate lead judge accounts for every finding and conflict.
 
 Then run:
 
 ```sh
-./signoff roast
+./signoff pull
 ```
 
 ### REVIEWED

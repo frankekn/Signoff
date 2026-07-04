@@ -1,6 +1,6 @@
 # Reviewer transport adapters
 
-Model names and CLI flags are volatile. Keep them out of the Roast protocol.
+Model names and CLI flags are volatile. Keep them out of the Pull protocol.
 
 Use any host mechanism that can provide real fresh read-only contexts. For each counted reviewer, record the actual provider, model, participant ID, and context ID in the generated review file. The builder's current context never counts as a reviewer.
 

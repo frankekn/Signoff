@@ -1,12 +1,12 @@
 ---
-name: roast
-description: "Use after executable verification for independent read-only review of one sealed patch against one locked contract. In Signoff mode, fill review-*.json and JUDGMENT.json; ./signoff roast enforces role separation, complete criterion coverage, finding accounting, and evidence-based conflict closure."
+name: pull
+description: "Use after executable verification for independent read-only review of one sealed patch against one locked contract. In Signoff mode, fill review-*.json and JUDGMENT.json; ./signoff pull enforces role separation, complete criterion coverage, finding accounting, and evidence-based conflict closure."
 disable-model-invocation: true
 ---
 
-# Roast — adversarial review of one sealed patch
+# Pull — adversarial review of one sealed patch
 
-Roast does not redesign the product and does not auto-apply suggestions. It asks whether one exact patch satisfies one exact contract using one exact evidence bundle.
+Pull does not redesign the product and does not auto-apply suggestions. It asks whether one exact patch satisfies one exact contract using one exact evidence bundle.
 
 ## Inputs in Signoff mode
 
@@ -50,7 +50,7 @@ A material PASS/FAIL or PASS/UNKNOWN conflict cannot be settled by majority, con
 After all files are complete, run:
 
 ```sh
-./signoff roast
+./signoff pull
 ```
 
 The runtime validates identities, hashes, complete criterion coverage, finding accounting, and conflict resolution. Do not edit files merely to make the gate green; repair the underlying evidence or implementation.

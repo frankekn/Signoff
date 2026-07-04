@@ -40,8 +40,8 @@ class WebProofApiTests(WebServerTestCase):
     def test_proof_summary_reviewed_pass_nonfinal_keeps_signoff_unavailable(self) -> None:
         self.fx.lock()
         iteration_dir = self.fx.passing_evidence(final=False)
-        self.fx.fill_roast(iteration_dir)
-        self.fx.runtime.roast()
+        self.fx.fill_pull(iteration_dir)
+        self.fx.runtime.pull()
 
         status, payload = self.request("/api/overview")
         self.assertEqual(status, 200)
@@ -57,8 +57,8 @@ class WebProofApiTests(WebServerTestCase):
     def test_proof_summary_reviewed_pass_final_exposes_review_gate_hash(self) -> None:
         self.fx.lock()
         iteration_dir = self.fx.passing_evidence(final=True)
-        self.fx.fill_roast(iteration_dir)
-        self.fx.runtime.roast()
+        self.fx.fill_pull(iteration_dir)
+        self.fx.runtime.pull()
 
         status, payload = self.request("/api/overview")
         self.assertEqual(status, 200)
@@ -73,8 +73,8 @@ class WebProofApiTests(WebServerTestCase):
     def test_proof_summary_done_exposes_final_receipt(self) -> None:
         self.fx.lock()
         iteration_dir = self.fx.passing_evidence(final=True)
-        self.fx.fill_roast(iteration_dir)
-        self.fx.runtime.roast()
+        self.fx.fill_pull(iteration_dir)
+        self.fx.runtime.pull()
         self.fx.runtime.finish("done")
 
         status, payload = self.request("/api/overview")

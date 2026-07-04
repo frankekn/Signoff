@@ -43,8 +43,8 @@ class WebMissionApiTests(WebServerTestCase):
         old_mission_id = self.fx.mission_id
         self.fx.lock()
         iteration_dir = self.fx.passing_evidence(final=True)
-        self.fx.fill_roast(iteration_dir)
-        self.fx.runtime.roast()
+        self.fx.fill_pull(iteration_dir)
+        self.fx.runtime.pull()
         self.fx.runtime.finish("done")
         status, payload = self.request("/api/missions", method="POST", body={"goal": "Second mission outcome"})
         self.assertEqual(status, 201)

@@ -156,7 +156,7 @@ The focused unit test must pass against the sealed patch.
             raise AssertionError(result)
         return iteration_dir
 
-    def fill_roast(
+    def fill_pull(
         self,
         iteration_dir: Path,
         verdicts: Iterable[str] = ("PASS", "PASS"),
@@ -170,7 +170,7 @@ The focused unit test must pass against the sealed patch.
         disposition: dict | None = None,
     ) -> None:
         if prepare:
-            self.runtime.prepare_roast()
+            self.runtime.prepare_pull()
         for index, (path, verdict) in enumerate(zip(sorted((iteration_dir / "reviews").glob("review-*.json")), verdicts), start=1):
             review = read_json(path)
             identity = {

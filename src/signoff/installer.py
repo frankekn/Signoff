@@ -93,7 +93,7 @@ def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
     elif (project / ".agents" / "skills" / "signoff" / "SKILL.md").is_file():
         skills_source = project / ".agents" / "skills"
     else:
-        raise SignoffError("cannot locate the bundled Signoff, Push, and Roast skills")
+        raise SignoffError("cannot locate the bundled Signoff, Push, and Pull skills")
 
     written: list[Path] = []
     runtime_destination = project / ".signoff" / "runtime" / "signoff"
@@ -103,7 +103,7 @@ def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
         written.extend(_copy_tree(package_source, runtime_destination))
 
     for host_dir in (project / ".agents" / "skills", project / ".claude" / "skills", project / ".gemini" / "skills"):
-        for skill_name in ("signoff", "push", "roast"):
+        for skill_name in ("signoff", "push", "pull"):
             source = skills_source / skill_name
             destination = host_dir / skill_name
             if destination.exists():
@@ -140,7 +140,7 @@ def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
         "status": "installed",
         "project": str(project),
         "runtime": str(runtime_destination.relative_to(project)),
-        "skills": ["signoff", "push", "roast"],
+        "skills": ["signoff", "push", "pull"],
         "managed_files": len(manifest["files"]),
         "next": "Run ./signoff doctor, then ./signoff start \"<the user’s exact outcome>\".",
     }

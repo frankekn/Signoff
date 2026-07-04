@@ -389,7 +389,7 @@ def validate_review(
     return {"reviewer": reviewer, "verdicts": verdicts, "finding_ids": finding_ids, "findings": findings}
 
 
-def validate_roast(
+def validate_pull(
     reviews: list[dict[str, Any]],
     judgment: dict[str, Any],
     *,
@@ -401,7 +401,7 @@ def validate_roast(
     evidence_check_ids: set[str],
 ) -> dict[str, Any]:
     if len(reviews) < 2:
-        raise ValidationError("Roast requires at least two substantive independent reviews")
+        raise ValidationError("Pull requires at least two substantive independent reviews")
     normalized = [
         validate_review(
             review,
