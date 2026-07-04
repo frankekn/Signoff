@@ -15,7 +15,7 @@ type PhasePresentation = {
 
 const stepIndex = {
   define: 0,
-  challenge: 1,
+  push: 1,
   lock: 2,
   build: 3,
   verify: 4,
@@ -25,11 +25,11 @@ const stepIndex = {
 
 const phases: readonly PhaseStep[] = [
   { id: 'DRAFT', label: 'Define' },
-  { id: 'PUSH', label: 'Challenge' },
+  { id: 'PUSH', label: 'Push' },
   { id: 'LOCKED', label: 'Lock' },
   { id: 'IMPLEMENTING', label: 'Build' },
   { id: 'VERIFIED', label: 'Verify' },
-  { id: 'REVIEWING', label: 'Review' },
+  { id: 'REVIEWING', label: 'Pull' },
   { id: 'DONE', label: 'Sign off' },
 ] as const
 
@@ -40,7 +40,7 @@ function withStepLabel(index: number, label: string): readonly PhaseStep[] {
 const phasePresentation: Record<string, PhasePresentation> = {
   IDLE: { activeIndex: stepIndex.define, status: 'paused', steps: withStepLabel(stepIndex.define, 'Ready') },
   DRAFT: { activeIndex: stepIndex.define, status: 'active', steps: phases },
-  PUSH: { activeIndex: stepIndex.challenge, status: 'active', steps: phases },
+  PUSH: { activeIndex: stepIndex.push, status: 'active', steps: phases },
   LOCKED: { activeIndex: stepIndex.lock, status: 'active', steps: phases },
   SLICE_DRAFT: { activeIndex: stepIndex.lock, status: 'active', steps: withStepLabel(stepIndex.lock, 'Bound slice') },
   IMPLEMENTING: { activeIndex: stepIndex.build, status: 'active', steps: phases },
