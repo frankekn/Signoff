@@ -210,6 +210,7 @@ def _legal_actions(phase: str, status: JsonObject, blocked_by_integrity: bool) -
         review_decision = text((current or {}).get("review_decision"), "")
         if review_decision != "PASS":
             return [action for action in actions if action["id"] == "finish_rework"]
+        actions = [action for action in actions if action["id"] != "finish_rework"]
         if not bool((current or {}).get("final")):
             return [action for action in actions if action["id"] != "finish_done"]
     return actions

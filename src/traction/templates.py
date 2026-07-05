@@ -92,7 +92,7 @@ def push_template(run_id: str, hashes: dict[str, str]) -> dict[str, Any]:
         "advisors": [advisor(1), advisor(2)],
         "decision": {
             "verdict": "PROCEED",
-            "rationale": "REPLACE_ME with evidence-based synthesis",
+            "rationale": "REPLACE_ME with evidence-based synthesis of advisor verdicts and routes",
             "conflict_resolutions": [],
             "first_slice": "REPLACE_ME with the smallest high-leverage acceptance slice",
             "chair": {

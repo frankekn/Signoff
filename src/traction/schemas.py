@@ -127,11 +127,19 @@ def validate_spec(spec: dict[str, Any], *, run_id: str, goal_sha256: str) -> dic
     }
 
 
-def push_conflicts(advisors: list[dict[str, Any]]) -> set[str]:
+def push_conflicts(advisors: list[dict[str, Any]], decision_verdict: str) -> set[str]:
+    conflicts: set[str] = set()
     verdicts = {advisor["verdict"] for advisor in advisors}
     if len(verdicts) > 1:
-        return {"verdict-split"}
-    return set()
+        conflicts.add("verdict-split")
+    routes = {" ".join(advisor["route"].split()).casefold() for advisor in advisors}
+    if len(routes) > 1:
+        conflicts.add("route-divergence")
+    if len(verdicts) == 1:
+        advisor_verdict = next(iter(verdicts))
+        if advisor_verdict != decision_verdict and decision_verdict != "STOP":
+            conflicts.add(f"advisor-unanimous-{advisor_verdict.casefold()}")
+    return conflicts
 
 
 def validate_push(
@@ -166,7 +174,7 @@ def validate_push(
             raise ValidationError(f"{context} must attest independent_first_round=true")
         if advisor["verdict"] not in {"PROCEED", "STOP", "PIVOT"}:
             raise ValidationError(f"{context}.verdict is invalid")
-        require_clean_text(advisor["route"], f"{context}.route", minimum=8)
+        route = require_clean_text(advisor["route"], f"{context}.route", minimum=8)
         criteria_values = _expect_list(advisor["falsifiable_criteria"], f"{context}.falsifiable_criteria", nonempty=True)
         falsifiable_criteria: list[str] = []
         for criterion_index, criterion_value in enumerate(criteria_values):
@@ -179,11 +187,21 @@ def validate_push(
             )
         if len(falsifiable_criteria) != len(set(falsifiable_criteria)):
             raise ValidationError(f"{context}.falsifiable_criteria contains duplicates")
-        require_clean_text(advisor["risk"], f"{context}.risk", minimum=5)
-        require_clean_text(advisor["first_move"], f"{context}.first_move", minimum=4)
-        require_clean_text(advisor["cut"], f"{context}.cut", minimum=3)
+        risk = require_clean_text(advisor["risk"], f"{context}.risk", minimum=5)
+        first_move = require_clean_text(advisor["first_move"], f"{context}.first_move", minimum=4)
+        cut = require_clean_text(advisor["cut"], f"{context}.cut", minimum=3)
         identities.append(identity)
-        normalized_advisors.append({**advisor, "identity": identity, "falsifiable_criteria": falsifiable_criteria})
+        normalized_advisors.append(
+            {
+                **advisor,
+                "identity": identity,
+                "route": route,
+                "falsifiable_criteria": falsifiable_criteria,
+                "risk": risk,
+                "first_move": first_move,
+                "cut": cut,
+            }
+        )
 
     participant_ids = [identity["participant_id"] for identity in identities]
     context_ids = [identity["context_id"] for identity in identities]
@@ -208,7 +226,7 @@ def validate_push(
     if verdict == "PROCEED":
         require_clean_text(decision["first_slice"], "push.decision.first_slice", minimum=5)
 
-    conflicts = push_conflicts(normalized_advisors)
+    conflicts = push_conflicts(normalized_advisors, verdict)
     resolutions_value = _expect_list(decision["conflict_resolutions"], "push.decision.conflict_resolutions")
     resolutions: dict[str, dict[str, Any]] = {}
     for index, resolution_value in enumerate(resolutions_value):

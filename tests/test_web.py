@@ -85,6 +85,18 @@ class WebApiTests(WebServerTestCase):
         self.assertEqual(create_status, 400)
         self.assertFalse(create_payload["ok"])
 
+    def test_pivot_run_can_be_stopped_from_web_action(self) -> None:
+        self.conclude_from_push("PIVOT")
+
+        status, payload = self.request(
+            "/api/action",
+            method="POST",
+            body={"action": "finish_stopped", "note": "stop pivot for test"},
+        )
+
+        self.assertEqual(status, 200)
+        self.assertEqual(payload["data"]["phase"], "STOPPED")
+
     def test_hard_integrity_failure_blocks_actions(self) -> None:
         self.fx.lock()
         spec = read_json(self.fx.run / "SPEC.json")

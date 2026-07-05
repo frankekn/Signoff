@@ -658,7 +658,7 @@ class Runtime:
                 "next": self.next_action(),
             }
 
-        require_phase(state, {"DRAFT", "PUSH", "LOCKED", "SLICE_DRAFT", "IMPLEMENTING", "VERIFY_FAILED", "VERIFIED", "REVIEWING", "REVIEWED", "PUSH_REVIEW"})
+        require_phase(state, {"DRAFT", "PUSH", "LOCKED", "SLICE_DRAFT", "IMPLEMENTING", "VERIFY_FAILED", "VERIFIED", "REVIEWING", "REVIEWED", "PUSH_REVIEW", "PIVOT"})
         phase = decision.upper()
         if phase == "PIVOT":
             phase = "PUSH_REVIEW"

@@ -6,11 +6,24 @@ from typing import TypeAlias
 
 from .errors import StateError
 from .state import TERMINAL_PHASES
-from .util import atomic_write_json, read_json
+from .util import atomic_write_json, read_json, sha256_file
 
 JsonScalar: TypeAlias = str | int | float | bool | None
 JsonValue: TypeAlias = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
 JsonObject: TypeAlias = dict[str, JsonValue]
+LEGACY_LAUNCHERS = ("signoff", "signoff.cmd", "signoff.ps1")
+LEGACY_SKILL_DIRS = (
+    ".agents/skills/signoff",
+    ".agents/skills/council",
+    ".agents/skills/roast",
+    ".claude/skills/signoff",
+    ".claude/skills/council",
+    ".claude/skills/roast",
+    ".gemini/skills/signoff",
+    ".gemini/skills/council",
+    ".gemini/skills/roast",
+)
+LEGACY_SKILL_PREFIXES = tuple(f"{directory}/" for directory in LEGACY_SKILL_DIRS)
 
 
 def migrate_legacy_control_root(project: Path) -> None:
@@ -25,6 +38,7 @@ def migrate_legacy_control_root(project: Path) -> None:
     if not legacy.exists():
         return
     _ensure_legacy_runs_are_terminal(legacy)
+    _remove_legacy_installer_outputs(project, legacy)
     legacy.rename(current)
     _translate_legacy_control_state(current)
 
@@ -65,6 +79,31 @@ def _translate_legacy_control_state(current: Path) -> None:
     root["runs"] = [id_map[mission_id] for mission_id in mission_ids]
     root.pop("missions", None)
     atomic_write_json(root_path, root)
+
+
+def _remove_legacy_installer_outputs(project: Path, legacy: Path) -> None:
+    manifest_path = legacy / "install-manifest.json"
+    if not manifest_path.is_file():
+        return
+    manifest = read_json(manifest_path)
+    files = manifest.get("files")
+    if not isinstance(files, dict):
+        return
+    for relative, expected_hash in files.items():
+        if not isinstance(relative, str) or not isinstance(expected_hash, str):
+            continue
+        normalized = relative.replace("\\", "/")
+        if normalized.startswith("/") or ".." in normalized.split("/"):
+            continue
+        if normalized not in LEGACY_LAUNCHERS and not normalized.startswith(LEGACY_SKILL_PREFIXES):
+            continue
+        candidate = project / normalized
+        if candidate.is_file() and sha256_file(candidate) == expected_hash:
+            candidate.unlink()
+    for relative in sorted(LEGACY_SKILL_DIRS, key=len, reverse=True):
+        directory = project / relative
+        if directory.is_dir() and not any(directory.iterdir()):
+            directory.rmdir()
 
 
 def _legacy_mission_ids(root: JsonObject) -> list[str]:

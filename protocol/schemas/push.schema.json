@@ -176,9 +176,11 @@
           }
         },
         "conflict_resolutions": {
+          "description": "Evidence-based resolutions for runtime-reported material conflicts such as verdict-split, route-divergence, or advisor-unanimous-<verdict> when the chair overrides unanimous advisors. STOP may always be chosen honestly without an override.",
           "type": "array",
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "required": [
               "topic",
               "basis",

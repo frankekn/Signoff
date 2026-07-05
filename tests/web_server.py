@@ -35,6 +35,15 @@ class WebServerTestCase(unittest.TestCase):
         self.fx.valid_push()
         push = read_json(self.fx.run / "PUSH.json")
         push["decision"]["verdict"] = verdict
+        if verdict == "PIVOT":
+            push["decision"]["conflict_resolutions"] = [
+                {
+                    "topic": "advisor-unanimous-proceed",
+                    "basis": "user_decision",
+                    "evidence": "The user-facing route needs revision before implementation continues.",
+                    "conclusion": "Record a PIVOT terminal state before any implementation slice.",
+                }
+            ]
         if verdict == "INSUFFICIENT_QUORUM":
             push["advisors"] = push["advisors"][:1]
         atomic_write_json(self.fx.run / "PUSH.json", push)

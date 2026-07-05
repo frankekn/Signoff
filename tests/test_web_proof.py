@@ -48,7 +48,7 @@ class WebProofApiTests(WebServerTestCase):
         action_ids = [action["id"] for action in payload["data"]["actions"]]
         self.assertNotIn("finish_done", action_ids)
         self.assertIn("finish_accepted", action_ids)
-        self.assertIn("finish_rework", action_ids)
+        self.assertNotIn("finish_rework", action_ids)
         proof = payload["data"]["proofSummary"]
         self.assertEqual(proof["reviewGate"]["decision"], "PASS")
         self.assertFalse(proof["contract"]["final"])

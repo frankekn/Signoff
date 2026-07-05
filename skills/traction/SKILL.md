@@ -46,7 +46,7 @@ Then run:
 
 Use the sibling `loop` skill (Push mode). Give every advisor the exact same goal, charter, spec, and hashes.
 
-Advisors answer independently before seeing peers. Fill the generated `PUSH.json`. Material verdict splits require an evidence-based resolution. If independent contexts are unavailable, return `INSUFFICIENT_QUORUM`; do not imitate extra voices.
+Advisors answer independently before seeing peers. Fill the generated `PUSH.json`. Material verdict splits, materially different routes, and chair overrides of unanimous advisors require evidence-based resolution. If independent contexts are unavailable, return `INSUFFICIENT_QUORUM`; do not imitate extra voices.
 
 Then run:
 

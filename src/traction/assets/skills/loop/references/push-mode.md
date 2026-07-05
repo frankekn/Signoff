@@ -29,9 +29,9 @@ If the host cannot create independent contexts, record `INSUFFICIENT_QUORUM`. Ne
 
 Prompt template: `deliberation-prompt.md`.
 
-## Verdict-split cross-examination
+## Material conflict cross-examination
 
-Only when advisors return different verdicts (`verdict-split`) run a second round. One bounded round only — never open unlimited conversation.
+When advisors return different verdicts (`verdict-split`) or materially different routes (`route-divergence`), run a second round. One bounded round only — never open unlimited conversation.
 
 Strip provider/model identity. Label opposing positions neutrally. Ask each side:
 
@@ -52,6 +52,8 @@ The chair frames and synthesizes but does not count as an advisor. The decision 
 - `INSUFFICIENT_QUORUM` — independent advice could not be obtained honestly.
 
 Every material conflict must be closed with one of: `experiment`, `existing_evidence`, `locked_spec`, `user_decision`.
+
+If all advisors agree on a verdict and the chair chooses a different verdict, record an evidence-based `advisor-unanimous-<verdict>` resolution unless the chair chooses `STOP`. Stopping is always an honest terminal decision.
 
 Votes, majority, confidence, consensus, model brand, or rhetorical strength are invalid arbitration bases. Preserve unresolved dissent instead of laundering it into confidence.
 

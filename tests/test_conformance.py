@@ -9,7 +9,7 @@ from pathlib import Path
 
 from traction.errors import IntegrityError, StateError, ValidationError
 from traction.installer import install
-from traction.util import atomic_write_json, read_json
+from traction.util import atomic_write_json, read_json, sha256_file
 
 from tests.support import RepoFixture
 
@@ -100,6 +100,76 @@ class ConformanceTests(unittest.TestCase):
         self.fx.valid_draft()
         self.fx.valid_push(conflict=True, resolve=True)
         self.assertEqual(self.fx.runtime.lock()["phase"], "LOCKED")
+
+    def test_push_route_divergence_without_evidence_resolution_is_rejected(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_push()
+        push = read_json(self.fx.run / "PUSH.json")
+        push["advisors"][1]["route"] = "Replace the application with a new CLI and defer the focused unit test."
+        atomic_write_json(self.fx.run / "PUSH.json", push)
+
+        with self.assertRaisesRegex(ValidationError, "route-divergence"):
+            self.fx.runtime.lock()
+
+    def test_push_route_divergence_can_be_resolved_by_evidence(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_push()
+        push = read_json(self.fx.run / "PUSH.json")
+        push["advisors"][1]["route"] = "Replace the application with a new CLI and defer the focused unit test."
+        push["decision"]["conflict_resolutions"] = [
+            {
+                "topic": "route-divergence",
+                "basis": "existing_evidence",
+                "evidence": "The locked spec only needs app.py behavior, so the one-file route is the bounded route.",
+                "conclusion": "Use the app.py route and reject the broader CLI rewrite.",
+            }
+        ]
+        atomic_write_json(self.fx.run / "PUSH.json", push)
+
+        self.assertEqual(self.fx.runtime.lock()["phase"], "LOCKED")
+
+    def test_unanimous_stop_advisors_cannot_be_overridden_without_evidence(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_push()
+        push = read_json(self.fx.run / "PUSH.json")
+        for advisor in push["advisors"]:
+            advisor["verdict"] = "STOP"
+        push["decision"]["verdict"] = "PROCEED"
+        push["decision"]["rationale"] = "The chair wants to continue despite unanimous advisor stop verdicts."
+        atomic_write_json(self.fx.run / "PUSH.json", push)
+
+        with self.assertRaisesRegex(ValidationError, "advisor-unanimous-stop"):
+            self.fx.runtime.lock()
+
+    def test_unanimous_advisor_override_can_be_resolved_by_evidence(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_push()
+        push = read_json(self.fx.run / "PUSH.json")
+        for advisor in push["advisors"]:
+            advisor["verdict"] = "STOP"
+        push["decision"]["verdict"] = "PROCEED"
+        push["decision"]["rationale"] = "The chair uses existing evidence to continue despite unanimous stop advice."
+        push["decision"]["conflict_resolutions"] = [
+            {
+                "topic": "advisor-unanimous-stop",
+                "basis": "existing_evidence",
+                "evidence": "The existing failing unit test and one-file implementation path keep the slice bounded.",
+                "conclusion": "Proceed with the one-file route despite the unanimous stop advice.",
+            }
+        ]
+        atomic_write_json(self.fx.run / "PUSH.json", push)
+
+        self.assertEqual(self.fx.runtime.lock()["phase"], "LOCKED")
+
+    def test_chair_can_stop_without_overriding_unanimous_proceed_advisors(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_push()
+        push = read_json(self.fx.run / "PUSH.json")
+        push["decision"]["verdict"] = "STOP"
+        push["decision"]["rationale"] = "Stopping is the honest terminal decision for this run."
+        atomic_write_json(self.fx.run / "PUSH.json", push)
+
+        self.assertEqual(self.fx.runtime.lock()["phase"], "STOPPED")
 
     def test_08_unmapped_file_fails_scope(self) -> None:
         self.fx.lock()
@@ -421,6 +491,75 @@ class ConformanceTests(unittest.TestCase):
         self.assertEqual(status["run_id"], self.fx.run_id)
         self.assertEqual(status["phase"], "STOPPED")
         self.assertEqual(self.fx.runtime.doctor()["status"], "pass")
+
+    def test_install_removes_manifest_owned_legacy_signoff_launchers_and_skills(self) -> None:
+        source_root = Path(__file__).resolve().parents[1]
+        self.fx.runtime.finish("stopped", note="done for test")
+        legacy_root, _mission_id = _move_current_control_to_legacy(self.fx.project, self.fx.run_id)
+        legacy_paths = [
+            "signoff",
+            "signoff.cmd",
+            "signoff.ps1",
+            ".agents/skills/signoff/SKILL.md",
+            ".agents/skills/council/SKILL.md",
+            ".agents/skills/roast/SKILL.md",
+            ".claude/skills/signoff/SKILL.md",
+            ".claude/skills/council/SKILL.md",
+            ".claude/skills/roast/SKILL.md",
+            ".gemini/skills/signoff/SKILL.md",
+            ".gemini/skills/council/SKILL.md",
+            ".gemini/skills/roast/SKILL.md",
+        ]
+        for relative in legacy_paths:
+            path = self.fx.project / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(f"legacy managed file: {relative}\n", encoding="utf-8")
+        atomic_write_json(
+            legacy_root / "install-manifest.json",
+            {
+                "schema_version": 1,
+                "files": {
+                    relative: sha256_file(self.fx.project / relative)
+                    for relative in legacy_paths
+                },
+            },
+        )
+
+        install(self.fx.project, source_root)
+
+        for relative in legacy_paths:
+            self.assertFalse((self.fx.project / relative).exists(), relative)
+        for host in (".agents", ".claude", ".gemini"):
+            for skill in ("signoff", "council", "roast"):
+                self.assertFalse((self.fx.project / host / "skills" / skill).exists())
+        self.assertTrue((self.fx.project / "traction").is_file())
+        self.assertTrue((self.fx.project / ".agents" / "skills" / "traction" / "SKILL.md").is_file())
+
+    def test_stopping_from_pivot_records_terminal_state_without_accepting_work(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_push()
+        push = read_json(self.fx.run / "PUSH.json")
+        push["decision"]["verdict"] = "PIVOT"
+        push["decision"]["rationale"] = "The goal needs a revised route before implementation."
+        push["decision"]["conflict_resolutions"] = [
+            {
+                "topic": "advisor-unanimous-proceed",
+                "basis": "user_decision",
+                "evidence": "The user-facing route needs revision before implementation continues.",
+                "conclusion": "Record a PIVOT terminal state before any implementation slice.",
+            }
+        ]
+        atomic_write_json(self.fx.run / "PUSH.json", push)
+        self.assertEqual(self.fx.runtime.lock()["phase"], "PIVOT")
+
+        with self.assertRaises(StateError):
+            self.fx.runtime.finish("accepted")
+        with self.assertRaises(StateError):
+            self.fx.runtime.finish("done")
+
+        result = self.fx.runtime.finish("stopped", note="stop the pivot instead")
+        self.assertEqual(result["phase"], "STOPPED")
+        self.assertEqual(self.fx.runtime.status()["phase"], "STOPPED")
 
     def test_35_installed_launcher_ignores_project_traction_module(self) -> None:
         source_root = Path(__file__).resolve().parents[1]
