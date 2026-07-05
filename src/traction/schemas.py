@@ -221,6 +221,8 @@ def validate_push(
     chair = validate_identity(decision["chair"], "push.decision.chair")
     if chair["participant_id"] in set(participant_ids):
         raise ValidationError("Push chair must not impersonate or count as an advisor")
+    if chair["context_id"] in set(context_ids):
+        raise ValidationError("Push chair context must not reuse an advisor context")
     if verdict != "INSUFFICIENT_QUORUM" and len(advisors) < 2:
         raise ValidationError("Push requires at least two independent advisors")
     if verdict == "INSUFFICIENT_QUORUM" and len(advisors) >= 2:

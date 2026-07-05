@@ -90,6 +90,16 @@ class ConformanceTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
 
+    def test_push_chair_context_reuse_is_not_quorum(self) -> None:
+        self.fx.valid_draft()
+        self.fx.valid_push()
+        push = read_json(self.fx.run / "PUSH.json")
+        push["decision"]["chair"]["context_id"] = push["advisors"][0]["identity"]["context_id"]
+        atomic_write_json(self.fx.run / "PUSH.json", push)
+
+        with self.assertRaisesRegex(ValidationError, "chair"):
+            self.fx.runtime.lock()
+
     def test_06_advisor_verdict_split_without_evidence_resolution_is_rejected(self) -> None:
         self.fx.valid_draft()
         self.fx.valid_push(conflict=True, resolve=False)
@@ -384,6 +394,56 @@ class ConformanceTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             self.fx.runtime.pull()
 
+    def test_pull_rejects_artifact_tamper_after_prepare_pull(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        self.fx.runtime.prepare_pull()
+        evidence = read_json(iteration / "EVIDENCE.json")
+        evidence["tampered_after_prepare_pull"] = True
+        atomic_write_json(iteration / "EVIDENCE.json", evidence)
+        with (iteration / "PATCH.diff").open("a", encoding="utf-8") as patch_file:
+            patch_file.write("\n# tampered after prepare-pull\n")
+        artifact_hashes = {
+            "contract": sha256_file(iteration / "CONTRACT.json"),
+            "evidence": sha256_file(iteration / "EVIDENCE.json"),
+            "patch": sha256_file(iteration / "PATCH.diff"),
+        }
+        self.fx.fill_pull(iteration, prepare=False)
+        for path in sorted((iteration / "reviews").glob("review-*.json")):
+            review = read_json(path)
+            review["artifact_hashes"] = artifact_hashes
+            atomic_write_json(path, review)
+        judgment = read_json(iteration / "JUDGMENT.json")
+        judgment["artifact_hashes"] = artifact_hashes
+        atomic_write_json(iteration / "JUDGMENT.json", judgment)
+
+        with self.assertRaisesRegex(IntegrityError, "changed after verification"):
+            self.fx.runtime.pull()
+
+    def test_prepare_pull_regenerates_packets_after_rework(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence()
+        self.fx.fill_pull(iteration, verdicts=("FAIL", "FAIL"), judgment_decision="REWORK")
+        self.fx.runtime.pull()
+        self.assertEqual(self.fx.runtime.finish("rework", root_cause="review found missing evidence")["phase"], "IMPLEMENTING")
+        self.assertEqual(self.fx.runtime.verify()["status"], "pass")
+
+        result = self.fx.runtime.prepare_pull()
+
+        self.assertEqual(result["phase"], "REVIEWING")
+        review = read_json(iteration / "reviews" / "review-1.json")
+        self.assertEqual(review["reviewer"]["participant_id"], "REPLACE_ME-reviewer-1")
+
+    def test_finish_rejects_live_patch_changed_after_review(self) -> None:
+        self.fx.lock()
+        iteration = self.fx.passing_evidence(final=True)
+        self.fx.fill_pull(iteration)
+        self.assertEqual(self.fx.runtime.pull()["decision"], "PASS")
+        (self.fx.project / "app.py").write_text('def greet():\n    return "tampered"\n', encoding="utf-8")
+
+        with self.assertRaisesRegex(IntegrityError, "patch changed after verification"):
+            self.fx.runtime.finish("done")
+
     def test_30_pass_judgment_cannot_retain_act_on_finding(self) -> None:
         self.fx.lock()
         iteration = self.fx.passing_evidence()
@@ -573,6 +633,26 @@ class ConformanceTests(unittest.TestCase):
 
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertEqual(json.loads(proc.stdout)["status"], "pass")
+
+    def test_installed_launcher_preserves_relative_project_override(self) -> None:
+        source_root = Path(__file__).resolve().parents[1]
+        sibling = self.fx.project.parent / f"{self.fx.project.name}-sibling"
+        sibling.mkdir()
+        subprocess.run(["git", "init", "-q", str(sibling)], check=True)
+        install(self.fx.project, source_root)
+        install(sibling, source_root)
+
+        proc = subprocess.run(
+            [str(self.fx.project / "traction"), "--project", f"../{sibling.name}", "status"],
+            cwd=self.fx.project,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(json.loads(proc.stdout)["phase"], "IDLE")
 
     def test_36_build_release_excludes_legacy_signoff_control_dir(self) -> None:
         source = Path(__file__).resolve().parents[1] / "scripts" / "build_release.py"

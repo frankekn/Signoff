@@ -31,14 +31,16 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 RUNTIME="$ROOT/.traction/runtime"
 PYTHON=${PYTHON:-python3}
+CALLER_CWD=$(pwd)
 cd "$RUNTIME"
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$RUNTIME${PYTHONPATH:+:$PYTHONPATH}" exec "$PYTHON" -m traction --project "$ROOT" "$@"
+TRACTION_CALLER_CWD="$CALLER_CWD" PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$RUNTIME${PYTHONPATH:+:$PYTHONPATH}" exec "$PYTHON" -m traction --project "$ROOT" "$@"
 '''
 
 CMD_LAUNCHER = r'''@echo off
 set "ROOT=%~dp0"
 set "RUNTIME=%ROOT%.traction\runtime"
 set "PYTHONDONTWRITEBYTECODE=1"
+set "TRACTION_CALLER_CWD=%CD%"
 cd /d "%RUNTIME%"
 set "PYTHONPATH=%RUNTIME%;%PYTHONPATH%"
 python -m traction --project "%ROOT%" %*
@@ -49,6 +51,7 @@ $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Runtime = Join-Path $Root ".traction\runtime"
 $env:PYTHONDONTWRITEBYTECODE = "1"
 $env:PYTHONPATH = "$Runtime;$env:PYTHONPATH"
+$env:TRACTION_CALLER_CWD = (Get-Location).Path
 Set-Location -LiteralPath $Runtime
 python -m traction --project $Root @args
 '''

@@ -496,6 +496,12 @@ class Runtime:
         hashes = _evidence_hashes(iteration_dir)
         reviews_dir = iteration_dir / "reviews"
         reviews_dir.mkdir(exist_ok=True)
+        if state["phase"] == "VERIFIED" and int(state["current"].get("attempt", 1)) > 1:
+            for path in sorted(reviews_dir.glob("review-*.json")):
+                path.unlink()
+            for path in (iteration_dir / "JUDGMENT.json", iteration_dir / "REVIEW_GATE.json"):
+                if path.exists():
+                    path.unlink()
         for index in range(1, count + 1):
             path = reviews_dir / f"review-{index}.json"
             if path.exists() and "REPLACE_ME" not in path.read_text(encoding="utf-8"):
@@ -520,6 +526,10 @@ class Runtime:
         evidence = read_json(iteration_dir / "EVIDENCE.json")
         if evidence.get("status") != "pass":
             raise IntegrityError("Pull input evidence is not passing")
+        if sha256_file(iteration_dir / "EVIDENCE.json") != state["current"]["evidence_sha256"]:
+            raise IntegrityError("EVIDENCE.json changed after verification")
+        if sha256_file(iteration_dir / "PATCH.diff") != state["current"]["patch_file_sha256"]:
+            raise IntegrityError("PATCH.diff changed after verification")
         hashes = _evidence_hashes(iteration_dir)
         reviews = [read_json(path) for path in sorted((iteration_dir / "reviews").glob("review-*.json"))]
         judgment = read_json(iteration_dir / "JUDGMENT.json")
@@ -580,6 +590,10 @@ class Runtime:
                     raise StateError("DONE requires contract.final=true")
                 if info["acceptance"] != spec_info["acceptance_ids"] or info["requirements"] != spec_info["requirement_ids"]:
                     raise StateError("DONE requires a cumulative final contract covering every locked requirement and acceptance criterion")
+            if decision in {"accepted", "done"}:
+                live_patch_sha = sha256_text(patch(self.project, state["current"]["baseline"]))
+                if live_patch_sha != state["current"]["patch_sha256"]:
+                    raise IntegrityError("patch changed after verification")
             record = {
                 "iteration": state["current"]["iteration"],
                 "decision": decision.upper(),

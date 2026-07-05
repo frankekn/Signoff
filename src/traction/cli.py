@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -70,7 +71,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    project = Path(args.project).expanduser().resolve()
+    project_arg = Path(args.project).expanduser()
+    caller_cwd = os.environ.get("TRACTION_CALLER_CWD")
+    if caller_cwd and not project_arg.is_absolute():
+        project = (Path(caller_cwd) / project_arg).resolve()
+    else:
+        project = project_arg.resolve()
     runtime = Runtime(project)
     try:
         if args.command == "install":
