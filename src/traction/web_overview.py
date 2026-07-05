@@ -10,10 +10,13 @@ from .state import run_dir, read_run_state, read_root_state
 from .web_proof import JsonObject, JsonValue, ProofSummary, integer, json_object, proof_summary_for, text
 
 
-class GripAction(TypedDict, total=False):
+class GripActionRequired(TypedDict):
     id: str
     label: str
     tone: str
+
+
+class GripAction(GripActionRequired, total=False):
     requiresNote: bool
 
 
@@ -84,9 +87,12 @@ def allowed_actions(phase: str) -> list[GripAction]:
             {"id": "pivot", "label": "Authorize pivot", "tone": "primary", "requiresNote": True},
             {"id": "finish_stopped", "label": "Stop run", "tone": "danger", "requiresNote": True},
         ],
+        "PIVOT": [
+            {"id": "pivot", "label": "Authorize pivot", "tone": "primary", "requiresNote": True},
+            {"id": "finish_stopped", "label": "Stop run", "tone": "danger", "requiresNote": True},
+        ],
         "DONE": [],
         "STOPPED": [],
-        "PIVOT": [],
         "BLOCKED": [],
     }
     return actions.get(phase, [])
@@ -200,8 +206,12 @@ def _legal_actions(phase: str, status: JsonObject, blocked_by_integrity: bool) -
         return []
     actions = allowed_actions(phase)
     current = json_object(status.get("current"))
-    if phase == "REVIEWED" and not bool((current or {}).get("final")):
-        return [action for action in actions if action["id"] != "finish_done"]
+    if phase == "REVIEWED":
+        review_decision = text((current or {}).get("review_decision"), "")
+        if review_decision != "PASS":
+            return [action for action in actions if action["id"] == "finish_rework"]
+        if not bool((current or {}).get("final")):
+            return [action for action in actions if action["id"] != "finish_done"]
     return actions
 
 

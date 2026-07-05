@@ -65,6 +65,14 @@ class WebApiTests(WebServerTestCase):
         create_status, create_payload = self.request("/api/runs", method="POST", body={"goal": "Start after pivot"})
         self.assertEqual(status, 200)
         self.assertFalse(payload["data"]["canStartRun"])
+        self.assertEqual([action["id"] for action in payload["data"]["actions"]], ["pivot", "finish_stopped"])
+        pivot_status, pivot_payload = self.request(
+            "/api/action",
+            method="POST",
+            body={"action": "pivot", "note": "authorize revised draft"},
+        )
+        self.assertEqual(pivot_status, 200)
+        self.assertEqual(pivot_payload["data"]["phase"], "DRAFT")
         self.assertEqual(create_status, 400)
         self.assertFalse(create_payload["ok"])
 

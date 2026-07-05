@@ -161,7 +161,15 @@ def _current_iteration(state: JsonObject) -> int | None:
 def _hash_path(project: Path, path: Path, expected_hash: str | None = None) -> ProofStatus:
     if not path.is_file():
         return _unknown()
-    return {"status": "present", "hash": expected_hash or sha256_file(path), "path": _relative(project, path)}
+    actual_hash = sha256_file(path)
+    if expected_hash and actual_hash != expected_hash:
+        return {
+            "status": "fail",
+            "detail": f"hash mismatch: expected {expected_hash}, found {actual_hash}",
+            "hash": actual_hash,
+            "path": _relative(project, path),
+        }
+    return {"status": "present", "hash": expected_hash or actual_hash, "path": _relative(project, path)}
 
 
 def _contract_summary(iteration_dir: Path | None) -> ContractSummary:
@@ -210,13 +218,18 @@ def _review_gate_summary(project: Path, iteration_dir: Path | None, state: JsonO
     if not path.is_file():
         return {"decision": "UNKNOWN", "status": "UNKNOWN", "detail": "not yet produced"}
     gate = read_json(path)
-    return {
-        "decision": gate.get("decision", "UNKNOWN") if isinstance(gate.get("decision"), str) else "UNKNOWN",
-        "status": "present",
+    proof = _hash_path(project, path, expected_hash or None)
+    decision = "FAIL" if proof["status"] == "fail" else gate.get("decision", "UNKNOWN")
+    result: ReviewGateSummary = {
+        "decision": decision if isinstance(decision, str) else "UNKNOWN",
+        "status": proof["status"],
         "proofLevel": gate.get("proof_level", "UNKNOWN") if isinstance(gate.get("proof_level"), str) else "UNKNOWN",
-        "hash": expected_hash or sha256_file(path),
+        "hash": proof.get("hash", ""),
         "path": _relative(project, path),
     }
+    if "detail" in proof:
+        result["detail"] = proof["detail"]
+    return result
 
 
 def _scope_summary(value: JsonValue | None) -> ScopeSummary | ProofStatus:
@@ -244,9 +257,13 @@ def _scope_summary(value: JsonValue | None) -> ScopeSummary | ProofStatus:
 def _evidence_summary(project: Path, evidence_path: Path | None, evidence: JsonObject | None, evidence_hash: str, patch_hash: str) -> ProofStatus:
     if not evidence or not evidence_path:
         return _unknown()
+    proof = _hash_path(project, evidence_path, evidence_hash or None)
+    if proof["status"] == "fail":
+        proof["patchHash"] = text(evidence.get("patch_sha256"), patch_hash)
+        return proof
     return {
         "status": text(evidence.get("status"), "UNKNOWN"),
-        "hash": evidence_hash or sha256_file(evidence_path),
+        "hash": proof.get("hash", ""),
         "path": _relative(project, evidence_path),
         "patchHash": text(evidence.get("patch_sha256"), patch_hash),
     }

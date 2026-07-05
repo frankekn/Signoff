@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 import shutil
-import sys
 from pathlib import Path
-from typing import Any
 
 from .errors import TractionError
+from .legacy import migrate_legacy_control_root
 from .util import atomic_write_json, atomic_write_text, now_utc, sha256_file
 
 START = "<!-- traction:managed:start -->"
@@ -125,22 +124,9 @@ def _copy_tree(source: Path, destination: Path) -> list[Path]:
     return copied
 
 
-def _migrate_legacy_control_root(project: Path) -> None:
-    legacy = project / ".signoff"
-    current = project / ".traction"
-    if legacy.exists() and current.exists():
-        print(
-            "traction: warning: legacy .signoff/ exists alongside .traction/; leaving both in place",
-            file=sys.stderr,
-        )
-        return
-    if legacy.exists():
-        legacy.rename(current)
-
-
-def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
+def install(project: Path, source_root: Path | None = None) -> dict[str, str | int | list[str]]:
     project = project.resolve()
-    _migrate_legacy_control_root(project)
+    migrate_legacy_control_root(project)
     source_root = source_root or find_source_root()
     package_source = Path(__file__).resolve().parent
     skills_source: Path | None = None

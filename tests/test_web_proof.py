@@ -70,6 +70,20 @@ class WebProofApiTests(WebServerTestCase):
         self.assertRegex(proof["reviewGate"]["hash"], r"^[0-9a-f]{64}$")
         self.assertTrue(proof["reviewGate"]["path"].endswith("/REVIEW_GATE.json"))
 
+    def test_reviewed_failed_final_gate_only_exposes_rework_action(self) -> None:
+        self.fx.lock()
+        iteration_dir = self.fx.passing_evidence(final=True)
+        self.fx.fill_pull(iteration_dir, verdicts=("FAIL", "FAIL"), judgment_decision="REWORK")
+        self.fx.runtime.pull()
+
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        action_ids = [action["id"] for action in payload["data"]["actions"]]
+        self.assertEqual(action_ids, ["finish_rework"])
+        proof = payload["data"]["proofSummary"]
+        self.assertTrue(proof["contract"]["final"])
+        self.assertEqual(proof["reviewGate"]["decision"], "REWORK")
+
     def test_proof_summary_done_exposes_final_receipt(self) -> None:
         self.fx.lock()
         iteration_dir = self.fx.passing_evidence(final=True)

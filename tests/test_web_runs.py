@@ -64,3 +64,21 @@ class WebRunApiTests(WebServerTestCase):
         action_ids = [action["id"] for action in payload["data"]["actions"]]
         self.assertEqual(action_ids, ["prepare_push", "finish_stopped"])
         self.assertEqual(payload["data"]["proofSummary"]["finalReceipt"]["status"], "present")
+
+    def test_inspected_historical_run_final_receipt_tamper_is_reported(self) -> None:
+        old_run_id = self.fx.run_id
+        self.fx.lock()
+        iteration_dir = self.fx.passing_evidence(final=True)
+        self.fx.fill_pull(iteration_dir)
+        self.fx.runtime.pull()
+        self.fx.runtime.finish("done")
+        receipt = self.fx.run / "FINAL_RECEIPT.json"
+        receipt.write_text(receipt.read_text(encoding="utf-8").replace('"schema_version": 1', '"schema_version": 2'), encoding="utf-8")
+        status, payload = self.request("/api/runs", method="POST", body={"goal": "Second run outcome"})
+        self.assertEqual(status, 201)
+
+        status, payload = self.request(f"/api/overview?inspectRunId={old_run_id}")
+        self.assertEqual(status, 200)
+        final_receipt = payload["data"]["proofSummary"]["finalReceipt"]
+        self.assertEqual(final_receipt["status"], "fail")
+        self.assertIn("hash mismatch", final_receipt["detail"])

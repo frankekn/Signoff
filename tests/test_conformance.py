@@ -14,6 +14,35 @@ from traction.util import atomic_write_json, read_json
 from tests.support import RepoFixture
 
 
+def _legacy_mission_id(run_id: str) -> str:
+    return "mission-" + run_id.removeprefix("run-")
+
+
+def _move_current_control_to_legacy(project: Path, run_id: str) -> tuple[Path, str]:
+    current_root = project / ".traction"
+    legacy_root = project / ".signoff"
+    mission_id = _legacy_mission_id(run_id)
+    mission_dir = legacy_root / "missions" / mission_id
+    current_root.rename(legacy_root)
+    runs_dir = legacy_root / "runs"
+    missions_dir = legacy_root / "missions"
+    runs_dir.rename(missions_dir)
+    (missions_dir / run_id).rename(mission_dir)
+    root = read_json(legacy_root / "state.json")
+    root["active_mission_id"] = mission_id
+    root["missions"] = [mission_id]
+    root.pop("active_run_id", None)
+    root.pop("runs", None)
+    atomic_write_json(legacy_root / "state.json", root)
+    state = read_json(mission_dir / "STATE.json")
+    state["mission_id"] = mission_id
+    state.pop("run_id", None)
+    if "run_baseline" in state:
+        state["mission_baseline"] = state.pop("run_baseline")
+    atomic_write_json(mission_dir / "STATE.json", state)
+    return legacy_root, mission_id
+
+
 class ConformanceTests(unittest.TestCase):
     def setUp(self) -> None:
         self.fx = RepoFixture()
@@ -358,21 +387,42 @@ class ConformanceTests(unittest.TestCase):
         self.assertIn("./traction status", text)
         self.assertIn("Keep this footer.", text)
 
-    def test_33_install_migrates_legacy_signoff_state(self) -> None:
+    def test_33_install_refuses_active_legacy_signoff_state(self) -> None:
         source_root = Path(__file__).resolve().parents[1]
-        legacy_root = self.fx.project / ".signoff"
-        current_root = self.fx.project / ".traction"
-        current_root.rename(legacy_root)
+        legacy_root, _mission_id = _move_current_control_to_legacy(self.fx.project, self.fx.run_id)
+
+        with self.assertRaisesRegex(StateError, "old ./signoff CLI"):
+            install(self.fx.project, source_root)
+
+        self.assertTrue(legacy_root.exists())
+        self.assertFalse((self.fx.project / ".traction").exists())
+
+    def test_34_install_migrates_terminal_legacy_signoff_state(self) -> None:
+        source_root = Path(__file__).resolve().parents[1]
+        self.fx.runtime.finish("stopped", note="done for test")
+        legacy_root, mission_id = _move_current_control_to_legacy(self.fx.project, self.fx.run_id)
 
         install(self.fx.project, source_root)
 
+        current_root = self.fx.project / ".traction"
+        run_id = "run-" + mission_id.removeprefix("mission-")
         self.assertFalse(legacy_root.exists())
         self.assertTrue((current_root / "state.json").is_file())
+        self.assertTrue((current_root / "runs" / run_id / "STATE.json").is_file())
+        root = read_json(current_root / "state.json")
+        state = read_json(current_root / "runs" / run_id / "STATE.json")
+        self.assertEqual(root["active_run_id"], run_id)
+        self.assertEqual(root["runs"], [run_id])
+        self.assertEqual(state["run_id"], run_id)
+        self.assertNotIn("active_mission_id", root)
+        self.assertNotIn("missions", root)
+        self.assertNotIn("mission_id", state)
         status = self.fx.runtime.status()
         self.assertEqual(status["run_id"], self.fx.run_id)
-        self.assertEqual(status["phase"], "DRAFT")
+        self.assertEqual(status["phase"], "STOPPED")
+        self.assertEqual(self.fx.runtime.doctor()["status"], "pass")
 
-    def test_34_installed_launcher_ignores_project_traction_module(self) -> None:
+    def test_35_installed_launcher_ignores_project_traction_module(self) -> None:
         source_root = Path(__file__).resolve().parents[1]
         (self.fx.project / "traction.py").write_text(
             'raise RuntimeError("project traction.py shadowed bundled runtime")\n',
@@ -392,7 +442,7 @@ class ConformanceTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertEqual(json.loads(proc.stdout)["status"], "pass")
 
-    def test_35_build_release_excludes_legacy_signoff_control_dir(self) -> None:
+    def test_36_build_release_excludes_legacy_signoff_control_dir(self) -> None:
         source = Path(__file__).resolve().parents[1] / "scripts" / "build_release.py"
         module = ast.parse(source.read_text(encoding="utf-8"))
         excluded_parts: set[str] | None = None
