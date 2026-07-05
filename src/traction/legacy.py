@@ -30,6 +30,7 @@ def migrate_legacy_control_root(project: Path) -> None:
     legacy = project / ".signoff"
     current = project / ".traction"
     if legacy.exists() and current.exists():
+        _ensure_legacy_runs_are_terminal(legacy)
         print(
             "traction: warning: legacy .signoff/ exists alongside .traction/; leaving both in place",
             file=sys.stderr,

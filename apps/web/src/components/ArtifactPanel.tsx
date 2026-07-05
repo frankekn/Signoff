@@ -125,21 +125,23 @@ export function ArtifactPanel({ runId, onDirtyChange }: ArtifactPanelProps) {
             <strong>{selected?.name ?? 'Artifact'}</strong>
             <span>{selected?.editable ? 'Editable in this phase' : 'Sealed or generated'}</span>
           </div>
-          {selected?.editable && (
+          {(dirty || selected?.editable) && (
             <div className="editor-actions">
               {dirty && (
                 <button type="button" className="button button--small button--neutral" onClick={discardDraft}>
                   Discard draft
                 </button>
               )}
-              <button
-                type="button"
-                className="button button--small button--primary"
-                disabled={!dirty || saveMutation.isPending}
-                onClick={() => saveMutation.mutate()}
-              >
-                {saveMutation.isPending ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
-              </button>
+              {selected?.editable && (
+                <button
+                  type="button"
+                  className="button button--small button--primary"
+                  disabled={!dirty || saveMutation.isPending}
+                  onClick={() => saveMutation.mutate()}
+                >
+                  {saveMutation.isPending ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
+                </button>
+              )}
             </div>
           )}
         </div>

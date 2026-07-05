@@ -97,6 +97,7 @@ The focused unit test passes against a patch limited to `app.py`.
         advisor["cut"] = "Exclude all refactors and dependency changes."
     push["decision"]["verdict"] = "PROCEED"
     push["decision"]["rationale"] = "Both independent demo advisors support the same minimal route and executable oracle."
+    push["decision"]["route_synthesis"] = "Use the shared app.py route and focused unittest as the demo implementation path."
     push["decision"]["first_slice"] = "Change only app.py and prove the exact greeting with unittest."
     push["decision"]["chair"] = {
         "participant_id": "demo-chair",
