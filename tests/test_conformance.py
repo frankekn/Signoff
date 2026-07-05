@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 import subprocess
 import sys
@@ -328,6 +329,85 @@ class ConformanceTests(unittest.TestCase):
         atomic_write_json(self.fx.run / "PUSH.json", push)
         with self.assertRaises(ValidationError):
             self.fx.runtime.lock()
+
+    def test_32_install_replaces_legacy_signoff_managed_block(self) -> None:
+        source_root = Path(__file__).resolve().parents[1]
+        control = self.fx.project / "AGENTS.md"
+        control.write_text(
+            "\n".join(
+                [
+                    "Existing instructions.",
+                    "",
+                    "<!-- signoff:managed:start -->",
+                    "Run ./signoff status before editing.",
+                    "<!-- signoff:managed:end -->",
+                    "",
+                    "Keep this footer.",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        install(self.fx.project, source_root)
+
+        text = control.read_text(encoding="utf-8")
+        self.assertNotIn("signoff:managed", text)
+        self.assertNotIn("./signoff", text)
+        self.assertEqual(text.count("traction:managed:start"), 1)
+        self.assertIn("./traction status", text)
+        self.assertIn("Keep this footer.", text)
+
+    def test_33_install_migrates_legacy_signoff_state(self) -> None:
+        source_root = Path(__file__).resolve().parents[1]
+        legacy_root = self.fx.project / ".signoff"
+        current_root = self.fx.project / ".traction"
+        current_root.rename(legacy_root)
+
+        install(self.fx.project, source_root)
+
+        self.assertFalse(legacy_root.exists())
+        self.assertTrue((current_root / "state.json").is_file())
+        status = self.fx.runtime.status()
+        self.assertEqual(status["run_id"], self.fx.run_id)
+        self.assertEqual(status["phase"], "DRAFT")
+
+    def test_34_installed_launcher_ignores_project_traction_module(self) -> None:
+        source_root = Path(__file__).resolve().parents[1]
+        (self.fx.project / "traction.py").write_text(
+            'raise RuntimeError("project traction.py shadowed bundled runtime")\n',
+            encoding="utf-8",
+        )
+        install(self.fx.project, source_root)
+
+        proc = subprocess.run(
+            [str(self.fx.project / "traction"), "doctor"],
+            cwd=self.fx.project,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(json.loads(proc.stdout)["status"], "pass")
+
+    def test_35_build_release_excludes_legacy_signoff_control_dir(self) -> None:
+        source = Path(__file__).resolve().parents[1] / "scripts" / "build_release.py"
+        module = ast.parse(source.read_text(encoding="utf-8"))
+        excluded_parts: set[str] | None = None
+        for statement in module.body:
+            if not isinstance(statement, ast.Assign):
+                continue
+            if not any(isinstance(target, ast.Name) and target.id == "EXCLUDED_PARTS" for target in statement.targets):
+                continue
+            excluded_parts = ast.literal_eval(statement.value)
+            break
+
+        if excluded_parts is None:
+            self.fail("EXCLUDED_PARTS was not found")
+        self.assertIn(".traction", excluded_parts)
+        self.assertIn(".signoff", excluded_parts)
 
 
 if __name__ == "__main__":

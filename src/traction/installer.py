@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import shutil
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +11,9 @@ from .util import atomic_write_json, atomic_write_text, now_utc, sha256_file
 
 START = "<!-- traction:managed:start -->"
 END = "<!-- traction:managed:end -->"
+LEGACY_START = "<!-- signoff:managed:start -->"
+LEGACY_END = "<!-- signoff:managed:end -->"
+MANAGED_MARKERS = ((START, END), (LEGACY_START, LEGACY_END))
 MANAGED_BLOCK = f"""{START}
 ## Traction
 
@@ -26,21 +30,27 @@ This repository uses the local Traction control plane.
 POSIX_LAUNCHER = r'''#!/bin/sh
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+RUNTIME="$ROOT/.traction/runtime"
 PYTHON=${PYTHON:-python3}
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$ROOT/.traction/runtime${PYTHONPATH:+:$PYTHONPATH}" exec "$PYTHON" -m traction --project "$ROOT" "$@"
+cd "$RUNTIME"
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$RUNTIME${PYTHONPATH:+:$PYTHONPATH}" exec "$PYTHON" -m traction --project "$ROOT" "$@"
 '''
 
 CMD_LAUNCHER = r'''@echo off
 set "ROOT=%~dp0"
+set "RUNTIME=%ROOT%.traction\runtime"
 set "PYTHONDONTWRITEBYTECODE=1"
-set "PYTHONPATH=%ROOT%.traction\runtime;%PYTHONPATH%"
+cd /d "%RUNTIME%"
+set "PYTHONPATH=%RUNTIME%;%PYTHONPATH%"
 python -m traction --project "%ROOT%" %*
 '''
 
 POWERSHELL_LAUNCHER = r'''$ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Runtime = Join-Path $Root ".traction\runtime"
 $env:PYTHONDONTWRITEBYTECODE = "1"
-$env:PYTHONPATH = "$Root\.traction\runtime;$env:PYTHONPATH"
+$env:PYTHONPATH = "$Runtime;$env:PYTHONPATH"
+Set-Location -LiteralPath $Runtime
 python -m traction --project $Root @args
 '''
 
@@ -55,13 +65,47 @@ def find_source_root() -> Path | None:
 
 def _replace_managed_block(path: Path) -> None:
     existing = path.read_text(encoding="utf-8") if path.exists() else ""
-    if START in existing and END in existing:
-        before, rest = existing.split(START, 1)
-        _old, after = rest.split(END, 1)
-        text = before.rstrip() + "\n\n" + MANAGED_BLOCK + after.lstrip("\n")
+    managed = _split_first_managed_block(existing)
+    if managed:
+        before, after = managed
+        text = (
+            _remove_managed_blocks(before).rstrip()
+            + "\n\n"
+            + MANAGED_BLOCK
+            + _remove_managed_blocks(after).lstrip("\n")
+        )
     else:
         text = existing.rstrip() + ("\n\n" if existing.strip() else "") + MANAGED_BLOCK
     atomic_write_text(path, text if text.endswith("\n") else text + "\n")
+
+
+def _split_first_managed_block(text: str) -> tuple[str, str] | None:
+    first: tuple[int, str, str] | None = None
+    for start, end in MANAGED_MARKERS:
+        start_index = text.find(start)
+        if start_index == -1:
+            continue
+        if end not in text[start_index:]:
+            continue
+        if first is None or start_index < first[0]:
+            first = (start_index, start, end)
+    if first is None:
+        return None
+    _index, start, end = first
+    before, rest = text.split(start, 1)
+    _old, after = rest.split(end, 1)
+    return before, after
+
+
+def _remove_managed_blocks(text: str) -> str:
+    for start, end in MANAGED_MARKERS:
+        while start in text:
+            before, rest = text.split(start, 1)
+            if end not in rest:
+                break
+            _old, after = rest.split(end, 1)
+            text = before.rstrip() + "\n\n" + after.lstrip("\n")
+    return text
 
 
 def _copy_tree(source: Path, destination: Path) -> list[Path]:
@@ -81,8 +125,22 @@ def _copy_tree(source: Path, destination: Path) -> list[Path]:
     return copied
 
 
+def _migrate_legacy_control_root(project: Path) -> None:
+    legacy = project / ".signoff"
+    current = project / ".traction"
+    if legacy.exists() and current.exists():
+        print(
+            "traction: warning: legacy .signoff/ exists alongside .traction/; leaving both in place",
+            file=sys.stderr,
+        )
+        return
+    if legacy.exists():
+        legacy.rename(current)
+
+
 def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
     project = project.resolve()
+    _migrate_legacy_control_root(project)
     source_root = source_root or find_source_root()
     package_source = Path(__file__).resolve().parent
     skills_source: Path | None = None
@@ -125,15 +183,16 @@ def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
         written.append(path)
 
     manifest_path = project / ".traction" / "install-manifest.json"
+    manifest_files = {
+        str(path.relative_to(project)).replace("\\", "/"): sha256_file(path)
+        for path in sorted(set(written))
+        if path.is_file()
+    }
     manifest = {
         "schema_version": 1,
         "installed_at": now_utc(),
         "source": str(source_root) if source_root else "installed-runtime",
-        "files": {
-            str(path.relative_to(project)).replace("\\", "/"): sha256_file(path)
-            for path in sorted(set(written))
-            if path.is_file()
-        },
+        "files": manifest_files,
     }
     atomic_write_json(manifest_path, manifest)
     return {
@@ -141,6 +200,6 @@ def install(project: Path, source_root: Path | None = None) -> dict[str, Any]:
         "project": str(project),
         "runtime": str(runtime_destination.relative_to(project)),
         "skills": ["traction", "loop"],
-        "managed_files": len(manifest["files"]),
+        "managed_files": len(manifest_files),
         "next": "Run ./traction doctor, then ./traction start \"<the user’s exact outcome>\".",
     }

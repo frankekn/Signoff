@@ -11,6 +11,7 @@ VERSION = "0.1.0-alpha.1"
 EXCLUDED_PARTS = {
     ".git",
     ".traction",
+    ".signoff",
     "node_modules",
     "dist",
     "build",
