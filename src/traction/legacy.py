@@ -103,7 +103,12 @@ def _remove_legacy_installer_outputs(project: Path, legacy: Path) -> None:
             candidate.unlink()
     for relative in sorted(LEGACY_SKILL_DIRS, key=len, reverse=True):
         directory = project / relative
-        if directory.is_dir() and not any(directory.iterdir()):
+        if not directory.is_dir():
+            continue
+        for child in sorted((path for path in directory.rglob("*") if path.is_dir()), key=lambda path: len(path.parts), reverse=True):
+            if not any(child.iterdir()):
+                child.rmdir()
+        if not any(directory.iterdir()):
             directory.rmdir()
 
 

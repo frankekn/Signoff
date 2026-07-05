@@ -502,6 +502,8 @@ class Runtime:
             for path in (iteration_dir / "JUDGMENT.json", iteration_dir / "REVIEW_GATE.json"):
                 if path.exists():
                     path.unlink()
+            for key in ("review_gate_sha256", "judgment_sha256", "review_decision", "proof_level", "reviewed_at"):
+                state["current"].pop(key, None)
         for index in range(1, count + 1):
             path = reviews_dir / f"review-{index}.json"
             if path.exists() and "REPLACE_ME" not in path.read_text(encoding="utf-8"):

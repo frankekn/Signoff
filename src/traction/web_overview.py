@@ -82,6 +82,7 @@ def allowed_actions(phase: str) -> list[GripAction]:
             {"id": "finish_done", "label": "Sign off", "tone": "primary"},
             {"id": "finish_accepted", "label": "Accept slice", "tone": "neutral"},
             {"id": "finish_rework", "label": "Rework", "tone": "danger", "requiresNote": True},
+            {"id": "finish_blocked", "label": "Record blocker", "tone": "danger", "requiresNote": True},
         ],
         "PUSH_REVIEW": [
             {"id": "pivot", "label": "Authorize pivot", "tone": "primary", "requiresNote": True},
@@ -208,9 +209,11 @@ def _legal_actions(phase: str, status: JsonObject, blocked_by_integrity: bool) -
     current = json_object(status.get("current"))
     if phase == "REVIEWED":
         review_decision = text((current or {}).get("review_decision"), "")
+        if review_decision == "BLOCKED":
+            return [action for action in actions if action["id"] == "finish_blocked"]
         if review_decision != "PASS":
             return [action for action in actions if action["id"] == "finish_rework"]
-        actions = [action for action in actions if action["id"] != "finish_rework"]
+        actions = [action for action in actions if action["id"] not in {"finish_rework", "finish_blocked"}]
         if not bool((current or {}).get("final")):
             return [action for action in actions if action["id"] != "finish_done"]
     return actions

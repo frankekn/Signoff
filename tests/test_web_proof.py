@@ -84,6 +84,19 @@ class WebProofApiTests(WebServerTestCase):
         self.assertTrue(proof["contract"]["final"])
         self.assertEqual(proof["reviewGate"]["decision"], "REWORK")
 
+    def test_reviewed_blocked_gate_exposes_blocked_action(self) -> None:
+        self.fx.lock()
+        iteration_dir = self.fx.passing_evidence(final=True)
+        self.fx.fill_pull(iteration_dir, verdicts=("UNKNOWN", "UNKNOWN"), judgment_decision="BLOCKED")
+        self.fx.runtime.pull()
+
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        action_ids = [action["id"] for action in payload["data"]["actions"]]
+        self.assertEqual(action_ids, ["finish_blocked"])
+        proof = payload["data"]["proofSummary"]
+        self.assertEqual(proof["reviewGate"]["decision"], "BLOCKED")
+
     def test_proof_summary_done_exposes_final_receipt(self) -> None:
         self.fx.lock()
         iteration_dir = self.fx.passing_evidence(final=True)

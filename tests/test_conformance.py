@@ -433,6 +433,8 @@ class ConformanceTests(unittest.TestCase):
         self.assertEqual(result["phase"], "REVIEWING")
         review = read_json(iteration / "reviews" / "review-1.json")
         self.assertEqual(review["reviewer"]["participant_id"], "REPLACE_ME-reviewer-1")
+        integrity = self.fx.runtime.integrity()
+        self.assertNotIn("review_gate", integrity)
 
     def test_finish_rejects_live_patch_changed_after_review(self) -> None:
         self.fx.lock()
@@ -554,6 +556,7 @@ class ConformanceTests(unittest.TestCase):
             "signoff.cmd",
             "signoff.ps1",
             ".agents/skills/signoff/SKILL.md",
+            ".agents/skills/signoff/references/artifact-guide.md",
             ".agents/skills/council/SKILL.md",
             ".agents/skills/roast/SKILL.md",
             ".claude/skills/signoff/SKILL.md",
@@ -644,6 +647,25 @@ class ConformanceTests(unittest.TestCase):
 
         proc = subprocess.run(
             [str(self.fx.project / "traction"), "--project", f"../{sibling.name}", "status"],
+            cwd=self.fx.project,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(json.loads(proc.stdout)["phase"], "IDLE")
+
+    def test_source_launcher_preserves_relative_project_override(self) -> None:
+        source_root = Path(__file__).resolve().parents[1]
+        sibling = self.fx.project.parent / f"{self.fx.project.name}-source-sibling"
+        sibling.mkdir()
+        subprocess.run(["git", "init", "-q", str(sibling)], check=True)
+        install(sibling, source_root)
+
+        proc = subprocess.run(
+            [str(source_root / "traction"), "--project", f"../{sibling.name}", "status"],
             cwd=self.fx.project,
             text=True,
             stdout=subprocess.PIPE,

@@ -52,6 +52,8 @@ def _action(runtime: Runtime, action: str, payload: dict[str, Any]) -> Any:
         return runtime.finish("accepted", note=str(payload.get("note", "")))
     if action == "finish_rework":
         return runtime.finish("rework", root_cause=str(payload.get("note", "")))
+    if action == "finish_blocked":
+        return runtime.finish("blocked", note=str(payload.get("note", "")))
     if action == "finish_stopped":
         return runtime.finish("stopped", note=str(payload.get("note", "")))
     if action == "pivot":
