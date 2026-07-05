@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from typing import TypeAlias, TypedDict
 
+from .errors import ValidationError
 from .state import run_dir, read_run_state
 from .util import read_json, sha256_file
 
@@ -178,7 +179,10 @@ def _contract_summary(iteration_dir: Path | None) -> ContractSummary:
     path = iteration_dir / "CONTRACT.json"
     if not path.is_file():
         return {"final": None}
-    contract = read_json(path)
+    try:
+        contract = read_json(path)
+    except ValidationError:
+        return {"final": None}
     return {"final": contract.get("final") if isinstance(contract.get("final"), bool) else None}
 
 
@@ -213,8 +217,8 @@ def _review_gate_summary(project: Path, iteration_dir: Path | None, state: JsonO
     current = json_object(state.get("current"))
     if current:
         expected_hash = text(current.get("review_gate_sha256"), "")
-    if record:
-        expected_hash = text(record.get("review_gate_sha256"), expected_hash or "")
+    if not expected_hash and record:
+        expected_hash = text(record.get("review_gate_sha256"), "")
     if not path.is_file():
         return {"decision": "UNKNOWN", "status": "UNKNOWN", "detail": "not yet produced"}
     gate = read_json(path)

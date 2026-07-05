@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from traction.util import atomic_write_json, read_json
+
 from tests.web_server import WebServerTestCase
 
 
@@ -110,3 +112,47 @@ class WebProofApiTests(WebServerTestCase):
         self.assertEqual(proof["finalReceipt"]["status"], "present")
         self.assertRegex(proof["finalReceipt"]["hash"], r"^[0-9a-f]{64}$")
         self.assertTrue(proof["finalReceipt"]["path"].endswith("/FINAL_RECEIPT.json"))
+
+    def test_malformed_contract_does_not_break_overview(self) -> None:
+        self.fx.lock()
+        self.fx.runtime.prepare_slice()
+        iteration_dir = self.fx.run / "iterations" / "0001"
+        contract_path = iteration_dir / "CONTRACT.json"
+        contract_path.write_text("{not json", encoding="utf-8")
+
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        self.assertIn(contract_path.relative_to(self.fx.project).as_posix(), payload["data"]["editablePaths"])
+        self.assertIsNone(payload["data"]["proofSummary"]["contract"]["final"])
+
+    def test_finish_blocked_does_not_false_fail_integrity(self) -> None:
+        self.fx.lock()
+        iteration_dir = self.fx.passing_evidence(final=True)
+        self.fx.fill_pull(iteration_dir, verdicts=("UNKNOWN", "UNKNOWN"), judgment_decision="BLOCKED")
+        self.fx.runtime.pull()
+        self.fx.runtime.finish("blocked", note="external quorum unavailable")
+
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        self.assertEqual(payload["data"]["status"]["phase"], "BLOCKED")
+        self.assertFalse(payload["data"]["blockedByIntegrity"])
+        self.assertEqual(payload["data"]["integrityStatus"], "pass")
+
+    def test_proof_summary_prefers_active_review_gate_hash_after_rework(self) -> None:
+        self.fx.lock()
+        iteration_dir = self.fx.passing_evidence(final=False)
+        self.fx.fill_pull(iteration_dir, verdicts=("FAIL", "FAIL"), judgment_decision="REWORK")
+        self.fx.runtime.pull()
+        self.fx.runtime.finish("rework", root_cause="review found missing evidence")
+        self.fx.implement()
+        self.fx.runtime.verify()
+        self.fx.fill_pull(iteration_dir)
+        self.fx.runtime.pull()
+        active_gate_hash = read_json(self.fx.run / "STATE.json")["current"]["review_gate_sha256"]
+
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        proof = payload["data"]["proofSummary"]
+        self.assertEqual(proof["reviewGate"]["status"], "present")
+        self.assertEqual(proof["reviewGate"]["hash"], active_gate_hash)
+        self.assertEqual(proof["reviewGate"]["decision"], "PASS")

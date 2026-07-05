@@ -24,6 +24,11 @@ function contractFinalLabel(proof: ProofSummary): string {
   return 'UNKNOWN'
 }
 
+function finalReceiptHealthy(status: string): boolean {
+  const normalized = status.toLowerCase()
+  return normalized === 'pass' || normalized === 'present'
+}
+
 export function ProofCard({ inspectedRun, proof }: ProofCardProps): ReactElement {
   return (
     <section className="proof-card">
@@ -64,9 +69,19 @@ export function ProofCard({ inspectedRun, proof }: ProofCardProps): ReactElement
           <small>{proof.acceptedCriteria.items.length > 0 ? proof.acceptedCriteria.items.join(', ') : 'none accepted yet'}</small>
         </div>
         <div className="proof-tile">
-          <span className="proof-contract-label">contract.final</span>
-          <strong>{contractFinalLabel(proof)}</strong>
-          <small>{proof.finalReceipt.path ?? `Final receipt: ${proof.finalReceipt.status}`}</small>
+          <span className="proof-contract-label">
+            {finalReceiptHealthy(proof.finalReceipt.status) ? 'contract.final' : 'Final receipt'}
+          </span>
+          <strong className={`proof-value--${proofTone(proof.finalReceipt.status)}`}>
+            {finalReceiptHealthy(proof.finalReceipt.status)
+              ? contractFinalLabel(proof)
+              : proof.finalReceipt.status}
+          </strong>
+          <small>
+            {finalReceiptHealthy(proof.finalReceipt.status)
+              ? (proof.finalReceipt.path ?? `Final receipt: ${proof.finalReceipt.status}`)
+              : (proof.finalReceipt.detail ?? proof.finalReceipt.path ?? 'Final receipt unhealthy')}
+          </small>
           <span className="proof-hash-label">Final receipt SHA-256</span>
           <code className="proof-hash--full">{proof.finalReceipt.hash ?? '—'}</code>
         </div>

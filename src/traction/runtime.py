@@ -750,7 +750,8 @@ class Runtime:
             if actual != state["current"]["contract_sha256"]:
                 raise IntegrityError("active contract hash mismatch")
             result["contract"] = "pass"
-            result["scope"] = self.check_scope()
+            if state["phase"] not in TERMINAL_PHASES:
+                result["scope"] = self.check_scope()
             if state["current"].get("evidence_sha256"):
                 if sha256_file(iteration_dir / "EVIDENCE.json") != state["current"]["evidence_sha256"]:
                     raise IntegrityError("evidence receipt hash mismatch")
