@@ -84,6 +84,7 @@ The focused unit test must pass against the sealed patch.
             advisor["first_move"] = "Run the focused failing unit test before changing code."
             advisor["cut"] = "Exclude every unrelated refactor and dependency change."
         push["decision"]["rationale"] = "Independent advisors examined the same route and support a bounded implementation."
+        push["decision"]["route_synthesis"] = "Use the shared app.py route and focused unit test as the bounded implementation path."
         push["decision"]["first_slice"] = "Make the focused greet behavior pass without adjacent cleanup."
         push["decision"]["chair"] = {
             "participant_id": "chair",

@@ -132,9 +132,6 @@ def push_conflicts(advisors: list[dict[str, Any]], decision_verdict: str) -> set
     verdicts = {advisor["verdict"] for advisor in advisors}
     if len(verdicts) > 1:
         conflicts.add("verdict-split")
-    routes = {" ".join(advisor["route"].split()).casefold() for advisor in advisors}
-    if len(routes) > 1:
-        conflicts.add("route-divergence")
     if len(verdicts) == 1:
         advisor_verdict = next(iter(verdicts))
         if advisor_verdict != decision_verdict and decision_verdict != "STOP":
@@ -211,11 +208,16 @@ def validate_push(
         raise ValidationError("push context_id values must be unique; duplicate contexts are not independent")
 
     decision = _expect_object(push["decision"], "push.decision")
-    require_keys(decision, ("verdict", "rationale", "conflict_resolutions", "first_slice", "chair"), "push.decision")
+    require_keys(
+        decision,
+        ("verdict", "rationale", "route_synthesis", "conflict_resolutions", "first_slice", "chair"),
+        "push.decision",
+    )
     verdict = decision["verdict"]
     if verdict not in PUSH_VERDICTS:
         raise ValidationError("push.decision.verdict is invalid")
     require_clean_text(decision["rationale"], "push.decision.rationale", minimum=8)
+    require_clean_text(decision["route_synthesis"], "push.decision.route_synthesis", minimum=12)
     chair = validate_identity(decision["chair"], "push.decision.chair")
     if chair["participant_id"] in set(participant_ids):
         raise ValidationError("Push chair must not impersonate or count as an advisor")

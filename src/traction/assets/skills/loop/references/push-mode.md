@@ -31,7 +31,7 @@ Prompt template: `deliberation-prompt.md`.
 
 ## Material conflict cross-examination
 
-When advisors return different verdicts (`verdict-split`) or materially different routes (`route-divergence`), run a second round. One bounded round only — never open unlimited conversation.
+When advisors return different verdicts (`verdict-split`), run a second round. One bounded round only — never open unlimited conversation.
 
 Strip provider/model identity. Label opposing positions neutrally. Ask each side:
 
@@ -44,7 +44,7 @@ Prompt template: `cross-examination-prompt.md`.
 
 ## Chair synthesis
 
-The chair frames and synthesizes but does not count as an advisor. The decision verdict is one of:
+The chair frames and synthesizes but does not count as an advisor. `route_synthesis` must state which advisor route was chosen or how the routes were merged. The decision verdict is one of:
 
 - `PROCEED` — the smallest useful route is justified and provable;
 - `STOP` — implementation is lower value than stopping;

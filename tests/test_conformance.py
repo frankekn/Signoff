@@ -101,29 +101,22 @@ class ConformanceTests(unittest.TestCase):
         self.fx.valid_push(conflict=True, resolve=True)
         self.assertEqual(self.fx.runtime.lock()["phase"], "LOCKED")
 
-    def test_push_route_divergence_without_evidence_resolution_is_rejected(self) -> None:
+    def test_push_missing_route_synthesis_is_rejected(self) -> None:
         self.fx.valid_draft()
         self.fx.valid_push()
         push = read_json(self.fx.run / "PUSH.json")
-        push["advisors"][1]["route"] = "Replace the application with a new CLI and defer the focused unit test."
+        push["decision"].pop("route_synthesis")
         atomic_write_json(self.fx.run / "PUSH.json", push)
 
-        with self.assertRaisesRegex(ValidationError, "route-divergence"):
+        with self.assertRaisesRegex(ValidationError, "route_synthesis"):
             self.fx.runtime.lock()
 
-    def test_push_route_divergence_can_be_resolved_by_evidence(self) -> None:
+    def test_push_divergent_routes_can_lock_with_route_synthesis(self) -> None:
         self.fx.valid_draft()
         self.fx.valid_push()
         push = read_json(self.fx.run / "PUSH.json")
         push["advisors"][1]["route"] = "Replace the application with a new CLI and defer the focused unit test."
-        push["decision"]["conflict_resolutions"] = [
-            {
-                "topic": "route-divergence",
-                "basis": "existing_evidence",
-                "evidence": "The locked spec only needs app.py behavior, so the one-file route is the bounded route.",
-                "conclusion": "Use the app.py route and reject the broader CLI rewrite.",
-            }
-        ]
+        push["decision"]["route_synthesis"] = "Choose the bounded app.py route and reject the broader CLI rewrite."
         atomic_write_json(self.fx.run / "PUSH.json", push)
 
         self.assertEqual(self.fx.runtime.lock()["phase"], "LOCKED")

@@ -127,6 +127,7 @@
       "required": [
         "verdict",
         "rationale",
+        "route_synthesis",
         "conflict_resolutions",
         "first_slice",
         "chair"
@@ -143,6 +144,10 @@
         "rationale": {
           "type": "string",
           "minLength": 8
+        },
+        "route_synthesis": {
+          "type": "string",
+          "minLength": 12
         },
         "first_slice": {
           "type": "string"
@@ -176,7 +181,7 @@
           }
         },
         "conflict_resolutions": {
-          "description": "Evidence-based resolutions for runtime-reported material conflicts such as verdict-split, route-divergence, or advisor-unanimous-<verdict> when the chair overrides unanimous advisors. STOP may always be chosen honestly without an override.",
+          "description": "Evidence-based resolutions for runtime-reported material conflicts such as verdict-split or advisor-unanimous-<verdict> when the chair overrides unanimous advisors. STOP may always be chosen honestly without an override.",
           "type": "array",
           "items": {
             "type": "object",
