@@ -41,9 +41,12 @@ set "ROOT=%~dp0"
 set "RUNTIME=%ROOT%.traction\runtime"
 set "PYTHONDONTWRITEBYTECODE=1"
 set "TRACTION_CALLER_CWD=%CD%"
-cd /d "%RUNTIME%"
+pushd "%RUNTIME%"
 set "PYTHONPATH=%RUNTIME%;%PYTHONPATH%"
 python -m traction --project "%ROOT%" %*
+set "EXITCODE=%ERRORLEVEL%"
+popd
+exit /b %EXITCODE%
 '''
 
 POWERSHELL_LAUNCHER = r'''$ErrorActionPreference = "Stop"
