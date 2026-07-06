@@ -156,3 +156,13 @@ class WebProofApiTests(WebServerTestCase):
         self.assertEqual(proof["reviewGate"]["status"], "present")
         self.assertEqual(proof["reviewGate"]["hash"], active_gate_hash)
         self.assertEqual(proof["reviewGate"]["decision"], "PASS")
+
+    def test_malformed_evidence_does_not_break_overview(self) -> None:
+        self.fx.lock()
+        iteration_dir = self.fx.passing_evidence()
+        (iteration_dir / "EVIDENCE.json").write_text("{not json", encoding="utf-8")
+
+        status, payload = self.request("/api/overview")
+        self.assertEqual(status, 200)
+        self.assertIsNone(payload["data"]["proofSummary"])
+        self.assertEqual(payload["data"]["integrityStatus"], "fail")

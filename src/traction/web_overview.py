@@ -170,6 +170,12 @@ def build_overview(project: Path, runtime: Runtime, inspect_run_id: str | None =
     actions = _legal_actions(phase, status, blocked_by_integrity)
     next_instruction = _next_instruction(status, blocked_by_integrity)
     runs = run_summaries(project)
+    proof_summary: ProofSummary | None = None
+    if proof_run_id:
+        try:
+            proof_summary = proof_summary_for(project, str(proof_run_id))
+        except ValidationError:
+            proof_summary = None
     return {
         "product": "Traction",
         "version": __version__,
@@ -184,7 +190,7 @@ def build_overview(project: Path, runtime: Runtime, inspect_run_id: str | None =
         "actions": actions,
         "editablePaths": sorted(editable),
         "runs": runs,
-        "proofSummary": proof_summary_for(project, str(proof_run_id)) if proof_run_id else None,
+        "proofSummary": proof_summary,
         "inspectedRun": next((run for run in runs if run["runId"] == proof_run_id), None) if proof_run_id else None,
     }
 
