@@ -52,8 +52,13 @@ $Runtime = Join-Path $Root ".traction\runtime"
 $env:PYTHONDONTWRITEBYTECODE = "1"
 $env:PYTHONPATH = "$Runtime;$env:PYTHONPATH"
 $env:TRACTION_CALLER_CWD = (Get-Location).Path
-Set-Location -LiteralPath $Runtime
-python -m traction --project $Root @args
+Push-Location -LiteralPath $Runtime
+try {
+  python -m traction --project $Root @args
+  exit $LASTEXITCODE
+} finally {
+  Pop-Location
+}
 '''
 
 
