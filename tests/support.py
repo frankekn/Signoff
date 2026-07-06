@@ -5,8 +5,8 @@ import tempfile
 from pathlib import Path
 from typing import Iterable
 
-from signoff.runtime import Runtime
-from signoff.util import atomic_write_json, read_json
+from traction.runtime import Runtime
+from traction.util import atomic_write_json, read_json
 
 
 class RepoFixture:
@@ -17,7 +17,7 @@ class RepoFixture:
         self.project = Path(self.tmp.name)
         subprocess.run(["git", "init", "-q", str(self.project)], check=True)
         subprocess.run(["git", "-C", str(self.project), "config", "user.email", "test@example.com"], check=True)
-        subprocess.run(["git", "-C", str(self.project), "config", "user.name", "Signoff Test"], check=True)
+        subprocess.run(["git", "-C", str(self.project), "config", "user.name", "Traction Test"], check=True)
         (self.project / "app.py").write_text('def greet():\n    return "hello"\n', encoding="utf-8")
         (self.project / "test_app.py").write_text(
             'import unittest\nimport app\nclass T(unittest.TestCase):\n    def test_greet(self):\n        self.assertEqual(app.greet(), "hello world")\n',
@@ -27,17 +27,17 @@ class RepoFixture:
         subprocess.run(["git", "-C", str(self.project), "commit", "-qm", "initial"], check=True)
         self.runtime = Runtime(self.project)
         self.runtime.start(self.goal)
-        self.mission_id = self.runtime.status()["mission_id"]
-        self.mission = self.project / ".signoff" / "missions" / self.mission_id
+        self.run_id = self.runtime.status()["run_id"]
+        self.run = self.project / ".traction" / "runs" / self.run_id
 
     def close(self) -> None:
         self.tmp.cleanup()
 
     def valid_draft(self) -> None:
-        (self.mission / "CHARTER.md").write_text(
-            f"""# Mission Charter
+        (self.run / "CHARTER.md").write_text(
+            f"""# Run Charter
 
-- Mission: `{self.mission_id}`
+- Run: `{self.run_id}`
 - Exact user outcome (immutable):
 
 > {self.goal}
@@ -59,63 +59,68 @@ The focused unit test must pass against the sealed patch.
 """,
             encoding="utf-8",
         )
-        spec = read_json(self.mission / "SPEC.json")
+        spec = read_json(self.run / "SPEC.json")
         spec["acceptance_criteria"][0]["observable"] = "Calling greet returns exactly hello world."
         spec["acceptance_criteria"][0]["oracle"]["description"] = "A focused unit test asserts the exact return value."
         spec["non_goals"] = ["Do not refactor unrelated files."]
-        atomic_write_json(self.mission / "SPEC.json", spec)
+        atomic_write_json(self.run / "SPEC.json", spec)
 
-    def valid_council(self, *, conflict: bool = False, resolve: bool = False, duplicate_context: bool = False) -> None:
-        self.runtime.prepare_council()
-        council = read_json(self.mission / "COUNCIL.json")
-        for index, advisor in enumerate(council["advisors"], start=1):
+    def valid_push(self, *, conflict: bool = False, resolve: bool = False, duplicate_context: bool = False) -> None:
+        self.runtime.prepare_push()
+        push = read_json(self.run / "PUSH.json")
+        for index, advisor in enumerate(push["advisors"], start=1):
             advisor["identity"] = {
                 "participant_id": f"advisor-{index}",
                 "provider": f"provider-{index}",
                 "model": f"model-{index}",
                 "context_id": "same-context" if duplicate_context else f"advisor-context-{index}",
             }
-            advisor["verdict"] = "PROCEED"
-            advisor["null_hypothesis"] = "The current behavior may already satisfy the requested outcome."
+            advisor["verdict"] = "STOP" if conflict and index == 2 else "PROCEED"
+            advisor["route"] = "Change greet in app.py and prove it with the focused unit test."
+            advisor["falsifiable_criteria"] = [
+                "The focused unit test passes after changing only app.py.",
+            ]
+            advisor["risk"] = "The test may encode the wrong expected value."
             advisor["first_move"] = "Run the focused failing unit test before changing code."
             advisor["cut"] = "Exclude every unrelated refactor and dependency change."
-            for claim in advisor["claims"]:
-                stance = "SUPPORT"
-                if conflict and index == 2 and claim["topic_key"] == "feasibility":
-                    stance = "OPPOSE"
-                claim.update(
-                    stance=stance,
-                    claim="The route is bounded, valuable, and independently testable.",
-                    evidence="The repository contains a focused test and a one-file implementation surface.",
-                    falsifier="A baseline check proving the requested behavior already exists or cannot be isolated.",
-                )
-        council["decision"]["rationale"] = "Independent advisors examined the same claims and support a bounded route."
-        council["decision"]["first_slice"] = "Make the focused greet behavior pass without adjacent cleanup."
-        council["decision"]["chair"] = {
+        push["decision"]["rationale"] = "Independent advisors examined the same route and support a bounded implementation."
+        push["decision"]["route_synthesis"] = "Use the shared app.py route and focused unit test as the bounded implementation path."
+        push["decision"]["first_slice"] = "Make the focused greet behavior pass without adjacent cleanup."
+        push["decision"]["chair"] = {
             "participant_id": "chair",
             "provider": "chair-provider",
             "model": "chair-model",
             "context_id": "chair-context",
         }
         if conflict and resolve:
-            council["decision"]["conflict_resolutions"] = [
+            push["decision"]["conflict_resolutions"] = [
                 {
-                    "topic_key": "feasibility",
+                    "topic": "verdict-split",
                     "basis": "existing_evidence",
                     "evidence": "The focused test and one-file path make the route executable within budget.",
                     "conclusion": "Proceed with the smallest implementation slice.",
                 }
             ]
-        atomic_write_json(self.mission / "COUNCIL.json", council)
+        atomic_write_json(self.run / "PUSH.json", push)
 
-    def lock(self, **council_kwargs) -> None:
+    def lock(self, **push_kwargs) -> None:
         self.valid_draft()
-        self.valid_council(**council_kwargs)
+        self.valid_push(**push_kwargs)
         self.runtime.lock()
 
-    def activate(self, *, final: bool = True, changed_lines: int = 20, production_files: int = 1, command: list[str] | None = None) -> Path:
+    def activate(
+        self,
+        *,
+        final: bool = True,
+        changed_lines: int = 20,
+        production_files: int = 1,
+        command: list[str] | None = None,
+        timeout_seconds: int = 30,
+        allowed_paths: list[str] | None = None,
+        forbidden_paths: list[str] | None = None,
+    ) -> Path:
         self.runtime.prepare_slice()
-        iteration_dir = self.mission / "iterations" / "0001"
+        iteration_dir = self.run / "iterations" / "0001"
         contract = read_json(iteration_dir / "CONTRACT.json")
         contract["builder"] = {
             "participant_id": "builder",
@@ -123,15 +128,15 @@ The focused unit test must pass against the sealed patch.
             "model": "builder-model",
             "context_id": "builder-context",
         }
-        contract["allowed_paths"] = ["app.py", "test_app.py"]
-        contract["forbidden_paths"] = [".git/**", ".signoff/**"]
+        contract["allowed_paths"] = allowed_paths or ["app.py", "test_app.py"]
+        contract["forbidden_paths"] = forbidden_paths or [".git/**", ".traction/**"]
         contract["exempt_paths"] = ["test_*.py"]
         contract["budgets"] = {"production_files": production_files, "changed_lines": changed_lines}
         contract["verification"] = [
             {
                 "id": "V-001",
                 "command": command or ["git", "grep", "-F", "-q", 'return "hello world"', "--", "app.py"],
-                "timeout_seconds": 30,
+                "timeout_seconds": timeout_seconds,
                 "working_directory": ".",
                 "acceptance_ids": ["AC-001"],
             }
@@ -152,11 +157,12 @@ The focused unit test must pass against the sealed patch.
             raise AssertionError(result)
         return iteration_dir
 
-    def fill_roast(
+    def fill_pull(
         self,
         iteration_dir: Path,
         verdicts: Iterable[str] = ("PASS", "PASS"),
         *,
+        prepare: bool = True,
         reviewer_one_is_builder: bool = False,
         duplicate_context: bool = False,
         judgment_decision: str = "PASS",
@@ -164,7 +170,8 @@ The focused unit test must pass against the sealed patch.
         finding: dict | None = None,
         disposition: dict | None = None,
     ) -> None:
-        self.runtime.prepare_roast()
+        if prepare:
+            self.runtime.prepare_pull()
         for index, (path, verdict) in enumerate(zip(sorted((iteration_dir / "reviews").glob("review-*.json")), verdicts), start=1):
             review = read_json(path)
             identity = {

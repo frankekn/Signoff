@@ -2,6 +2,13 @@
 
 All notable changes are documented here.
 
+## Unreleased
+
+- Renamed the product from Signoff to Traction; Court → Grip, Mission → Run, Council/Roast → Push/Pull.
+- Lean Push artifact: falsifiable-route advisor shape; canonical claim registry removed.
+- Unified loop skill with mixture-of-agents fan-out protocol for Push and Pull.
+- Adversarial conformance tests expanded (charter/Push/contract tamper, forbidden paths, file budget, timeout, review hash, `ACT_ON` retention).
+
 ## 0.1.0-alpha.1 — 2026-06-25
 
 - Established Signoff as the product, Court as the deterministic core, Signoff Protocol as the artifact contract, and Receipt as the evidence output.

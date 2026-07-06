@@ -10,6 +10,7 @@ DIST = ROOT / "dist"
 VERSION = "0.1.0-alpha.1"
 EXCLUDED_PARTS = {
     ".git",
+    ".traction",
     ".signoff",
     "node_modules",
     "dist",
@@ -21,7 +22,7 @@ EXCLUDED_PARTS = {
 EXCLUDED_SUFFIXES = {".pyc", ".pyo"}
 
 DIST.mkdir(exist_ok=True)
-archive = DIST / f"signoff-{VERSION}.zip"
+archive = DIST / f"traction-{VERSION}.zip"
 if archive.exists():
     archive.unlink()
 with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
@@ -30,7 +31,7 @@ with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslev
         if any(part in EXCLUDED_PARTS for part in relative.parts):
             continue
         if path.is_file() and path.suffix not in EXCLUDED_SUFFIXES:
-            info = zipfile.ZipInfo.from_file(path, Path(f"signoff-{VERSION}") / relative)
+            info = zipfile.ZipInfo.from_file(path, Path(f"traction-{VERSION}") / relative)
             info.compress_type = zipfile.ZIP_DEFLATED
             with path.open("rb") as source:
                 zf.writestr(info, source.read(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)

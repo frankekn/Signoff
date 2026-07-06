@@ -1,14 +1,14 @@
 {
-  "name": "signoff-workspace",
+  "name": "traction-workspace",
   "private": true,
   "version": "0.1.0-alpha.1",
   "workspaces": [
     "apps/web"
   ],
   "scripts": {
-    "dev": "npm --workspace @signoff/web run dev",
-    "build:web": "npm --workspace @signoff/web run build && python3 scripts/copy_web_dist.py",
-    "typecheck": "npm --workspace @signoff/web run typecheck",
+    "dev": "npm --workspace @traction/web run dev",
+    "build:web": "npm --workspace @traction/web run build && python3 scripts/copy_web_dist.py",
+    "typecheck": "npm --workspace @traction/web run typecheck",
     "test": "python3 scripts/test.py",
     "check": "python3 scripts/check_repo.py"
   },

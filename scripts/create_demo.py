@@ -12,9 +12,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from signoff.installer import install  # noqa: E402
-from signoff.runtime import Runtime  # noqa: E402
-from signoff.util import atomic_write_json, read_json  # noqa: E402
+from traction.installer import install  # noqa: E402
+from traction.runtime import Runtime  # noqa: E402
+from traction.util import atomic_write_json, read_json  # noqa: E402
 
 
 def git(project: Path, *args: str) -> None:
@@ -23,7 +23,7 @@ def git(project: Path, *args: str) -> None:
 
 def create(destination: Path | None = None) -> Path:
     if destination is None:
-        destination = Path(tempfile.mkdtemp(prefix="signoff-demo-"))
+        destination = Path(tempfile.mkdtemp(prefix="traction-demo-"))
     else:
         destination = destination.expanduser().resolve()
         if destination.exists():
@@ -32,25 +32,25 @@ def create(destination: Path | None = None) -> Path:
 
     shutil.copytree(ROOT / "examples" / "demo-project", destination, dirs_exist_ok=True)
     git(destination, "init", "-q")
-    git(destination, "config", "user.email", "demo@signoff.local")
-    git(destination, "config", "user.name", "Signoff Demo")
+    git(destination, "config", "user.email", "demo@traction.local")
+    git(destination, "config", "user.name", "Traction Demo")
     git(destination, "add", ".")
     git(destination, "commit", "-qm", "demo baseline")
 
     install(destination, ROOT)
     git(destination, "add", ".")
-    git(destination, "commit", "-qm", "install Signoff")
+    git(destination, "commit", "-qm", "install Traction")
     runtime = Runtime(destination)
     goal = "Change greet() to return exactly hello world while preserving all unrelated behavior."
     runtime.start(goal)
     status = runtime.status()
-    mission_id = status["mission_id"]
-    mission = destination / ".signoff" / "missions" / mission_id
+    run_id = status["run_id"]
+    run_path = destination / ".traction" / "runs" / run_id
 
-    (mission / "CHARTER.md").write_text(
-        f"""# Mission Charter
+    (run_path / "CHARTER.md").write_text(
+        f"""# Run Charter
 
-- Mission: `{mission_id}`
+- Run: `{run_id}`
 - Exact user outcome (immutable):
 
 > {goal}
@@ -72,15 +72,15 @@ The focused unit test passes against a patch limited to `app.py`.
 """,
         encoding="utf-8",
     )
-    spec = read_json(mission / "SPEC.json")
+    spec = read_json(run_path / "SPEC.json")
     spec["acceptance_criteria"][0]["observable"] = "Calling greet returns exactly the string hello world."
     spec["acceptance_criteria"][0]["oracle"]["description"] = "The focused unittest checks the exact returned string."
     spec["non_goals"] = ["Do not add dependencies or refactor unrelated code."]
-    atomic_write_json(mission / "SPEC.json", spec)
+    atomic_write_json(run_path / "SPEC.json", spec)
 
-    runtime.prepare_council()
-    council = read_json(mission / "COUNCIL.json")
-    for index, advisor in enumerate(council["advisors"], start=1):
+    runtime.prepare_push()
+    push = read_json(run_path / "PUSH.json")
+    for index, advisor in enumerate(push["advisors"], start=1):
         advisor["identity"] = {
             "participant_id": f"demo-advisor-{index}",
             "provider": "demo",
@@ -88,30 +88,30 @@ The focused unit test passes against a patch limited to `app.py`.
             "context_id": f"demo-context-{index}",
         }
         advisor["verdict"] = "PROCEED"
-        advisor["null_hypothesis"] = "The requested behavior might already exist or the test may encode the wrong result."
+        advisor["route"] = "Change only app.py and prove the exact greeting with the focused unittest."
+        advisor["falsifiable_criteria"] = [
+            "The focused unittest passes after the minimal implementation change.",
+        ]
+        advisor["risk"] = "The requested behavior might already exist or the test may encode the wrong result."
         advisor["first_move"] = "Run the focused unittest before changing implementation code."
         advisor["cut"] = "Exclude all refactors and dependency changes."
-        for claim in advisor["claims"]:
-            claim["stance"] = "SUPPORT"
-            claim["claim"] = f"The route is acceptable for {claim['topic_key']} in this small demo."
-            claim["evidence"] = "The repository has one function and a focused observable test."
-            claim["falsifier"] = "A failing focused test after the minimal implementation would falsify this route."
-    council["decision"]["verdict"] = "PROCEED"
-    council["decision"]["rationale"] = "Both independent demo advisors support the same minimal route and executable oracle."
-    council["decision"]["first_slice"] = "Change only app.py and prove the exact greeting with unittest."
-    council["decision"]["chair"] = {
+    push["decision"]["verdict"] = "PROCEED"
+    push["decision"]["rationale"] = "Both independent demo advisors support the same minimal route and executable oracle."
+    push["decision"]["route_synthesis"] = "Use the shared app.py route and focused unittest as the demo implementation path."
+    push["decision"]["first_slice"] = "Change only app.py and prove the exact greeting with unittest."
+    push["decision"]["chair"] = {
         "participant_id": "demo-chair",
         "provider": "demo",
         "model": "chair",
         "context_id": "demo-chair-context",
     }
-    atomic_write_json(mission / "COUNCIL.json", council)
+    atomic_write_json(run_path / "PUSH.json", push)
     runtime.lock()
     runtime.prepare_slice()
 
     state = runtime.status()
     iteration = int(state["current"]["iteration"])
-    contract_path = mission / "iterations" / f"{iteration:04d}" / "CONTRACT.json"
+    contract_path = run_path / "iterations" / f"{iteration:04d}" / "CONTRACT.json"
     contract = read_json(contract_path)
     contract["title"] = "Return the exact requested greeting."
     contract["builder"] = {
@@ -121,7 +121,7 @@ The focused unit test passes against a patch limited to `app.py`.
         "context_id": "demo-builder-context",
     }
     contract["allowed_paths"] = ["app.py", "test_app.py"]
-    contract["forbidden_paths"] = [".git/**", ".signoff/**"]
+    contract["forbidden_paths"] = [".git/**", ".traction/**"]
     contract["exempt_paths"] = ["test_*.py"]
     contract["budgets"] = {"production_files": 1, "changed_lines": 12}
     contract["verification"] = [
@@ -140,7 +140,7 @@ The focused unit test passes against a patch limited to `app.py`.
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Create a disposable Signoff demo repository")
+    parser = argparse.ArgumentParser(description="Create a disposable Traction demo repository")
     parser.add_argument("--destination", type=Path)
     args = parser.parse_args()
     project = create(args.destination)

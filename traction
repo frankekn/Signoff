@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+RUNTIME="$ROOT/src"
+PYTHON=${PYTHON:-python3}
+CALLER_CWD=$(pwd)
+cd "$RUNTIME"
+TRACTION_CALLER_CWD="$CALLER_CWD" PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$RUNTIME${PYTHONPATH:+:$PYTHONPATH}" exec "$PYTHON" -m traction --project "$ROOT" "$@"

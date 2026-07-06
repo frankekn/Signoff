@@ -16,7 +16,7 @@ check:
 	python3 scripts/check_repo.py
 
 benchmark:
-	./signoff benchmark
+	./traction benchmark
 
 demo:
 	./scripts/demo.sh

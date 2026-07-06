@@ -1,6 +1,6 @@
 # Benchmark and evidence plan
 
-Signoff must not claim that “multi-agent loops work” from demos. The evaluation separates deterministic protocol conformance from real coding efficacy.
+Traction must not claim that “multi-agent loops work” from demos. The evaluation separates deterministic protocol conformance from real coding efficacy.
 
 ## 1. Protocol conformance
 
@@ -9,13 +9,13 @@ Question: **Does the runtime enforce the protocol it claims to enforce?**
 Run:
 
 ```sh
-./signoff benchmark
+./traction benchmark
 python3 scripts/test.py
 ```
 
 Required adversarial classes:
 
-- locked charter/spec/Council/contract tampering;
+- locked charter/spec/Push/contract tampering;
 - pre-existing dirty work and mid-iteration commits;
 - unmapped and forbidden files;
 - file and changed-line budget overflow;
@@ -30,23 +30,23 @@ Required adversarial classes:
 - final contract that is not cumulative;
 - completion with unresolved `ACT_ON` or insufficient proof.
 
-A passing conformance suite proves gate behavior only. It does not prove that agents write better code.
+Tests 23–31 in the conformance suite now cover charter/Push/contract tamper, forbidden paths, file budget, timeout, review hash, and `ACT_ON` retention. A passing conformance suite proves gate behavior only. It does not prove that agents write better code.
 
 ## 2. Real-agent efficacy experiment
 
-Question: **Under controlled budgets, does Signoff improve useful outcomes?**
+Question: **Under controlled budgets, does Traction improve useful outcomes?**
 
 ### Conditions
 
 Use the same agent/model/tool permissions in every condition:
 
 1. `baseline` — user goal only, normal agent behavior;
-2. `prompt-loop` — user goal plus a strong textual instruction to spec, review, test, and iterate, but no deterministic Signoff runtime;
-3. `signoff` — full Signoff protocol;
+2. `prompt-loop` — user goal plus a strong textual instruction to spec, review, test, and iterate, but no deterministic Traction runtime;
+3. `traction` — full Traction protocol;
 4. ablations:
    - no immutable spec lock;
    - no path/budget scope gate;
-   - no independent Roast;
+   - no independent Pull;
    - no evidence receipts;
    - no conflict-to-experiment rule;
    - no STOP/PIVOT option.
@@ -80,7 +80,7 @@ For each task and condition, hold constant:
 - visible task description;
 - retry policy.
 
-Signoff may use multiple contexts; count their total time, tokens, and cost. Report success-per-dollar and success-per-minute, not only raw success.
+Traction may use multiple contexts; count their total time, tokens, and cost. Report success-per-dollar and success-per-minute, not only raw success.
 
 ### Hidden verification
 
@@ -100,7 +100,7 @@ Binary success requires all hidden acceptance tests and policy checks to pass. R
 
 #### False-completion rate
 
-Among runs that claim completion, the fraction failing hidden verification. This is Signoff's most important trust metric.
+Among runs that claim completion, the fraction failing hidden verification. This is Traction's most important trust metric.
 
 #### Spec-retention score
 
@@ -129,7 +129,7 @@ Task success with the project's original test suite and hidden regression suite 
 
 ## 3. Provisional claim threshold
 
-A public “Signoff is effective” claim should require a preregistered held-out study with at least 100 distinct tasks and multiple seeds or repeated runs, plus all of:
+A public “Traction is effective” claim should require a preregistered held-out study with at least 100 distinct tasks and multiple seeds or repeated runs, plus all of:
 
 - the lower bound of the 95% bootstrap interval for held-out success delta versus prompt-loop is above zero;
 - false-completion rate is reduced by at least 40% relative to prompt-loop;
@@ -144,12 +144,12 @@ These thresholds are provisional and should be versioned before data collection,
 
 The iPhone-like promise needs a separate test.
 
-Recruit users who can describe a software outcome but do not routinely configure developer tools. Give them a repository and one instruction: paste the Signoff repository URL and their goal into a supported coding agent.
+Recruit users who can describe a software outcome but do not routinely configure developer tools. Give them a repository and one instruction: paste the Traction repository URL and their goal into a supported coding agent.
 
 Measure:
 
 - install completion without human troubleshooting;
-- time to first valid mission state;
+- time to first valid run state;
 - number of concepts the user must understand;
 - whether the user can explain the final result and evidence;
 - whether recovery from a failed gate is agent-driven;
@@ -159,7 +159,7 @@ Provisional target: at least 90% successful first installation across supported 
 
 ## 5. Harness usage
 
-`bench/run_efficacy.py` copies each fixture into an isolated worktree, optionally installs Signoff, renders a mode-specific prompt, invokes the supplied agent argv template, and executes hidden verification after the agent exits.
+`bench/run_efficacy.py` copies each fixture into an isolated worktree, optionally installs Traction, renders a mode-specific prompt, invokes the supplied agent argv template, and executes hidden verification after the agent exits.
 
 Example:
 
@@ -167,7 +167,7 @@ Example:
 python bench/run_efficacy.py \
   --manifest /path/to/private-manifest.json \
   --agent-argv-json '["codex", "exec", "--cd", "{project}", "{prompt}"]' \
-  --modes baseline,prompt-loop,signoff \
+  --modes baseline,prompt-loop,traction \
   --repetitions 3 \
   --output benchmark-results/run.json
 ```
@@ -192,3 +192,5 @@ The harness cannot enforce provider-side token budgets unless the agent command 
 - report uncertainty and effect sizes, not only win rates;
 - preserve the claim boundary in every chart and release note;
 - disclose model versions, dates, host settings, and benchmark contamination risks.
+
+The bench has no published efficacy results yet.

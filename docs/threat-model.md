@@ -2,7 +2,7 @@
 
 ## Protected properties
 
-Signoff aims to make these failures detectable:
+Traction aims to make these failures detectable:
 
 - the user's goal or acceptance criteria change silently;
 - implementation escapes the authorized file/line budget;
@@ -27,13 +27,13 @@ Signoff aims to make these failures detectable:
 
 ## Out-of-scope adversaries
 
-A process with arbitrary local access can patch the runtime, rewrite Git objects, forge provider/context metadata, intercept commands, or replace the interpreter. Local Signoff is tamper-evident, not a secure enclave.
+A process with arbitrary local access can patch the runtime, rewrite Git objects, forge provider/context metadata, intercept commands, or replace the interpreter. Local Traction is tamper-evident, not a secure enclave.
 
 The runtime also cannot prove that two external model calls were psychologically independent; it validates distinct asserted context identities and honest host behavior. Provider-signed call receipts are a possible future extension.
 
 ## Command execution
 
-Contract commands are executable code. Signoff uses argument arrays and `shell=False`, but an explicitly selected shell binary can still execute arbitrary shell input. Run untrusted repositories in an OS/container sandbox with restricted secrets and network.
+Contract commands are executable code. Traction uses argument arrays and `shell=False`, but an explicitly selected shell binary can still execute arbitrary shell input. Run untrusted repositories in an OS/container sandbox with restricted secrets and network.
 
 ## Hidden tests
 

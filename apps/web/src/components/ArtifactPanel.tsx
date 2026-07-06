@@ -11,7 +11,7 @@ function prettySize(bytes: number) {
 function priority(path: string) {
   if (path.endsWith('CHARTER.md')) return 0
   if (path.endsWith('SPEC.json')) return 1
-  if (path.endsWith('COUNCIL.json')) return 2
+  if (path.endsWith('PUSH.json')) return 2
   if (path.endsWith('CONTRACT.json')) return 3
   if (path.endsWith('EVIDENCE.json')) return 4
   if (path.endsWith('JUDGMENT.json')) return 5
@@ -19,16 +19,23 @@ function priority(path: string) {
   return 20
 }
 
-export function ArtifactPanel({ missionId }: { missionId?: string }) {
+interface ArtifactPanelProps {
+  runId?: string
+  onDirtyChange?: (dirty: boolean) => void
+}
+
+export function ArtifactPanel({ runId, onDirtyChange }: ArtifactPanelProps) {
   const queryClient = useQueryClient()
   const [selectedPath, setSelectedPath] = useState('')
   const [draft, setDraft] = useState('')
-  const [dirty, setDirty] = useState(false)
+  const [dirtyPath, setDirtyPath] = useState<string | null>(null)
+  const [dirtyWarning, setDirtyWarning] = useState('')
+  const dirty = dirtyPath === selectedPath
 
   const artifactsQuery = useQuery({
-    queryKey: ['artifacts', missionId],
-    queryFn: () => api.artifacts(missionId),
-    enabled: Boolean(missionId),
+    queryKey: ['artifacts', runId],
+    queryFn: () => api.artifacts(runId),
+    enabled: Boolean(runId),
     refetchInterval: 3_000,
   })
 
@@ -41,10 +48,10 @@ export function ArtifactPanel({ missionId }: { missionId?: string }) {
     if (!selectedPath && artifacts.length > 0) {
       setSelectedPath(artifacts.find((item) => item.editable)?.path ?? artifacts[0].path)
     }
-    if (selectedPath && !artifacts.some((item) => item.path === selectedPath)) {
+    if (selectedPath && !dirtyPath && !artifacts.some((item) => item.path === selectedPath)) {
       setSelectedPath(artifacts[0]?.path ?? '')
     }
-  }, [artifacts, selectedPath])
+  }, [artifacts, dirtyPath, selectedPath])
 
   const artifactQuery = useQuery({
     queryKey: ['artifact', selectedPath],
@@ -57,13 +64,15 @@ export function ArtifactPanel({ missionId }: { missionId?: string }) {
   }, [artifactQuery.data, dirty])
 
   useEffect(() => {
-    setDirty(false)
-  }, [selectedPath])
+    onDirtyChange?.(Boolean(dirtyPath))
+  }, [dirtyPath, onDirtyChange])
 
   const saveMutation = useMutation({
     mutationFn: () => api.saveArtifact(selectedPath, draft),
     onSuccess: async () => {
-      setDirty(false)
+      setDirtyPath(null)
+      setDirtyWarning('')
+      onDirtyChange?.(false)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['artifact', selectedPath] }),
         queryClient.invalidateQueries({ queryKey: ['artifacts'] }),
@@ -73,24 +82,38 @@ export function ArtifactPanel({ missionId }: { missionId?: string }) {
   })
 
   const selected: Artifact | undefined = artifacts.find((item) => item.path === selectedPath)
+  const selectArtifact = (path: string): void => {
+    if (dirtyPath && dirtyPath !== path) {
+      setDirtyWarning('Save or discard the current draft before switching artifacts or runs.')
+      return
+    }
+    setDirtyWarning('')
+    setSelectedPath(path)
+  }
+  const discardDraft = (): void => {
+    setDraft(artifactQuery.data?.content ?? '')
+    setDirtyPath(null)
+    setDirtyWarning('')
+    onDirtyChange?.(false)
+  }
 
-  if (!missionId) {
-    return <div className="empty-state">Start a mission to see its contract, evidence, and receipts.</div>
+  if (!runId) {
+    return <div className="empty-state">Start a run to see its contract, evidence, and receipts.</div>
   }
 
   return (
     <div className="artifact-layout">
-      <aside className="artifact-list" aria-label="Mission artifacts">
+      <aside className="artifact-list" aria-label="Run artifacts">
         {artifacts.map((artifact) => (
           <button
             type="button"
             key={artifact.path}
             className={artifact.path === selectedPath ? 'artifact-row selected' : 'artifact-row'}
-            onClick={() => setSelectedPath(artifact.path)}
+            onClick={() => selectArtifact(artifact.path)}
           >
             <span>
               <strong>{artifact.name}</strong>
-              <small>{artifact.path.replace(/^\.signoff\/missions\/[^/]+\//, '')}</small>
+              <small>{artifact.path.replace(/^\.traction\/runs\/[^/]+\//, '')}</small>
             </span>
             <span className={artifact.editable ? 'edit-pill' : 'read-pill'}>{artifact.editable ? 'Edit' : prettySize(artifact.size)}</span>
           </button>
@@ -102,17 +125,27 @@ export function ArtifactPanel({ missionId }: { missionId?: string }) {
             <strong>{selected?.name ?? 'Artifact'}</strong>
             <span>{selected?.editable ? 'Editable in this phase' : 'Sealed or generated'}</span>
           </div>
-          {selected?.editable && (
-            <button
-              type="button"
-              className="button button--small button--primary"
-              disabled={!dirty || saveMutation.isPending}
-              onClick={() => saveMutation.mutate()}
-            >
-              {saveMutation.isPending ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
-            </button>
+          {(dirty || selected?.editable) && (
+            <div className="editor-actions">
+              {dirty && (
+                <button type="button" className="button button--small button--neutral" onClick={discardDraft}>
+                  Discard draft
+                </button>
+              )}
+              {selected?.editable && (
+                <button
+                  type="button"
+                  className="button button--small button--primary"
+                  disabled={!dirty || saveMutation.isPending}
+                  onClick={() => saveMutation.mutate()}
+                >
+                  {saveMutation.isPending ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
+                </button>
+              )}
+            </div>
           )}
         </div>
+        {dirtyWarning && <div className="dirty-warning">{dirtyWarning}</div>}
         {artifactQuery.isLoading ? (
           <div className="editor-loading">Loading artifact…</div>
         ) : (
@@ -122,7 +155,9 @@ export function ArtifactPanel({ missionId }: { missionId?: string }) {
             readOnly={!selected?.editable}
             onChange={(event) => {
               setDraft(event.target.value)
-              setDirty(true)
+              setDirtyPath(selectedPath)
+              setDirtyWarning('')
+              onDirtyChange?.(true)
             }}
             aria-label={selected?.name ?? 'Artifact content'}
           />

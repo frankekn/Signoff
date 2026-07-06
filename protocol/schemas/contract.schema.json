@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:signoff-protocol:schema:contract:1",
-  "title": "Signoff Iteration Contract",
+  "$id": "urn:traction-protocol:schema:contract:1",
+  "title": "Traction Iteration Contract",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "schema_version",
-    "mission_id",
+    "run_id",
     "iteration",
     "title",
     "builder",
@@ -23,7 +23,7 @@
     "schema_version": {
       "const": 1
     },
-    "mission_id": {
+    "run_id": {
       "type": "string"
     },
     "iteration": {

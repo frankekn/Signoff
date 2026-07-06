@@ -2,7 +2,7 @@
 
 ## One obvious path
 
-The user gives one outcome. The coding agent installs locally and follows `./signoff next`. Advanced protocol details are present for agents and auditors, not placed in front of the user.
+The user gives one outcome. The coding agent installs locally and follows `./traction next`. Advanced protocol details are present for agents and auditors, not placed in front of the user.
 
 ## Defaults over configuration theater
 
@@ -14,7 +14,7 @@ Models are used where ambiguity and judgment matter. Hashes, state transitions, 
 
 ## Honest degradation
 
-If independent contexts, executable proof, or required external evidence are unavailable, Signoff reports weaker proof or blocks. It never creates synthetic quorum to preserve momentum.
+If independent contexts, executable proof, or required external evidence are unavailable, Traction reports weaker proof or blocks. It never creates synthetic quorum to preserve momentum.
 
 ## A stop is a product result
 

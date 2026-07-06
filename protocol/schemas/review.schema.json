@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:signoff-protocol:schema:review:1",
-  "title": "Signoff Roast Review",
+  "$id": "urn:traction-protocol:schema:review:1",
+  "title": "Traction Pull Review",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "schema_version",
-    "mission_id",
+    "run_id",
     "iteration",
     "reviewer",
     "artifact_hashes",
@@ -19,7 +19,7 @@
     "schema_version": {
       "const": 1
     },
-    "mission_id": {
+    "run_id": {
       "type": "string"
     },
     "iteration": {

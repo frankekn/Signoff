@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:signoff-protocol:schema:spec:1",
-  "title": "Signoff Specification",
+  "$id": "urn:traction-protocol:schema:spec:1",
+  "title": "Traction Specification",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "schema_version",
-    "mission_id",
+    "run_id",
     "goal_sha256",
     "requirements",
     "acceptance_criteria",
@@ -19,7 +19,7 @@
     "schema_version": {
       "const": 1
     },
-    "mission_id": {
+    "run_id": {
       "type": "string",
       "minLength": 1
     },

@@ -1,14 +1,14 @@
 export type Tone = 'primary' | 'neutral' | 'danger'
 
-export interface CourtAction {
+export interface GripAction {
   id: string
   label: string
   tone: Tone
   requiresNote?: boolean
 }
 
-export interface MissionSummary {
-  missionId: string
+export interface RunSummary {
+  runId: string
   goal: string
   phase: string
   revision?: number
@@ -18,9 +18,9 @@ export interface MissionSummary {
   error?: string
 }
 
-export interface CourtStatus {
-  mission_id?: string
-  active_mission_id?: string | null
+export interface GripStatus {
+  run_id?: string
+  active_run_id?: string | null
   phase: string
   revision?: number
   iteration?: number
@@ -30,16 +30,62 @@ export interface CourtStatus {
   integrity?: Record<string, unknown>
 }
 
+export interface ProofCommand {
+  id: string
+  command: string[]
+  status: string
+  exitCode?: number | null
+  acceptanceIds: string[]
+}
+
+export interface ProofStatus {
+  status: string
+  detail?: string
+  hash?: string
+  path?: string
+  patchHash?: string
+}
+
+export interface ReviewGateProof extends ProofStatus {
+  decision: string
+  proofLevel?: string
+}
+
+export interface ProofSummary {
+  runId: string
+  phase: string
+  iteration?: number | null
+  commands: ProofCommand[]
+  scope: ProofStatus & Record<string, unknown>
+  evidence: ProofStatus
+  patch: ProofStatus
+  reviewGate: ReviewGateProof
+  acceptedCriteria: {
+    count: number
+    items: string[]
+  }
+  contract: {
+    final: boolean | null
+  }
+  finalReceipt: ProofStatus
+}
+
 export interface Overview {
   product: string
   version: string
   project: string
   goal: string
-  status: CourtStatus
+  status: GripStatus
   next: string
-  actions: CourtAction[]
+  canStartRun: boolean
+  blockedByIntegrity: boolean
+  integrityStatus: string
+  integrityMessage: string
+  actions: GripAction[]
   editablePaths: string[]
-  missions: MissionSummary[]
+  runs: RunSummary[]
+  proofSummary: ProofSummary | null
+  inspectedRun: RunSummary | null
 }
 
 export interface Artifact {
@@ -80,14 +126,15 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  overview: () => request<Overview>('/api/overview'),
-  artifacts: (missionId?: string) =>
-    request<Artifact[]>(`/api/artifacts${missionId ? `?missionId=${encodeURIComponent(missionId)}` : ''}`),
+  overview: (inspectRunId?: string) =>
+    request<Overview>(`/api/overview${inspectRunId ? `?inspectRunId=${encodeURIComponent(inspectRunId)}` : ''}`),
+  artifacts: (runId?: string) =>
+    request<Artifact[]>(`/api/artifacts${runId ? `?runId=${encodeURIComponent(runId)}` : ''}`),
   artifact: (path: string) => request<{ path: string; content: string; size: number }>(`/api/artifact?path=${encodeURIComponent(path)}`),
-  events: (missionId?: string) =>
-    request<LedgerEvent[]>(`/api/events${missionId ? `?missionId=${encodeURIComponent(missionId)}` : ''}`),
-  createMission: (goal: string) =>
-    request<Record<string, unknown>>('/api/missions', {
+  events: (runId?: string) =>
+    request<LedgerEvent[]>(`/api/events${runId ? `?runId=${encodeURIComponent(runId)}` : ''}`),
+  createRun: (goal: string) =>
+    request<Record<string, unknown>>('/api/runs', {
       method: 'POST',
       body: JSON.stringify({ goal }),
     }),
